@@ -116,6 +116,27 @@ Až budete mít doménu aktivní, aktualizujte i:
 
 ---
 
+## 5b. E-mailová schránka na doméně přes Gmail (Google Workspace)
+
+Chcete `info@silkihair.cz` fungující přímo jako Gmail (ne přeposílání s SMTP triky,
+které bývá nespolehlivé) — proto Google Workspace:
+
+1. Založte účet na [workspace.google.com](https://workspace.google.com) se svou
+   doménou (`silkihair.cz`). Placená služba (řádově $6–7 / měsíc za schránku,
+   plán Business Starter — aktuální cenu v Kč si ověřte přímo na webu Googlu).
+2. Google vás vyzve k **ověření vlastnictví domény** — přidáte jeden **TXT záznam**
+   ve správě DNS na WEDOSu (nebo v Netlify DNS, pokud jste tam delegovali
+   nameservery — viz krok 5).
+3. Google vám zobrazí **MX záznamy** — ty přidáte na stejném místě.
+4. Hotovo. Pošta na `info@silkihair.cz` teď chodí do Gmailu (web i mobilní appka),
+   web na Netlify běží dál beze změny.
+
+**Proč to nekoliduje s webem:** MX záznamy (pošta) a A/CNAME záznamy (web) jsou
+oddělené typy DNS záznamů ve stejné doméně — nastavení jednoho neruší druhé.
+Klidně tedy web na Netlify + pošta přes Google Workspace současně.
+
+---
+
 ## 6. První přihlášení do administrace
 
 1. Otevřete `https://VASE-DOMENA/admin` (nebo zatím `https://silki-hair.netlify.app/admin`).
