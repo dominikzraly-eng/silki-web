@@ -1,6 +1,6 @@
 backend:
   name: github
-  repo: TVOJE-JMENO/TVUJ-REPOZITAR   # ← nahraďte skutečným GitHub repozitářem (majitel/nazev-repo)
+  repo: dominikzraly-eng/silki-web
   branch: main
   base_url: https://TVUJ-NETLIFY-SITE.netlify.app   # ← nahraďte adresou vašeho Netlify webu
   auth_endpoint: api/auth
