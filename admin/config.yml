@@ -2,7 +2,7 @@ backend:
   name: github
   repo: dominikzraly-eng/silki-web
   branch: main
-  base_url: https://TVUJ-NETLIFY-SITE.netlify.app   # ← nahraďte adresou vašeho Netlify webu
+  base_url: https://silkihair.netlify.app
   auth_endpoint: api/auth
 
 # Kam se ukládají nahrané fotky a odkud se na webu odkazují

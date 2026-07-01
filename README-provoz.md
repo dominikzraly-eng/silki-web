@@ -42,7 +42,7 @@ Zbývá: založit účty, propojit je a doplnit pár hodnot.
 5. **Deploy site**. Za pár desítek vteřin dostanete adresu typu
    `https://nahodny-nazev-1234.netlify.app` — to je váš živý web.
 6. Doporučuji hned přejmenovat: **Site configuration → General → Change site name**
-   → např. `silki-hair` → adresa se změní na `https://silki-hair.netlify.app`.
+   → např. `silki-hair` → adresa se změní na `https://silkihair.netlify.app`.
 
 ✅ Od teď: každý `git push` na `main` automaticky přenasadí web během ~30 vteřin.
 
@@ -57,8 +57,8 @@ GitHub potřebuje vědět, že tenhle web smí o přihlášení žádat:
    **Developer settings** → **OAuth Apps** → **New OAuth App**.
 2. Vyplňte:
    - **Application name**: Silki Admin
-   - **Homepage URL**: `https://silki-hair.netlify.app` (vaše skutečná Netlify adresa)
-   - **Authorization callback URL**: `https://silki-hair.netlify.app/api/auth/callback`
+   - **Homepage URL**: `https://silkihair.netlify.app` (vaše skutečná Netlify adresa)
+   - **Authorization callback URL**: `https://silkihair.netlify.app/api/auth/callback`
 3. **Register application**.
 4. Zkopírujte **Client ID**.
 5. **Generate a new client secret** → zkopírujte i ten (zobrazí se jen jednou!).
@@ -81,9 +81,9 @@ Otevřete `site/admin/config.yml` a nahraďte dva placeholdery skutečnými hodn
 ```yaml
 backend:
   name: github
-  repo: VASE-JMENO/silki-web          # ← váš GitHub repozitář
+  repo: dominikzraly-eng/silki-web
   branch: main
-  base_url: https://silki-hair.netlify.app   # ← vaše Netlify adresa
+  base_url: https://silkihair.netlify.app   # ← vaše Netlify adresa
   auth_endpoint: api/auth
 ```
 Uložte, potom:
@@ -139,7 +139,7 @@ Klidně tedy web na Netlify + pošta přes Google Workspace současně.
 
 ## 6. První přihlášení do administrace
 
-1. Otevřete `https://VASE-DOMENA/admin` (nebo zatím `https://silki-hair.netlify.app/admin`).
+1. Otevřete `https://VASE-DOMENA/admin` (nebo zatím `https://silkihair.netlify.app/admin`).
 2. **Login with GitHub** → potvrdíte přístup.
 3. Uvidíte dvě sekce:
    - **Sortiment (culíky)** — přidávání/úprava jednotlivých kusů (odstín, délka,
