@@ -1,0 +1,148 @@
+{
+  "produkty": [
+    {
+      "cislo": "SK-001",
+      "stav": "in",
+      "odstin": "Tmavé",
+      "delka_cm": 51,
+      "delka_label": "51–55",
+      "gramaz": 105,
+      "cena_g": 135,
+      "foto": "https://images.unsplash.com/photo-1633681926022-84c23e8cb2d6?auto=format&fit=crop&w=900&q=75",
+      "foto_alt": "Tmavé vlasy 51–55 cm",
+      "vyber_domu": true
+    },
+    {
+      "cislo": "SK-002",
+      "stav": "in",
+      "odstin": "Blond",
+      "delka_cm": 46,
+      "delka_label": "46–50",
+      "gramaz": 92,
+      "cena_g": 140,
+      "foto": "https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=900&q=75",
+      "foto_alt": "Blond vlasy 46–50 cm",
+      "vyber_domu": false
+    },
+    {
+      "cislo": "SK-003",
+      "stav": "in",
+      "odstin": "Střední",
+      "delka_cm": 61,
+      "delka_label": "61–65",
+      "gramaz": 118,
+      "cena_g": 172,
+      "foto": "https://images.unsplash.com/photo-1519699047748-de8e457a634e?auto=format&fit=crop&w=900&q=75",
+      "foto_alt": "Střední odstín vlasů 61–65 cm",
+      "vyber_domu": true
+    },
+    {
+      "cislo": "SK-004",
+      "stav": "in",
+      "odstin": "Tmavé",
+      "delka_cm": 71,
+      "delka_label": "71–75",
+      "gramaz": 130,
+      "cena_g": 161,
+      "foto": "https://images.unsplash.com/photo-1605497788044-5a32c7078486?auto=format&fit=crop&w=900&q=75",
+      "foto_alt": "Tmavé vlnité vlasy 71–75 cm",
+      "vyber_domu": false
+    },
+    {
+      "cislo": "SK-006",
+      "stav": "in",
+      "odstin": "Střední",
+      "delka_cm": 41,
+      "delka_label": "41–45",
+      "gramaz": 85,
+      "cena_g": 113,
+      "foto": "https://images.unsplash.com/photo-1457972729786-0411a3b2b626?auto=format&fit=crop&w=900&q=75",
+      "foto_alt": "Střední odstín vlasů 41–45 cm",
+      "vyber_domu": false
+    },
+    {
+      "cislo": "SK-007",
+      "stav": "in",
+      "odstin": "Tmavé",
+      "delka_cm": 66,
+      "delka_label": "66–70",
+      "gramaz": 122,
+      "cena_g": 156,
+      "foto": "https://images.unsplash.com/photo-1560869713-7d0a29430803?auto=format&fit=crop&w=900&q=75",
+      "foto_alt": "Tmavé dlouhé vlasy 66–70 cm",
+      "vyber_domu": false
+    },
+    {
+      "cislo": "SK-008",
+      "stav": "in",
+      "odstin": "Blond",
+      "delka_cm": 81,
+      "delka_label": "81–85",
+      "gramaz": 140,
+      "cena_g": 205,
+      "foto": "https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?auto=format&fit=crop&w=900&q=75",
+      "foto_alt": "Blond dlouhé vlasy 81–85 cm",
+      "vyber_domu": true
+    },
+    {
+      "cislo": "SK-009",
+      "stav": "in",
+      "odstin": "Střední",
+      "delka_cm": 30,
+      "delka_label": "30–35",
+      "gramaz": 78,
+      "cena_g": 65,
+      "foto": "https://images.unsplash.com/photo-1522337094846-8a818192de1f?auto=format&fit=crop&w=900&q=75",
+      "foto_alt": "Střední odstín vlasů 30–35 cm",
+      "vyber_domu": false
+    },
+    {
+      "cislo": "SK-011",
+      "stav": "in",
+      "odstin": "Blond",
+      "delka_cm": 61,
+      "delka_label": "61–65",
+      "gramaz": 110,
+      "cena_g": 176,
+      "foto": "https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?auto=format&fit=crop&w=900&q=75",
+      "foto_alt": "Blond vlasy 61–65 cm",
+      "vyber_domu": false
+    },
+    {
+      "cislo": "SK-012",
+      "stav": "in",
+      "odstin": "Střední",
+      "delka_cm": 76,
+      "delka_label": "76–80",
+      "gramaz": 128,
+      "cena_g": 190,
+      "foto": "https://images.unsplash.com/photo-1492106087820-71f1a00d2b11?auto=format&fit=crop&w=900&q=75",
+      "foto_alt": "Střední odstín vlasů 76–80 cm",
+      "vyber_domu": false
+    },
+    {
+      "cislo": "SK-005",
+      "stav": "sold",
+      "odstin": "Blond",
+      "delka_cm": 56,
+      "delka_label": "56–60",
+      "gramaz": 99,
+      "cena_g": 172,
+      "foto": "https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?auto=format&fit=crop&w=900&q=75",
+      "foto_alt": "Blond vlasy 56–60 cm — prodáno",
+      "vyber_domu": false
+    },
+    {
+      "cislo": "SK-010",
+      "stav": "sold",
+      "odstin": "Tmavé",
+      "delka_cm": 46,
+      "delka_label": "46–50",
+      "gramaz": 95,
+      "cena_g": 116,
+      "foto": "https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?auto=format&fit=crop&w=900&q=75",
+      "foto_alt": "Tmavé vlasy 46–50 cm — prodáno",
+      "vyber_domu": false
+    }
+  ]
+}

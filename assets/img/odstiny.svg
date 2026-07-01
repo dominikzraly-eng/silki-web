@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 360" role="img" aria-label="Paleta odstínů vlasů — od nejtmavší po nejsvětlejší blond (placeholder)">
+  <rect width="900" height="360" fill="#F2E9DF"/>
+  <g>
+    <rect x="0"   y="0" width="150" height="300" fill="#241A14"/>
+    <rect x="150" y="0" width="150" height="300" fill="#3D2A1D"/>
+    <rect x="300" y="0" width="150" height="300" fill="#6A4A30"/>
+    <rect x="450" y="0" width="150" height="300" fill="#9A6F45"/>
+    <rect x="600" y="0" width="150" height="300" fill="#C29A63"/>
+    <rect x="750" y="0" width="150" height="300" fill="#E3C896"/>
+  </g>
+  <text x="450" y="335" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="18" letter-spacing="2" fill="#574A40">PALETA ODSTÍNŮ — placeholder, nahraďte vlastní fotkou</text>
+</svg>

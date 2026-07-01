@@ -1,0 +1,15 @@
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+# Umožní Decap CMS (administraci) přihlásit se přes GitHub
+# na hezčí adrese /api/auth místo syrové /.netlify/functions/auth.
+[[redirects]]
+  from = "/api/auth"
+  to = "/.netlify/functions/auth"
+  status = 200
+
+[[redirects]]
+  from = "/api/auth/callback"
+  to = "/.netlify/functions/auth"
+  status = 200

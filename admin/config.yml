@@ -1,0 +1,63 @@
+backend:
+  name: github
+  repo: TVOJE-JMENO/TVUJ-REPOZITAR   # ← nahraďte skutečným GitHub repozitářem (majitel/nazev-repo)
+  branch: main
+  base_url: https://TVUJ-NETLIFY-SITE.netlify.app   # ← nahraďte adresou vašeho Netlify webu
+  auth_endpoint: api/auth
+
+# Kam se ukládají nahrané fotky a odkud se na webu odkazují
+media_folder: "assets/img/uploads"
+public_folder: "assets/img/uploads"
+
+locale: "cs"
+
+collections:
+  - name: "produkty"
+    label: "Sortiment (culíky)"
+    description: "Přidejte, upravte nebo odeberte jednotlivé kusy. Cena se na webu dopočítá automaticky (gramáž × cena za gram)."
+    files:
+      - file: "data/products.json"
+        label: "Seznam kusů"
+        name: "produkty"
+        fields:
+          - label: "Kusy"
+            name: "produkty"
+            widget: "list"
+            summary: "{{fields.cislo}} — {{fields.odstin}} {{fields.delka_label}} cm ({{fields.stav}})"
+            fields:
+              - { label: "Číslo kusu", name: "cislo", widget: "string", hint: "např. SK-013" }
+              - label: "Stav"
+                name: "stav"
+                widget: "select"
+                options:
+                  - { label: "Skladem", value: "in" }
+                  - { label: "Prodáno", value: "sold" }
+                default: "in"
+              - label: "Odstín"
+                name: "odstin"
+                widget: "select"
+                options: ["Tmavé", "Střední", "Blond"]
+              - { label: "Délka od (cm, číslo pro filtr)", name: "delka_cm", widget: "number", hint: "spodní hranice rozmezí, např. 51" }
+              - { label: "Délka — popisek", name: "delka_label", widget: "string", hint: "např. 51–55" }
+              - { label: "Gramáž (g)", name: "gramaz", widget: "number" }
+              - { label: "Cena za gram (Kč)", name: "cena_g", widget: "number", hint: "Celková cena se dopočítá sama: gramáž × cena za gram." }
+              - { label: "Fotka", name: "foto", widget: "image" }
+              - { label: "Popisek fotky (pro čtečky a SEO)", name: "foto_alt", widget: "string", required: false }
+              - { label: "Zobrazit na hlavní stránce", name: "vyber_domu", widget: "boolean", default: false, hint: "Zaškrtněte max. u 3 kusů — zobrazí se v sekci „Aktuálně k dispozici“." }
+
+  - name: "nastaveni"
+    label: "Kontaktní údaje"
+    description: "Tyto údaje se automaticky promítnou na všech stránkách webu (patička, kontakty, WhatsApp odkazy…)."
+    files:
+      - file: "data/site.json"
+        label: "Kontakt a sociální sítě"
+        name: "site"
+        fields:
+          - { label: "Telefon (zobrazovaný text)", name: "telefon_zobrazit", widget: "string", hint: "např. +420 608 784 440" }
+          - { label: "WhatsApp číslo (jen číslice, s předvolbou)", name: "telefon_whatsapp", widget: "string", hint: "např. 420608784440 — bez mezer a plus" }
+          - { label: "E-mail", name: "email", widget: "string" }
+          - { label: "Instagram — zobrazovaný handle", name: "instagram_handle", widget: "string" }
+          - { label: "Instagram — odkaz", name: "instagram_url", widget: "string" }
+          - { label: "Facebook — odkaz", name: "facebook_url", widget: "string", required: false }
+          - { label: "Lokalita — krátká (patička)", name: "lokalita_kratka", widget: "string" }
+          - { label: "Lokalita — delší (stránka Kontakt)", name: "lokalita_dlouha", widget: "string" }
