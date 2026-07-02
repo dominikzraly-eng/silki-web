@@ -238,6 +238,55 @@
       .catch(function () { /* keep static fallback text already in the HTML */ });
   })();
 
+  /* ---------- 9c. Named page images (data/images.json) ----------
+     Each <img data-img-key="slot_name"> gets its src/alt from one shared
+     file, so swapping a photo in the admin updates it without touching
+     any HTML. The markup's own src/alt stays as the no-JS fallback. */
+  (function () {
+    var imgEls = document.querySelectorAll("[data-img-key]");
+    if (!imgEls.length) return;
+    fetch("data/images.json")
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (images) {
+        if (!images) return;
+        imgEls.forEach(function (el) {
+          var entry = images[el.getAttribute("data-img-key")];
+          if (!entry) return;
+          el.src = entry.src;
+          if (entry.alt) el.alt = entry.alt;
+        });
+      })
+      .catch(function () { /* keep static fallback image already in the HTML */ });
+  })();
+
+  /* ---------- 9d. Open-ended gallery (data/galerie.json) ----------
+     Unlike the named slots above, the gallery is a list the owner adds
+     to/removes from over time, so it's modelled and rendered like the
+     product catalog rather than as fixed named images. */
+  (function () {
+    var galleryEl = document.querySelector("[data-gallery]");
+    if (!galleryEl) return;
+    fetch("data/galerie.json")
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        var polozky = (data && data.polozky) || [];
+        galleryEl.innerHTML = polozky.map(function (p) {
+          return '<figure class="shot reveal"><img src="' + p.src + '" alt="' + (p.alt || "") + '" loading="lazy"></figure>';
+        }).join("");
+        if (!reduceMotion && "IntersectionObserver" in window) {
+          var io3 = new IntersectionObserver(function (entries) {
+            entries.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add("in"); io3.unobserve(en.target); } });
+          }, { threshold: 0.1, rootMargin: "0px 0px -8% 0px" });
+          galleryEl.querySelectorAll(".reveal").forEach(function (el) { io3.observe(el); });
+        } else {
+          galleryEl.querySelectorAll(".reveal").forEach(function (el) { el.classList.add("in"); });
+        }
+      })
+      .catch(function () {
+        galleryEl.innerHTML = '<p class="form-note">Galerii se nepodařilo načíst.</p>';
+      });
+  })();
+
   /* ---------- 10. Product catalog (data/products.json) ----------
      Renders both the full catalog grid (sortiment.html) and the
      homepage's featured picks from one shared data source, so adding

@@ -61,3 +61,94 @@ collections:
           - { label: "Facebook — odkaz", name: "facebook_url", widget: "string", required: false }
           - { label: "Lokalita — krátká (patička)", name: "lokalita_kratka", widget: "string" }
           - { label: "Lokalita — delší (stránka Kontakt)", name: "lokalita_dlouha", widget: "string" }
+
+  - name: "fotky"
+    label: "Fotky na webu"
+    description: "Jedna konkrétní fotka na jednom konkrétním místě webu. Nahrajte novou a nahradí tu starou přesně tam, kde je popsáno."
+    files:
+      - file: "data/images.json"
+        label: "Pojmenované fotky"
+        name: "images"
+        fields:
+          - label: "Hero fotka — Domů (úvodní)"
+            name: "hero_domu"
+            widget: "object"
+            fields:
+              - { label: "Fotka", name: "src", widget: "image" }
+              - { label: "Popisek (pro čtečky a SEO)", name: "alt", widget: "string", required: false }
+          - label: "Fotka — Domů, sekce „Proč Silki“"
+            name: "proc_silki"
+            widget: "object"
+            fields:
+              - { label: "Fotka", name: "src", widget: "image" }
+              - { label: "Popisek (pro čtečky a SEO)", name: "alt", widget: "string", required: false }
+          - label: "Fotka — Domů, sekce Kurzy"
+            name: "kurzy_teaser_domu"
+            widget: "object"
+            fields:
+              - { label: "Fotka", name: "src", widget: "image" }
+              - { label: "Popisek (pro čtečky a SEO)", name: "alt", widget: "string", required: false }
+          - label: "Fotka — Domů, sekce Blond"
+            name: "blond_teaser_domu"
+            widget: "object"
+            fields:
+              - { label: "Fotka", name: "src", widget: "image" }
+              - { label: "Popisek (pro čtečky a SEO)", name: "alt", widget: "string", required: false }
+          - label: "Fotka — O nás, úvodní příběh"
+            name: "onas_pribeh"
+            widget: "object"
+            fields:
+              - { label: "Fotka", name: "src", widget: "image" }
+              - { label: "Popisek (pro čtečky a SEO)", name: "alt", widget: "string", required: false }
+          - label: "Fotka — O nás, sekce Kurzy"
+            name: "onas_kurzy"
+            widget: "object"
+            fields:
+              - { label: "Fotka", name: "src", widget: "image" }
+              - { label: "Popisek (pro čtečky a SEO)", name: "alt", widget: "string", required: false }
+          - label: "Fotka — Blond, „Základ kvality“"
+            name: "blond_zaklad_kvality"
+            widget: "object"
+            fields:
+              - { label: "Fotka", name: "src", widget: "image" }
+              - { label: "Popisek (pro čtečky a SEO)", name: "alt", widget: "string", required: false }
+          - label: "Fotka — Kurzy, „Obsah kurzu“"
+            name: "kurzy_obsah"
+            widget: "object"
+            fields:
+              - { label: "Fotka", name: "src", widget: "image" }
+              - { label: "Popisek (pro čtečky a SEO)", name: "alt", widget: "string", required: false }
+          - label: "Fotka — Pro kadeřnice, návaznost na kurz"
+            name: "kadernice_kurz"
+            widget: "object"
+            fields:
+              - { label: "Fotka", name: "src", widget: "image" }
+              - { label: "Popisek (pro čtečky a SEO)", name: "alt", widget: "string", required: false }
+          - label: "Fotka — Reference, „Před“"
+            name: "reference_pred"
+            widget: "object"
+            fields:
+              - { label: "Fotka", name: "src", widget: "image" }
+              - { label: "Popisek (pro čtečky a SEO)", name: "alt", widget: "string", required: false }
+          - label: "Fotka — Reference, „Po“"
+            name: "reference_po"
+            widget: "object"
+            fields:
+              - { label: "Fotka", name: "src", widget: "image" }
+              - { label: "Popisek (pro čtečky a SEO)", name: "alt", widget: "string", required: false }
+
+  - name: "galerie"
+    label: "Galerie proměn"
+    description: "Fotky v sekci Galerie na stránce Reference. Na rozdíl od fotek výše jich může být libovolný počet — přidávejte, mažte i přeskupujte podle potřeby."
+    files:
+      - file: "data/galerie.json"
+        label: "Fotky galerie"
+        name: "galerie"
+        fields:
+          - label: "Fotky"
+            name: "polozky"
+            widget: "list"
+            summary: "{{fields.alt}}"
+            fields:
+              - { label: "Fotka", name: "src", widget: "image" }
+              - { label: "Popisek (pro čtečky a SEO)", name: "alt", widget: "string", required: false }
