@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /marketing/
+
+Sitemap: https://silkihair.cz/sitemap.xml

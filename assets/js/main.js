@@ -326,6 +326,43 @@
     }).join("");
     computeTotals(container);
     initCatalogFilters(container);
+    injectProductLd(produkty);
+  }
+
+  /* Structured data (schema.org Product) generated from the live catalog —
+     lets Google show pieces with price/availability in search results. */
+  function injectProductLd(produkty) {
+    var inStock = produkty.filter(function (p) { return p.stav === "in"; });
+    if (!inStock.length) return;
+    var origin = window.location.origin;
+    var ld = {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "itemListElement": inStock.map(function (p, i) {
+        var img = /^https?:/.test(p.foto) ? p.foto : origin + "/" + p.foto;
+        return {
+          "@type": "ListItem",
+          "position": i + 1,
+          "item": {
+            "@type": "Product",
+            "name": p.odstin + " vlasy " + p.delka_label + " cm — " + p.cislo,
+            "image": img,
+            "description": "Pravé evropské vlasy na prodlužování. Odstín " + p.odstin.toLowerCase() + ", délka " + p.delka_label + " cm, gramáž " + p.gramaz + " g.",
+            "offers": {
+              "@type": "Offer",
+              "priceCurrency": "CZK",
+              "price": String(p.gramaz * p.cena_g),
+              "availability": "https://schema.org/InStock",
+              "url": origin + "/sortiment.html"
+            }
+          }
+        };
+      })
+    };
+    var s = document.createElement("script");
+    s.type = "application/ld+json";
+    s.textContent = JSON.stringify(ld);
+    document.head.appendChild(s);
   }
 
   function renderFeatured(container, produkty) {
