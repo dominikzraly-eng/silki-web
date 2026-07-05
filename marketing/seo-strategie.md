@@ -58,7 +58,20 @@ Tempo: 1 článek měsíčně stačí. Délka 600–1200 slov, vždy 1 interní 
 - Cíl 3 měsíce: indexace všech stránek, první pozice do TOP 20 na longtail dotazy („kurz prodlužování vlasů praha").
 - Cíl 6–12 měsíců: TOP 10 na 2–3 primární dotazy, rostoucí organická poptávka.
 
-## 6. Čeho se vyvarovat
+## 6. GEO — optimalizace pro AI vyhledávání (ChatGPT, Perplexity, Google AI)
+
+Rostoucí část zákaznic se ptá AI („kde koupit kvalitní vlasy na prodloužení?") místo Googlu. AI modely doporučují značky, které nacházejí v **autentických diskuzích, recenzích a strukturovaných datech** — ne v reklamě.
+
+**Na webu už nasazeno:** strukturovaná data (Organization/FAQ/Course/Product), FAQ obsah (přesně formát, který AI cituje), `llms.txt` (souhrn firmy pro AI crawlery), robots.txt neblokuje AI roboty (GPTBot, ClaudeBot, PerplexityBot mají přístup).
+
+**Off-site taktika (česká verze „Reddit strategie"):** globálně AI čerpají hlavně z Redditu; česky odpovídající AI čerpá z českých UGC zdrojů. Priorita:
+1. **Recenze na Google Business Profile** — AI je čte a cituje u lokálních dotazů; po každém prodeji/kurzu poslat klientce odkaz na recenzi
+2. **Facebook skupiny** (prodlužování vlasů, kadeřnické) a **fóra eMimino/Modrýkoník** — místa, kde se reálně ptají budoucí zákaznice
+3. **Reddit** (r/femalehairadvice apod.) — relevantní jen pro případnou expanzi mimo CZ
+
+**Zásada:** žádný astroturfing (fake příspěvky pod cizí identitou) — platformy to banují a při odhalení je to reputační škoda. Správná verze: požádat spokojené reálné zákaznice, ať zkušenost napíšou tam, kde se ptají ostatní. Stejný efekt pro AI viditelnost, nulové riziko.
+
+## 7. Čeho se vyvarovat
 
 - Nekopírovat texty konkurence (duplicitní obsah Google penalizuje).
 - Nekupovat PR články z linkfarem — u malého webu nadělají víc škody než užitku.
