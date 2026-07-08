@@ -7,17 +7,17 @@ Interní dokument: brand, kanály, analytika. Doplněk k `seo-strategie.md`.
 ## 1. Brand messaging (jednotný jazyk všude)
 
 **Pozicování (1 věta):**
-> Silki je rodinná firma prodávající pravé evropské vlasy — ručně vybírané kus po kuse, vážené na gram, s cenou, která přesně odpovídá tomu, co dostanete.
+> Silki je rodinná firma prodávající pravé evropské vlasy — ručně vybírané kus po kuse, s cenou, která přesně odpovídá tomu, co dostanete.
 
 **Hlavní sdělení (v tomto pořadí důležitosti):**
 1. 100% neopracované (panenské) evropské vlasy
-2. Každý kus ručně vybraný a individuálně zvážený — férová cena podle gramáže
+2. Každý kus ručně vybraný kus po kuse — férová cena podle gramáže
 3. Rodinná firma, 10+ let dlouhodobých spoluprací s klientkami i kadeřnicemi
 4. Kurzy keratinové metody vedené spoluzakladatelkami
 
 **Tón:** věcný, vřelý, řemeslný. Mluvíme o vlasech jako o materiálu, kterému rozumíme — ne salonní kýč, ne přehnané superlativy.
 
-**Povolená tvrzení:** 100% neopracované · ručně vybírané · každý kus zvážen · pravé evropské vlasy · rodinná firma · 10+ let spoluprací · tisíce culíků.
+**Povolená tvrzení:** 100% neopracované · ručně vybírané · pravé evropské vlasy · rodinná firma · 10+ let spoluprací · tisíce culíků.
 
 **Zakázaná tvrzení:** „dohledatelný původ" a podobné nedoložitelné sliby · „nejlevnější/nejlepší v ČR" · „slovanské vlasy" (dokud není potvrzen skutečný původ) · cokoli o zdravotních účincích.
 
