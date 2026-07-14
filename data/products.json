@@ -1,11 +1,11 @@
 {
   "produkty": [
     {
-      "foto": "assets/img/uploads/snímek-obrazovky-2025-10-26-091308.png",
+      "foto": "assets/img/uploads/img_3858.png",
       "vyber_domu": true,
-      "delka_cm": 51,
+      "delka_cm": 60,
       "foto_alt": "Tmavé vlasy 51–55 cm",
-      "gramaz": 105,
+      "gramaz": 125,
       "cislo": "SK-001",
       "stav": "in",
       "delka_label": "56-60",
