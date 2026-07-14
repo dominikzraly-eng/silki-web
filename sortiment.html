@@ -23,6 +23,16 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/styles.css">
+  <style>
+    .toolbar-actions { display: flex; align-items: center; gap: var(--sp-4); flex-wrap: wrap; }
+    .share-btn { display: inline-flex; align-items: center; gap: 8px; min-height: 46px; padding: 0 18px; border-radius: var(--radius-pill); border: 1.5px solid var(--line); background: var(--ivory); color: var(--ink); font: inherit; font-size: .9rem; font-weight: 600; cursor: pointer; transition: border-color var(--dur-1) var(--ease-out), color var(--dur-1) var(--ease-out); }
+    .share-btn:hover { border-color: var(--gold); }
+    .share-btn.copied { border-color: var(--gold-deep); color: var(--gold-deep); }
+    .share-btn svg { width: 17px; height: 17px; flex: none; }
+    .product .tier-tag { display: inline-block; font-size: .64rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; margin-bottom: 8px; }
+    .tier-tag.tier-panenske { background: var(--gold-deep); color: var(--ivory); }
+    .tier-tag.tier-vyberove { background: var(--cream-2); color: var(--gold-deep); }
+  </style>
 </head>
 <body>
 
@@ -80,6 +90,14 @@
         <div class="toolbar reveal">
           <div class="filters-row">
             <div class="ff">
+              <label for="f-type">Kvalita</label>
+              <select id="f-type">
+                <option value="all">Obě řady</option>
+                <option value="panenske">Evropské panenské</option>
+                <option value="vyberove">Evropské výběrové</option>
+              </select>
+            </div>
+            <div class="ff">
               <label for="f-length">Délka</label>
               <select id="f-length">
                 <option value="all">Všechny délky</option>
@@ -108,7 +126,13 @@
               </select>
             </div>
           </div>
-          <label class="sold-toggle"><input type="checkbox" id="f-sold"> Zobrazit i prodané</label>
+          <div class="toolbar-actions">
+            <label class="sold-toggle"><input type="checkbox" id="f-sold"> Zobrazit i prodané</label>
+            <button type="button" class="share-btn" data-share-filter aria-label="Sdílet tento výběr">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+              <span data-share-text>Sdílet výběr</span>
+            </button>
+          </div>
         </div>
 
         <p class="catalog-count" data-catalog-count>—</p>
@@ -140,6 +164,7 @@
           <span class="status-badge in" data-m-status>Skladem</span>
           <h2 data-m-title style="font-size:2rem">SK-000</h2>
           <div class="specs">
+            <div class="row"><span>Kvalita</span><span data-m-kvalita></span></div>
             <div class="row"><span>Odstín</span><span data-m-shade></span></div>
             <div class="row"><span>Délka</span><span data-m-length></span></div>
             <div class="row"><span>Gramáž</span><span data-m-grams></span></div>
