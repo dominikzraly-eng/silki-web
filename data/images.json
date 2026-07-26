@@ -1,6 +1,6 @@
 {
   "blond_zaklad_kvality": {
-    "src": "https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=800&q=70",
+    "src": "assets/img/uploads/img_9995.jpeg",
     "alt": "Světlé blond vlasy prémiové kvality"
   },
   "kurzy_teaser_domu": {
@@ -8,7 +8,7 @@
     "alt": "Kurz prodlužování vlasů Silki"
   },
   "proc_silki": {
-    "src": "https://images.unsplash.com/photo-1605497788044-5a32c7078486?auto=format&fit=crop&w=800&q=70",
+    "src": "assets/img/uploads/img_5342.jpeg",
     "alt": "Detail prémiových evropských vlasů Silki"
   },
   "onas_pribeh": {
@@ -16,15 +16,15 @@
     "alt": "Detail prémiového culíku evropských vlasů Silki"
   },
   "kurzy_obsah": {
-    "src": "https://images.unsplash.com/photo-1522336572468-97b06e8ef143?auto=format&fit=crop&w=800&q=70",
+    "src": "assets/img/uploads/img_4123.jpeg",
     "alt": "Praktický nácvik prodlužování vlasů metodou keratin"
   },
   "reference_po": {
-    "src": "https://images.unsplash.com/photo-1605980776566-0486c3ac7617?auto=format&fit=crop&w=900&q=70",
+    "src": "assets/img/uploads/img_4514.jpeg",
     "alt": "Vlasy po prodloužení vlasy Silki"
   },
   "reference_pred": {
-    "src": "https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?auto=format&fit=crop&w=900&q=70",
+    "src": "assets/img/uploads/img_4941.jpeg",
     "alt": "Vlasy před prodloužením"
   },
   "hero_domu": {
@@ -32,15 +32,15 @@
     "alt": "Dlouhé lesklé evropské vlasy prémiové kvality"
   },
   "kadernice_kurz": {
-    "src": "https://images.unsplash.com/photo-1522336572468-97b06e8ef143?auto=format&fit=crop&w=800&q=70",
+    "src": "assets/img/uploads/img_4288.jpeg",
     "alt": "Kurz keratinového prodlužování pro kadeřnice"
   },
   "onas_kurzy": {
-    "src": "https://images.unsplash.com/photo-1522336572468-97b06e8ef143?auto=format&fit=crop&w=800&q=70",
+    "src": "assets/img/uploads/img_0631.jpeg",
     "alt": "Kurz prodlužování vlasů Silki"
   },
   "blond_teaser_domu": {
-    "src": "https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=800&q=70",
+    "src": "assets/img/uploads/img_3487.jpeg",
     "alt": "Blond vlasy prémiové kvality"
   }
 }
