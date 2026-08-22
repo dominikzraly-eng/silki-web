@@ -23,6 +23,25 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/styles.css">
+  <style>
+    .price-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 760px; margin-inline: auto; }
+    @media (max-width: 720px) { .price-grid { grid-template-columns: 1fr; } }
+    .plan.featured strong { color: var(--ivory); }
+
+    .upcoming { max-width: 720px; margin-inline: auto; }
+    .upcoming-card { display: flex; align-items: center; gap: var(--sp-6); background: var(--ink); color: var(--ivory); border-radius: var(--radius-lg); padding: var(--sp-6) var(--sp-7); box-shadow: var(--shadow-lg); }
+    .upcoming-date { flex: none; text-align: center; border-right: 1px solid rgba(253,251,248,.2); padding-right: var(--sp-6); line-height: 1; }
+    .upcoming-date .d { display: block; font-family: var(--font-display); font-size: 3rem; color: var(--ivory); }
+    .upcoming-date .y { display: block; font-family: var(--font-mono); font-size: .9rem; letter-spacing: .14em; color: #D8B884; margin-top: 8px; }
+    .upcoming-info { flex: 1; min-width: 0; }
+    .upcoming-info h3 { color: var(--ivory); font-size: 1.35rem; }
+    .upcoming-info p { color: rgba(253,251,248,.72); margin-top: 6px; }
+    .upcoming-info .btn { margin-top: var(--sp-4); }
+    @media (max-width: 560px) {
+      .upcoming-card { flex-direction: column; text-align: center; gap: var(--sp-4); }
+      .upcoming-date { border-right: none; border-bottom: 1px solid rgba(253,251,248,.2); padding-right: 0; padding-bottom: var(--sp-4); }
+    }
+  </style>
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -35,6 +54,7 @@
     "hasCourseInstance": {
       "@type": "CourseInstance",
       "courseMode": "Onsite",
+      "startDate": "2026-08-28",
       "location": { "@type": "Place", "name": "Praha", "address": { "@type": "PostalAddress", "addressLocality": "Praha", "addressCountry": "CZ" } }
     }
   }
@@ -99,44 +119,31 @@
       <div class="container">
         <div class="section-head center reveal">
           <span class="eyebrow center">Vyberte si formát</span>
-          <h2>Kurzy pro každou úroveň</h2>
-          <p>Tři varianty podle toho, kde se právě nacházíte — od úplného začátku po školení na míru pro celé týmy.</p>
+          <h2>Kurz pro každou úroveň</h2>
+          <p>Jeden kompletní kurz pro začátečnice i kadeřnice — tempo i obsah přizpůsobíme vaší úrovni. Pro celé týmy, salony a školy máme školení na míru.</p>
         </div>
 
         <div class="price-grid">
-          <!-- Beginners -->
-          <div class="plan reveal">
-            <h3>Pro začátečníky</h3>
-            <p>Kompletní kurz od nuly pro každého, kdo chce začít s prodlužováním vlasů a vybudovat si nové řemeslo.</p>
+          <!-- Merged course: beginners + hairdressers in one -->
+          <div class="plan featured reveal">
+            <span class="ribbon">Hlavní kurz</span>
+            <h3>Kurz prodlužování keratinem</h3>
+            <p>Kompletní kurz pro <strong>začátečnice i kadeřnice</strong> — od úplných základů po profesionální výsledek. Tempo i obsah přizpůsobíme vaší úrovni a praxi.</p>
             <div><span class="amt">10&nbsp;000</span> <span class="per">Kč · základní</span></div>
             <ul class="plan-list">
               <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Celý obsah kurzu krok za krokem</li>
               <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Praktický nácvik na modelech</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Část „Mindset pro úspěch“</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Certifikát o absolvování</li>
-            </ul>
-            <p class="per" style="font-size:.85rem">Se startovacím balíčkem 12&nbsp;000&nbsp;Kč</p>
-            <a href="#prihlaska" class="btn btn-outline btn-block">Přihlásit se</a>
-          </div>
-
-          <!-- Hairdressers (featured) -->
-          <div class="plan featured reveal" data-delay="1">
-            <span class="ribbon">Doporučujeme</span>
-            <h3>Pro kadeřnice</h3>
-            <p>Pro stylistky a kadeřnice, které už pracují s vlasy a chtějí rozšířit služby o prodlužování keratinem.</p>
-            <div><span class="amt">10&nbsp;000</span> <span class="per">Kč · od</span></div>
-            <ul class="plan-list">
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Tempo a obsah přizpůsobené praxi</li>
               <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Micro / nano keratin techniky</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Návaznost na partnerství Silki</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Střih, styling a „Mindset pro úspěch“</li>
               <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Certifikát o absolvování</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Návaznost na partnerství Silki</li>
             </ul>
             <p class="per" style="font-size:.85rem">Se startovacím balíčkem 12&nbsp;000&nbsp;Kč</p>
             <a href="#prihlaska" class="btn btn-gold btn-block">Mám zájem</a>
           </div>
 
           <!-- Individual / Salons & Schools -->
-          <div class="plan reveal" data-delay="2">
+          <div class="plan reveal" data-delay="1">
             <h3>Individuál — Salony &amp; Školy</h3>
             <p>Školení na míru pro celé týmy, salony a odborné školy. Termín, místo i rozsah podle vašich potřeb.</p>
             <div><span class="amt" style="font-size:2rem">Na poptávku</span></div>
@@ -231,6 +238,32 @@
       </div>
     </section>
 
+    <!-- UPCOMING COURSES -->
+    <section class="section" id="terminy">
+      <div class="container">
+        <div class="section-head center reveal">
+          <span class="eyebrow center">Nadcházející kurzy</span>
+          <h2>Nejbližší termín</h2>
+        </div>
+        <div class="upcoming reveal">
+          <div class="upcoming-card">
+            <div class="upcoming-date">
+              <span class="d">28.&nbsp;8.</span>
+              <span class="y">2026</span>
+            </div>
+            <div class="upcoming-info">
+              <h3>Kurz prodlužování keratinem</h3>
+              <p>Praha · omezený počet míst. Rezervujte si své místo — potvrdíme obratem.</p>
+              <div style="display:flex;flex-wrap:wrap;gap:var(--sp-4);align-items:center;margin-top:var(--sp-5)">
+                <a href="https://wa.me/420608784440?text=Dobr%C3%BD%20den%2C%20m%C3%A1m%20z%C3%A1jem%20o%20kurz%20prodlu%C5%BEov%C3%A1n%C3%AD%20keratinem%2028.%208.%202026." target="_blank" rel="noopener" class="btn btn-gold">Rezervovat přes WhatsApp</a>
+                <a href="#prihlaska" class="link-arrow" style="display:inline-flex;color:#D8B884">Vyplnit poptávku <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- APPLICATION FORM -->
     <section class="section" id="prihlaska">
       <div class="container narrow">
@@ -241,7 +274,9 @@
         </div>
 
         <div class="form-card reveal" data-delay="1">
-          <form data-booking novalidate>
+          <form data-booking name="poptavka-kurz" method="POST" data-netlify="true" netlify-honeypot="bot-field" novalidate>
+            <input type="hidden" name="form-name" value="poptavka-kurz">
+            <p hidden><label>Nevyplňujte: <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
             <div class="form-row">
               <div class="field">
                 <label for="name">Jméno a příjmení <span class="req">*</span></label>
@@ -266,8 +301,7 @@
                 <label for="course">Vyberte kurz <span class="req">*</span></label>
                 <select id="course" name="course" required>
                   <option value="" disabled selected>—</option>
-                  <option value="zacatecnice">Pro začátečníky</option>
-                  <option value="kadernice">Pro kadeřnice</option>
+                  <option value="kurz">Kurz prodlužování keratinem (28.&nbsp;8.&nbsp;2026)</option>
                   <option value="individual">Individuál — Salony &amp; Školy</option>
                 </select>
                 <span class="err">Vyberte prosím kurz.</span>

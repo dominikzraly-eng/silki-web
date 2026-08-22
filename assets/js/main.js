@@ -167,7 +167,8 @@
         firstInvalid.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center" });
         return;
       }
-      // Simulated async submit (wire to Formspree / Reservio / backend here)
+      // Submit to Netlify Forms via AJAX. The <form> must have name + data-netlify
+      // + a hidden "form-name" input so Netlify captures it and can notify by e-mail.
       var submitBtn = form.querySelector('[type="submit"]');
       var labelCs = submitBtn ? submitBtn.getAttribute("data-loading-cs") : null;
       var labelEn = submitBtn ? submitBtn.getAttribute("data-loading-en") : null;
@@ -176,7 +177,16 @@
         submitBtn.dataset.orig = submitBtn.innerHTML;
         submitBtn.textContent = (root.getAttribute("lang") === "en" ? labelEn : labelCs) || "…";
       }
-      setTimeout(function () {
+      function resetBtn() { if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = submitBtn.dataset.orig; } }
+      var body = new URLSearchParams();
+      new FormData(form).forEach(function (v, k) { body.append(k, v); });
+      if (!body.has("form-name")) body.append("form-name", form.getAttribute("name") || "silki-form");
+      fetch("/", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: body.toString()
+      }).then(function (r) {
+        if (!r.ok) throw new Error("HTTP " + r.status);
         var success = form.parentElement.querySelector(".form-success");
         if (success) {
           form.style.display = "none";
@@ -185,8 +195,11 @@
           success.focus();
         }
         showToast(root.getAttribute("lang") === "en" ? "Request sent — we’ll be in touch soon." : "Odesláno — brzy se vám ozveme.");
-        if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = submitBtn.dataset.orig; }
-      }, 1100);
+        resetBtn();
+      }).catch(function () {
+        showToast(root.getAttribute("lang") === "en" ? "Sending failed — please reach us on WhatsApp." : "Odeslání se nezdařilo — napište nám prosím na WhatsApp.");
+        resetBtn();
+      });
     });
   }
 

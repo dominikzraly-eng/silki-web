@@ -123,7 +123,9 @@
             <h2 style="font-size:clamp(1.6rem,3vw,2.2rem);margin-bottom:var(--sp-2)">Poptávka vlasů</h2>
             <p style="margin-bottom:var(--sp-6)">Napište nám, o co máte zájem — rádi poradíme s délkou, odstínem i gramáží. Pole označená <span class="serif-accent">*</span> jsou povinná.</p>
 
-            <form data-booking novalidate>
+            <form data-booking name="poptavka" method="POST" data-netlify="true" netlify-honeypot="bot-field" novalidate>
+              <input type="hidden" name="form-name" value="poptavka">
+              <p hidden><label>Nevyplňujte: <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
               <input type="hidden" name="subject" value="">
               <div class="form-row">
                 <div class="field">

@@ -194,7 +194,9 @@
         </div>
 
         <div class="form-card reveal" data-delay="1">
-          <form data-booking novalidate>
+          <form data-booking name="registrace-kadernice" method="POST" data-netlify="true" netlify-honeypot="bot-field" novalidate>
+            <input type="hidden" name="form-name" value="registrace-kadernice">
+            <p hidden><label>Nevyplňujte: <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
             <div class="form-row">
               <div class="field">
                 <label for="name">Jméno a příjmení <span class="req">*</span></label>
