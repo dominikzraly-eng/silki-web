@@ -323,15 +323,14 @@
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="' + path + '"/></svg>';
   }
   var ARROW = "M5 12h14M13 6l6 6-6 6";
-  function kvalitaLabel(v, short) { if (v === "vyberove") return short ? "Výběrové" : "Evropské výběrové"; return short ? "Panenské" : "Evropské panenské"; }
 
   function renderCatalog(container, produkty) {
     container.innerHTML = produkty.map(function (p) {
       var sold = p.stav === "sold";
       return (
-        '<button type="button" class="product' + (sold ? " sold" : "") + '" data-status="' + p.stav + '" data-num="' + p.cislo + '" data-kvalita="' + (p.kvalita || "panenske") + '" data-shade="' + p.odstin + '" data-shade-label="' + p.odstin + '" data-length="' + p.delka_cm + '" data-length-label="' + p.delka_label + '" data-grams="' + p.gramaz + '" data-rate="' + p.cena_g + '" data-img="' + p.foto + '">' +
+        '<button type="button" class="product' + (sold ? " sold" : "") + '" data-status="' + p.stav + '" data-num="' + p.cislo + '" data-shade="' + p.odstin + '" data-shade-label="' + p.odstin + '" data-length="' + p.delka_cm + '" data-length-label="' + p.delka_label + '" data-grams="' + p.gramaz + '" data-rate="' + p.cena_g + '" data-img="' + p.foto + '">' +
           '<div class="media"><img src="' + p.foto + '" width="600" height="750" alt="' + p.foto_alt + '" loading="lazy"><span class="num">' + p.cislo + '</span><span class="status ' + (sold ? "out" : "in") + '">' + (sold ? "Prodáno" : "Skladem") + '</span></div>' +
-          '<div class="body"><span class="tier-tag tier-' + (p.kvalita || "panenske") + '">' + kvalitaLabel(p.kvalita, true) + '</span><h3>' + p.odstin + ' · ' + p.delka_label + ' cm</h3>' +
+          '<div class="body"><h3>' + p.odstin + ' · ' + p.delka_label + ' cm</h3>' +
             '<div class="specs"><div class="row"><span>Odstín</span><span>' + p.odstin + '</span></div><div class="row"><span>Délka</span><span>' + p.delka_label + ' cm</span></div><div class="row"><span>Gramáž</span><span>' + p.gramaz + ' g</span></div><div class="row"><span>Cena / gram</span><span>' + p.cena_g + ' Kč</span></div></div>' +
             '<div class="price"><div><div class="rate">Celková cena</div><div class="total" data-total>—</div></div><span class="view-hint">Detail ' + svgIcon(ARROW) + '</span></div>' +
           '</div>' +
@@ -405,7 +404,6 @@
 
   /* ---------- 10b. Catalog filters + sold toggle ---------- */
   function initCatalogFilters(container) {
-    var fType = document.getElementById("f-type");
     var fLength = document.getElementById("f-length");
     var fShade = document.getElementById("f-shade");
     var fWeight = document.getElementById("f-weight");
@@ -430,9 +428,8 @@
       if (band === "gt120") return g > 120;
       return true;
     }
-    function syncUrl(tb, lb, sb, wb, showSold) {
+    function syncUrl(lb, sb, wb, showSold) {
       var params = new URLSearchParams();
-      if (tb && tb !== "all") params.set("typ", tb);
       if (lb && lb !== "all") params.set("delka", lb);
       if (sb && sb !== "all") params.set("odstin", sb);
       if (wb && wb !== "all") params.set("gramaz", wb);
@@ -441,7 +438,6 @@
       window.history.replaceState(null, "", window.location.pathname + (qs ? "?" + qs : ""));
     }
     function applyFilters(writeUrl) {
-      var tb = fType ? fType.value : "all";
       var lb = fLength ? fLength.value : "all";
       var sb = fShade ? fShade.value : "all";
       var wb = fWeight ? fWeight.value : "all";
@@ -451,7 +447,6 @@
         var sold = p.getAttribute("data-status") === "sold";
         var ok = true;
         if (sold && !showSold) ok = false;
-        if (ok && tb !== "all" && p.getAttribute("data-kvalita") !== tb) ok = false;
         if (ok && !inLengthBand(p.getAttribute("data-length"), lb)) ok = false;
         if (ok && sb !== "all" && p.getAttribute("data-shade") !== sb) ok = false;
         if (ok && !inWeightBand(parseFloat(p.getAttribute("data-grams")), wb)) ok = false;
@@ -460,17 +455,16 @@
       });
       if (countEl) countEl.innerHTML = "<strong>" + visible + "</strong> " + (visible === 1 ? "kus" : (visible >= 2 && visible <= 4 ? "kusy" : "kusů"));
       if (emptyEl) emptyEl.classList.toggle("show", visible === 0);
-      if (writeUrl !== false) syncUrl(tb, lb, sb, wb, showSold);
+      if (writeUrl !== false) syncUrl(lb, sb, wb, showSold);
     }
     function readUrl() {
       var q = new URLSearchParams(window.location.search);
-      if (fType && q.get("typ")) fType.value = q.get("typ");
       if (fLength && q.get("delka")) fLength.value = q.get("delka");
       if (fShade && q.get("odstin")) fShade.value = q.get("odstin");
       if (fWeight && q.get("gramaz")) fWeight.value = q.get("gramaz");
       if (fSold && q.get("prodane") === "1") fSold.checked = true;
     }
-    [fType, fLength, fShade, fWeight].forEach(function (s) { if (s) s.addEventListener("change", function () { applyFilters(true); }); });
+    [fLength, fShade, fWeight].forEach(function (s) { if (s) s.addEventListener("change", function () { applyFilters(true); }); });
     if (fSold) fSold.addEventListener("change", function () { applyFilters(true); });
 
     function legacyCopy(text) {
@@ -510,7 +504,6 @@
       modal.querySelector("[data-m-img]").src = p.getAttribute("data-img") || "";
       modal.querySelector("[data-m-img]").alt = "Vlasy " + (p.getAttribute("data-num") || "");
       modal.querySelector("[data-m-title]").textContent = p.getAttribute("data-num") || "";
-      var mKv = modal.querySelector("[data-m-kvalita]"); if (mKv) mKv.textContent = kvalitaLabel(p.getAttribute("data-kvalita"));
       modal.querySelector("[data-m-shade]").textContent = p.getAttribute("data-shade-label") || "";
       modal.querySelector("[data-m-length]").textContent = (p.getAttribute("data-length-label") || "") + " cm";
       modal.querySelector("[data-m-grams]").textContent = p.getAttribute("data-grams") + " g";

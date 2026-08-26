@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Ceník vlasů za gram — tmavé, střední, blond | Silki</title>
-  <meta name="description" content="Transparentní ceník pravých evropských vlasů: cena za 1 gram podle délky a odstínu ve dvou řadách — panenské a výběrové. Celková cena = gramáž × cena za gram. Plus ceník práce metodou keratin.">
+  <meta name="description" content="Transparentní ceník pravých evropských vlasů: cena za 1 gram podle délky a odstínu. Celková cena = gramáž × cena za gram. Plus ceník práce metodou keratin.">
   <link rel="canonical" href="https://silkihair.cz/cenik.html">
   <link rel="icon" href="favicon.ico" sizes="any">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -15,7 +15,7 @@
   <meta property="og:site_name" content="Silki">
   <meta property="og:locale" content="cs_CZ">
   <meta property="og:title" content="Ceník vlasů za gram — tmavé, střední, blond | Silki">
-  <meta property="og:description" content="Transparentní ceník pravých evropských vlasů: cena za 1 gram podle délky a odstínu ve dvou řadách — panenské a výběrové. Celková cena = gramáž × cena za gram. Plus ceník práce metodou keratin.">
+  <meta property="og:description" content="Transparentní ceník pravých evropských vlasů: cena za 1 gram podle délky a odstínu. Celková cena = gramáž × cena za gram. Plus ceník práce metodou keratin.">
   <meta property="og:url" content="https://silkihair.cz/cenik.html">
   <meta property="og:image" content="https://silkihair.cz/assets/img/uploads/whatsapp-image-2026-06-07-at-22.58.55.jpeg">
   <meta name="twitter:card" content="summary_large_image">
@@ -29,7 +29,7 @@
     /* ---- Práce — metoda keratin (kompaktní pás nad ceníkem vlasů) ---- */
     .prace-wrap { max-width: 940px; margin-inline: auto; }
     .prace-band {
-      display: grid; grid-template-columns: repeat(4, 1fr);
+      display: grid; grid-template-columns: repeat(3, 1fr);
       background: var(--ivory);
       border: 1px solid var(--line-2); border-radius: var(--radius-lg);
       overflow: hidden; box-shadow: var(--shadow-sm);
@@ -46,17 +46,16 @@
     .prace-item .pk-price .pk-c { font-size: 1.05rem; color: var(--ink-2); margin-left: 4px; }
     .prace-item .pk-price em { display: block; font-style: normal; font-size: .66rem; letter-spacing: .05em; color: var(--gold-deep); margin-top: 8px; }
     @media (max-width: 620px) {
-      .prace-band { grid-template-columns: 1fr 1fr; }
-      .prace-item:nth-child(3), .prace-item:nth-child(4) { border-top: 1px solid var(--line-2); }
-      .prace-item:nth-child(odd) { border-left: none; }
+      .prace-band { grid-template-columns: 1fr; }
+      .prace-item + .prace-item { border-left: none; border-top: 1px solid var(--line-2); }
     }
 
-    /* ---- Vlasy — dvě kvalitativní hladiny ---- */
+    /* ---- Vlasy — cena za gram ---- */
     .cenik-hair { position: relative; overflow: hidden; }
     .cenik-hair .hero-orn.one { top: 60px; right: -60px; }
     .cenik-hair .hero-orn.two { bottom: 40px; left: -100px; }
 
-    .tier-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-5); align-items: start; max-width: 980px; margin-inline: auto; }
+    .tier-grid { display: grid; grid-template-columns: 1fr; gap: var(--sp-5); align-items: start; max-width: 560px; margin-inline: auto; }
     @media (max-width: 860px) { .tier-grid { grid-template-columns: 1fr; } }
 
     .tier-card { background: var(--ivory); border: 1px solid var(--line-2); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); }
@@ -139,9 +138,8 @@
         </div>
         <div class="prace-wrap reveal in">
           <div class="prace-band">
-            <div class="prace-item"><span class="pk-name">Klasické spoje</span><span class="pk-price">25<span class="pk-c">Kč</span><em>za pramen</em></span></div>
-            <div class="prace-item"><span class="pk-name">Micro spoje</span><span class="pk-price">20<span class="pk-c">Kč</span><em>za pramen</em></span></div>
-            <div class="prace-item"><span class="pk-name">Obnova</span><span class="pk-price">35<span class="pk-c">Kč</span><em>za pramen</em></span></div>
+            <div class="prace-item"><span class="pk-name">Nasazení</span><span class="pk-price">28<span class="pk-c">Kč</span><em>za pramen</em></span></div>
+            <div class="prace-item"><span class="pk-name">Obnova</span><span class="pk-price">38<span class="pk-c">Kč</span><em>za pramen</em></span></div>
             <div class="prace-item"><span class="pk-name">Keratinování</span><span class="pk-price">10<span class="pk-c">Kč</span><em>za pramen</em></span></div>
           </div>
           <p class="form-note" style="text-align:center;margin-top:var(--sp-4)">Ceny práce jsou orientační — přesnou kalkulaci připravíme na konzultaci.</p>
@@ -149,7 +147,7 @@
       </div>
     </section>
 
-    <!-- ===== VLASY — CENA ZA GRAM, DVĚ KVALITATIVNÍ HLADINY ===== -->
+    <!-- ===== VLASY — CENA ZA GRAM ===== -->
     <section class="section cenik-hair bg-cream2" style="padding-top:var(--sp-8)">
       <span class="hero-orn one" aria-hidden="true"></span>
       <span class="hero-orn two" aria-hidden="true"></span>
@@ -157,14 +155,13 @@
         <div class="section-head center reveal in" style="margin-bottom:var(--sp-7)">
           <span class="eyebrow center">Vlasy</span>
           <h2>Cena za 1 gram</h2>
-          <p>Dvě kvalitativní hladiny — vyberte podle nároků a rozpočtu. Konečnou cenu kusu spočítáte jako <span class="serif-accent">gramáž&nbsp;×&nbsp;cena za gram</span>.</p>
+          <p>100&nbsp;% neopracované evropské panenské vlasy. Ceny jsou za 1&nbsp;gram podle délky a odstínu — konečnou cenu kusu spočítáte jako <span class="serif-accent">gramáž&nbsp;×&nbsp;cena za gram</span>.</p>
         </div>
 
         <div class="tier-grid reveal in">
           <!-- PREMIUM -->
           <article class="tier-card premium">
             <div class="tier-head">
-              <span class="tier-badge">Nejvyšší kvalita</span>
               <h3>Evropské panenské</h3>
               <p class="tier-sub">100&nbsp;% neopracované, ručně vybírané. Nejjemnější struktura a nejdelší životnost.</p>
             </div>
@@ -184,33 +181,6 @@
                 <tr><td>76–80</td><td>164</td><td>190</td><td>194</td></tr>
                 <tr><td>81–85</td><td>166</td><td>199</td><td>205</td></tr>
                 <tr><td>85–90</td><td>177</td><td>207</td><td>213</td></tr>
-              </tbody>
-            </table>
-          </article>
-
-          <!-- STANDARD -->
-          <article class="tier-card standard">
-            <div class="tier-head">
-              <span class="tier-badge">Dostupnější</span>
-              <h3>Evropské výběrové</h3>
-              <p class="tier-sub">Dostupnější řada s výbornou výdrží a skvělým poměrem ceny a kvality.</p>
-            </div>
-            <table class="tt">
-              <caption class="sr-only">Ceník evropských výběrových vlasů — cena za 1 gram podle délky a odstínu</caption>
-              <thead><tr><th>Délka <span class="u">cm</span></th><th>Tmavé <span class="u">Kč/g</span></th><th>Střední <span class="u">Kč/g</span></th><th>Blond <span class="u">Kč/g</span></th></tr></thead>
-              <tbody>
-                <tr><td>30–35</td><td>38</td><td>42</td><td>45</td></tr>
-                <tr><td>35–40</td><td>49</td><td>57</td><td>59</td></tr>
-                <tr><td>41–45</td><td>69</td><td>73</td><td>82</td></tr>
-                <tr><td>46–50</td><td>75</td><td>88</td><td>91</td></tr>
-                <tr><td>51–55</td><td>88</td><td>103</td><td>106</td></tr>
-                <tr><td>56–60</td><td>91</td><td>108</td><td>112</td></tr>
-                <tr><td>61–65</td><td>96</td><td>112</td><td>114</td></tr>
-                <tr><td>66–70</td><td>101</td><td>118</td><td>121</td></tr>
-                <tr><td>71–75</td><td>105</td><td>120</td><td>122</td></tr>
-                <tr><td>76–80</td><td>107</td><td>124</td><td>126</td></tr>
-                <tr><td>81–85</td><td>108</td><td>129</td><td>133</td></tr>
-                <tr><td>85–90</td><td>115</td><td>135</td><td>138</td></tr>
               </tbody>
             </table>
           </article>

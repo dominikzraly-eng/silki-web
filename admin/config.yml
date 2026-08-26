@@ -37,14 +37,6 @@ collections:
                 name: "odstin"
                 widget: "select"
                 options: ["Tmavé", "Střední", "Blond"]
-              - label: "Kvalita / řada"
-                name: "kvalita"
-                widget: "select"
-                options:
-                  - { label: "Evropské panenské", value: "panenske" }
-                  - { label: "Evropské výběrové", value: "vyberove" }
-                default: "panenske"
-                hint: "Do které řady kus patří — určuje filtr v sortimentu."
               - { label: "Délka od (cm, číslo pro filtr)", name: "delka_cm", widget: "number", hint: "spodní hranice rozmezí, např. 51" }
               - { label: "Délka — popisek", name: "delka_label", widget: "string", hint: "např. 51–55" }
               - { label: "Gramáž (g)", name: "gramaz", widget: "number" }
