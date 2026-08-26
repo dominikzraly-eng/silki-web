@@ -1,76 +1,76 @@
 {
   "produkty": [
     {
+      "foto": "assets/img/uploads/culik-tmave-vlnite.jpg",
+      "vyber_domu": true,
+      "delka_cm": 41,
+      "foto_alt": "Tmavý vlnitý culík panenských vlasů 41–45 cm",
+      "gramaz": 85,
       "cislo": "SK-001",
       "stav": "in",
-      "odstin": "Tmavé",
-      "delka_cm": 41,
       "delka_label": "41–45",
-      "gramaz": 85,
-      "cena_g": 106,
-      "foto": "assets/img/uploads/culik-tmave-vlnite.jpg",
-      "foto_alt": "Tmavý vlnitý culík panenských vlasů 41–45 cm",
-      "vyber_domu": true
+      "odstin": "Tmavé",
+      "cena_g": 106
     },
     {
+      "foto": "assets/img/uploads/img_5342.jpeg",
+      "vyber_domu": true,
+      "delka_cm": 51,
+      "foto_alt": "Plavý blond culík panenských vlasů 51–55 cm",
+      "gramaz": 105,
       "cislo": "SK-002",
       "stav": "in",
-      "odstin": "Blond",
-      "delka_cm": 51,
       "delka_label": "51–55",
-      "gramaz": 105,
-      "cena_g": 163,
-      "foto": "assets/img/uploads/culik-blond-plava.jpg",
-      "foto_alt": "Plavý blond culík panenských vlasů 51–55 cm",
-      "vyber_domu": true
+      "odstin": "Blond",
+      "cena_g": 163
     },
     {
+      "foto": "assets/img/uploads/culik-tmave-rovne.jpg",
+      "vyber_domu": true,
+      "delka_cm": 56,
+      "foto_alt": "Tmavý rovný culík panenských vlasů 56–60 cm",
+      "gramaz": 120,
       "cislo": "SK-003",
       "stav": "in",
-      "odstin": "Tmavé",
-      "delka_cm": 56,
       "delka_label": "56–60",
-      "gramaz": 120,
-      "cena_g": 140,
-      "foto": "assets/img/uploads/culik-tmave-rovne.jpg",
-      "foto_alt": "Tmavý rovný culík panenských vlasů 56–60 cm",
-      "vyber_domu": true
+      "odstin": "Tmavé",
+      "cena_g": 140
     },
     {
+      "foto": "assets/img/uploads/img_4514.jpeg",
+      "vyber_domu": false,
+      "delka_cm": 46,
+      "foto_alt": "Světle hnědé culíky panenských vlasů 46–50 cm",
+      "gramaz": 92,
       "cislo": "SK-004",
       "stav": "in",
-      "odstin": "Střední",
-      "delka_cm": 46,
       "delka_label": "46–50",
-      "gramaz": 92,
-      "cena_g": 136,
-      "foto": "assets/img/uploads/img_4514.jpeg",
-      "foto_alt": "Světle hnědé culíky panenských vlasů 46–50 cm",
-      "vyber_domu": false
+      "odstin": "Střední",
+      "cena_g": 136
     },
     {
+      "foto": "assets/img/uploads/img_3858.jpg",
+      "vyber_domu": false,
+      "delka_cm": 51,
+      "foto_alt": "Tmavý culík panenských vlasů 51–55 cm",
+      "gramaz": 108,
       "cislo": "SK-005",
       "stav": "in",
-      "odstin": "Tmavé",
-      "delka_cm": 51,
       "delka_label": "51–55",
-      "gramaz": 108,
-      "cena_g": 135,
-      "foto": "assets/img/uploads/img_3858.jpg",
-      "foto_alt": "Tmavý culík panenských vlasů 51–55 cm",
-      "vyber_domu": false
+      "odstin": "Tmavé",
+      "cena_g": 135
     },
     {
+      "foto": "assets/img/uploads/img_4941.jpeg",
+      "vyber_domu": false,
+      "delka_cm": 51,
+      "foto_alt": "Středně hnědý culík panenských vlasů 51–55 cm",
+      "gramaz": 100,
       "cislo": "SK-006",
       "stav": "in",
-      "odstin": "Střední",
-      "delka_cm": 51,
       "delka_label": "51–55",
-      "gramaz": 100,
-      "cena_g": 159,
-      "foto": "assets/img/uploads/img_4941.jpeg",
-      "foto_alt": "Středně hnědý culík panenských vlasů 51–55 cm",
-      "vyber_domu": false
+      "odstin": "Střední",
+      "cena_g": 159
     }
   ]
 }
