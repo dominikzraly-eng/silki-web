@@ -105,5 +105,17 @@ function handshakeScript(status, payloadJson) {
 }
 
 function htmlResponse(html) {
-  return { statusCode: 200, headers: { "Content-Type": "text/html" }, body: html };
+  // Tahle odpoved obsahuje inline <script> (postMessage handshake pro Decap).
+  // Prisna CSP z netlify.toml (script-src 'self') by ho zablokovala a rozbila
+  // prihlaseni do administrace, proto si tenhle endpoint posila vlastni CSP.
+  return {
+    statusCode: 200,
+    headers: {
+      "Content-Type": "text/html",
+      "Content-Security-Policy": "default-src 'none'; script-src 'unsafe-inline'; frame-ancestors 'none'; base-uri 'none'",
+      "X-Robots-Tag": "noindex, nofollow",
+      "Cache-Control": "no-store"
+    },
+    body: html
+  };
 }

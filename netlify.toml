@@ -13,3 +13,53 @@
   from = "/api/auth/callback"
   to = "/.netlify/functions/auth"
   status = 200
+
+
+# ============================================================
+# Bezpečnostní hlavičky
+# ============================================================
+# Pořadí je důležité: /* platí všude, /admin/* přepisuje CSP níž.
+# Netlify u shodného názvu hlavičky použije poslední odpovídající pravidlo.
+
+[[headers]]
+  for = "/*"
+
+  [headers.values]
+    # media-src + frame-src: sekce Blond pocita s videi (vlastni i YouTube).
+    # Bez nich by je prohlizec zablokoval, az je nekdo vlozi.
+    # 'unsafe-inline' u style-src je nutné: 6 stránek má <style> blok
+    # a v HTML je 87 style="..." atributů. Odstranit ho jde až po převodu
+    # inline stylů do assets/css/. Skripty jsou jen vlastní, takže
+    # script-src zůstává přísný, což je ta část, na které u XSS záleží.
+    Content-Security-Policy = "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://i.ytimg.com; connect-src 'self'; manifest-src 'self'; media-src 'self'; frame-src https://www.youtube.com https://www.youtube-nocookie.com; upgrade-insecure-requests"
+
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(), camera=(), microphone=(), payment=(), usb=(), magnetometer=(), gyroscope=()"
+
+    # frame-ancestors výše je novější standard, tohle je pro starší prohlížeče
+    X-Frame-Options = "DENY"
+
+    # Netlify posílá max-age samo, ale bez includeSubDomains
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+
+
+# Decap CMS se načítá z unpkg.com a mluví s GitHub API.
+# Přísná politika výše by administraci rozbila, proto má vlastní.
+[[headers]]
+  for = "/admin"
+
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com https://fonts.googleapis.com; font-src 'self' data: https://unpkg.com https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://api.github.com https://unpkg.com; worker-src 'self' blob:; form-action 'self' https://github.com"
+    X-Robots-Tag = "noindex, nofollow"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+[[headers]]
+  for = "/admin/*"
+
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com https://fonts.googleapis.com; font-src 'self' data: https://unpkg.com https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://api.github.com https://unpkg.com; worker-src 'self' blob:; form-action 'self' https://github.com"
+    X-Robots-Tag = "noindex, nofollow"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
