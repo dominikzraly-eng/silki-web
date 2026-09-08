@@ -199,8 +199,32 @@
       }).catch(function () {
         showToast(root.getAttribute("lang") === "en" ? "Sending failed — please reach us on WhatsApp." : "Odeslání se nezdařilo — napište nám prosím na WhatsApp.");
         resetBtn();
+        showDirectContact(form);
       });
     });
+  }
+
+  /* Kdyz odeslani selze, nestaci mizici toast - nabidnout primy kontakt primo
+     ve formulari, aby poptavka neskoncila v nicem. */
+  function showDirectContact(form) {
+    if (form.querySelector(".form-fallback")) return;
+    var wrap = document.createElement("div");
+    wrap.className = "form-fallback";
+    wrap.setAttribute("role", "alert");
+    wrap.style.cssText = "margin:var(--sp-5) 0;padding:var(--sp-5);border-radius:var(--radius);" +
+      "border:1px solid rgba(176,141,87,.45);background:rgba(176,141,87,.10)";
+    var tel = (document.querySelector('[data-site="telefon_zobrazit"]') || {}).textContent || "";
+    wrap.innerHTML =
+      '<p style="font-size:.95rem"><strong>Odeslání se nezdařilo.</strong> Napište nám prosím přímo — ozveme se obratem.</p>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:var(--sp-3);margin-top:var(--sp-4)">' +
+        '<a class="btn btn-gold" target="_blank" rel="noopener" href="https://wa.me/420608784440">WhatsApp' +
+        (tel ? " " + tel : "") + '</a>' +
+        '<a class="btn btn-outline" href="mailto:info@silkihair.cz">info@silkihair.cz</a>' +
+      '</div>';
+    var btn = form.querySelector('[type="submit"]');
+    if (btn && btn.parentNode) btn.parentNode.insertBefore(wrap, btn);
+    else form.appendChild(wrap);
+    wrap.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center" });
   }
 
   /* ---------- 9. Price formatting (Kč) ---------- */
