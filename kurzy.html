@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Kurz prodlužování vlasů keratinem — Praha | Silki</title>
-  <meta name="description" content="Kurz prodlužování vlasů metodou keratin pro začátečníky i kadeřnice. Praktický nácvik, certifikát a startovací balíček. Praha, po domluvě celá ČR.">
+  <title>Kurz prodlužování vlasů keratinem — Praha 25. 9. | Silki</title>
+  <meta name="description" content="Kurz prodlužování vlasů metodou keratin — kompletní teorie i praxe pod vedením lektorek Silki Hair. Praha, 25. 9. 2026. Startovací balíček.">
   <link rel="canonical" href="https://silkihair.cz/kurzy.html">
   <link rel="icon" href="favicon.ico" sizes="any">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -14,8 +14,8 @@
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Silki">
   <meta property="og:locale" content="cs_CZ">
-  <meta property="og:title" content="Kurz prodlužování vlasů keratinem — Praha | Silki">
-  <meta property="og:description" content="Kurz prodlužování vlasů metodou keratin pro začátečníky i kadeřnice. Praktický nácvik, certifikát a startovací balíček. Praha, po domluvě celá ČR.">
+  <meta property="og:title" content="Kurz prodlužování vlasů keratinem — Praha 25. 9. | Silki">
+  <meta property="og:description" content="Kurz prodlužování vlasů metodou keratin — kompletní teorie i praxe pod vedením lektorek Silki Hair. Praha, 25. 9. 2026. Startovací balíček.">
   <meta property="og:url" content="https://silkihair.cz/kurzy.html">
   <meta property="og:image" content="https://silkihair.cz/assets/img/uploads/whatsapp-image-2026-06-07-at-22.58.55.jpeg">
   <meta name="twitter:card" content="summary_large_image">
@@ -27,6 +27,10 @@
     .price-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 760px; margin-inline: auto; }
     @media (max-width: 720px) { .price-grid { grid-template-columns: 1fr; } }
     .plan.featured strong { color: var(--ivory); }
+    /* seznam odrazek i mimo cenovou kartu (lektorky) */
+    .card .plan-list { display: grid; gap: var(--sp-3); }
+    .card .plan-list li { display: flex; gap: var(--sp-3); align-items: flex-start; font-size: .96rem; color: var(--ink-2); }
+    .card .plan-list svg { width: 18px; height: 18px; color: var(--gold-deep); flex: none; margin-top: 3px; }
 
     .upcoming { max-width: 720px; margin-inline: auto; }
     .upcoming-card { display: flex; align-items: center; gap: var(--sp-6); background: var(--ink); color: var(--ivory); border-radius: var(--radius-lg); padding: var(--sp-6) var(--sp-7); box-shadow: var(--shadow-lg); }
@@ -47,7 +51,7 @@
     "@context": "https://schema.org",
     "@type": "Course",
     "name": "Kurz prodlužování vlasů metodou keratin",
-    "description": "Profesionální kurz prodlužování vlasů metodou keratin (micro/nano) pro začátečníky i kadeřnice. Praktický nácvik, střih a styling, podnikatelský mindset. Primárně Praha, po domluvě celá ČR.",
+    "description": "Profesionální kurz prodlužování vlasů metodou keratin pod vedením lektorek Silki Hair. Kompletní teorie i praxe — příprava pramenů, keratinování, nasazení a sundání spojů, obnova. Součástí je i mindset pro úspěch.",
     "provider": { "@type": "Organization", "name": "Silki", "url": "https://silkihair.cz" },
     "inLanguage": "cs",
     "offers": { "@type": "Offer", "price": "10000", "priceCurrency": "CZK", "category": "Paid" },
@@ -55,7 +59,8 @@
       "@type": "CourseInstance",
       "courseMode": "Onsite",
       "startDate": "2026-09-25",
-      "location": { "@type": "Place", "name": "Praha", "address": { "@type": "PostalAddress", "addressLocality": "Praha", "addressCountry": "CZ" } }
+      "endDate": "2026-09-25",
+      "location": { "@type": "Place", "name": "Beauty Coworking", "address": { "@type": "PostalAddress", "streetAddress": "Voctářova 18", "addressLocality": "Praha 8", "postalCode": "180 00", "addressCountry": "CZ" } }
     }
   }
   </script>
@@ -103,147 +108,138 @@
     <!-- HERO -->
     <section class="page-hero">
       <div class="container narrow">
-        <span class="eyebrow center reveal">Kurzy Silki</span>
-        <h1 class="reveal" data-delay="1" style="margin-top:var(--sp-4)">Naučte se prodlužovat vlasy metodou keratin</h1>
-        <p class="reveal" data-delay="2">Profesionální kurz pod vedením zkušených lektorek Silki. Od přípravy pramenů přes micro&nbsp;/&nbsp;nano keratin techniky až po střih, styling a podnikatelský mindset. Primárně Praha, po domluvě celá ČR.</p>
+        <span class="eyebrow center reveal">Silki Hair CZ</span>
+        <h1 class="reveal" data-delay="1" style="margin-top:var(--sp-4)">Kurz prodlužování vlasů</h1>
+        <p class="reveal" data-delay="2">Profesionální kurz pod vedením zkušených lektorek ze Silki Hair. Kompletní teorie a praxe.</p>
+        <p class="reveal" data-delay="2">Na kurzu prodlužování vlasů se naučíš kompletní teorii i praxi. Od přípravy klasických i microkeratinových spojů po nasazování, gumičkování, rozčesávání, sundavání, pěšinkování. Naší prioritou jsou klientky, zdravé vlasy a prameny, které drží a nepadají.</p>
         <div class="hero-actions reveal" data-delay="3" style="justify-content:center">
-          <a href="#prihlaska" class="btn btn-primary">Nezávazně poptat</a>
+          <a href="#prihlaska" class="btn btn-primary">Mám zájem o kurz</a>
           <a href="https://wa.me/420608784440" target="_blank" rel="noopener" class="link-arrow">Napsat na WhatsApp
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
         </div>
       </div>
     </section>
 
-    <!-- THREE OPTIONS -->
+    <!-- METODA KERATIN -->
     <section class="section" style="padding-top:var(--sp-5)">
-      <div class="container">
+      <div class="container narrow">
         <div class="section-head center reveal">
-          <span class="eyebrow center">Vyberte si formát</span>
-          <h2>Kurz pro každou úroveň</h2>
-          <p>Jeden kompletní kurz pro začátečnice i kadeřnice — tempo i obsah přizpůsobíme vaší úrovni. Pro celé týmy, salony a školy máme školení na míru.</p>
+          <span class="eyebrow center">Metoda</span>
+          <h2>Prodlužování metodou keratin</h2>
         </div>
-
-        <div class="price-grid">
-          <!-- Merged course: beginners + hairdressers in one -->
-          <div class="plan featured reveal">
-            <span class="ribbon">Hlavní kurz</span>
-            <h3>Kurz prodlužování keratinem</h3>
-            <p>Kompletní kurz pro <strong>začátečnice i kadeřnice</strong> — od úplných základů po profesionální výsledek. Tempo i obsah přizpůsobíme vaší úrovni a praxi.</p>
-            <div><span class="amt">10&nbsp;000</span> <span class="per">Kč · základní</span></div>
-            <ul class="plan-list">
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Celý obsah kurzu krok za krokem</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Praktický nácvik na modelech</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Micro / nano keratin techniky</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Střih, styling a „Mindset pro úspěch“</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Certifikát o absolvování</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Návaznost na partnerství Silki</li>
-            </ul>
-            <p class="per" style="font-size:.85rem">Se startovacím balíčkem 12&nbsp;000&nbsp;Kč</p>
-            <a href="#prihlaska" class="btn btn-gold btn-block">Mám zájem</a>
-          </div>
-
-          <!-- Individual / Salons & Schools -->
-          <div class="plan reveal" data-delay="1">
-            <h3>Individuál — Salony &amp; Školy</h3>
-            <p>Školení na míru pro celé týmy, salony a odborné školy. Termín, místo i rozsah podle vašich potřeb.</p>
-            <div><span class="amt" style="font-size:2rem">Na poptávku</span></div>
-            <ul class="plan-list">
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Skupinové i individuální školení</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Obsah sestavený na míru týmu</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Možnost zajíždění do dalších měst</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Certifikát pro každého účastníka</li>
-            </ul>
-            <p class="per" style="font-size:.85rem">Cena dle rozsahu a počtu osob</p>
-            <a href="#prihlaska" class="btn btn-outline btn-block">Nezávazná poptávka</a>
-          </div>
-        </div>
-        <p class="form-note" style="text-align:center;margin-top:var(--sp-6)">Přesné termíny, cena a rozsah se domlouvají individuálně. Počet míst na kurzu je omezený.</p>
+        <p class="lead reveal" style="text-align:center;max-width:62ch;margin-inline:auto">Prodlužování vlasů metodou keratin je dnes jedna z nejžádanějších služeb v beauty oboru. Na našem kurzu vás krok za krokem naučíme, jak tuto techniku zvládnout tak, abyste si mohly začít budovat svoji vlastní klientelu. Pokud je keratin aplikován správně, je to nejšetrnější metoda na trhu.</p>
       </div>
     </section>
 
-    <!-- CURRICULUM -->
+    <!-- OBSAH KURZU -->
     <section class="section bg-ivory">
       <div class="container split">
         <div class="split-copy reveal">
           <span class="eyebrow">Co se naučíte</span>
-          <h2>Obsah kurzu</h2>
-          <p class="lead">Kompletní cesta od základů po hotový, profesionální výsledek — metodou keratin (micro / nano).</p>
-          <ul class="feature-list" style="grid-template-columns:1fr 1fr;display:grid;gap:var(--sp-3) var(--sp-5)">
+          <h2>Na kurzu prodlužování vlasů se naučíte</h2>
+          <ul class="feature-list" style="margin-top:var(--sp-6)">
             <li><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><span>Seznámení s příslušenstvím</span></li>
             <li><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><span>Příprava vlasových pramenů</span></li>
-            <li><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><span>Keratinování</span></li>
-            <li><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><span>Micro / nano keratin techniky</span></li>
-            <li><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><span>Rozvržení partií</span></li>
+            <li><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><span>Keratinování a překeratinování od klasických spojů přes micro keratin</span></li>
+            <li><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><span>Správné rozvržení vlasových partií</span></li>
             <li><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><span>Gumičkování</span></li>
-            <li><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><span>Nasazení spojů</span></li>
-            <li><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><span>Sundání pramenů</span></li>
-            <li><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><span>Obnova vlasů</span></li>
-            <li><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><span>Střih a styling</span></li>
-            <li><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><span>Mindset pro úspěch &amp; budování klientely</span></li>
+            <li><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><span>Správné nasazení vlasových spojů, které je nejšetrnější k vlastním vlasům</span></li>
+            <li><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><span>Šetrné sundání vlasových pramenů</span></li>
+            <li><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><span>Obnova vlasových pramenů</span></li>
           </ul>
         </div>
         <div class="split-media reveal" data-delay="1"><img data-img-key="kurzy_obsah" src="assets/img/uploads/img_4123.jpeg" width="800" height="640" alt="Praktický nácvik prodlužování vlasů metodou keratin" loading="lazy"></div>
       </div>
     </section>
 
-    <!-- PRACTICAL INFO -->
+    <!-- MINDSET -->
     <section class="section">
-      <div class="container">
+      <div class="container narrow">
         <div class="section-head center reveal">
-          <span class="eyebrow center">Praktické informace</span>
-          <h2>Vše, co potřebujete vědět</h2>
+          <span class="eyebrow center">Mindset pro úspěch</span>
+          <h2>Nejen technika, ale i hlava</h2>
         </div>
-        <div class="grid grid-4">
-          <article class="card reveal">
-            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
-            <h3 style="font-size:1.15rem">Kde</h3>
-            <p>Primárně Praha, po domluvě celá ČR.</p>
-          </article>
-          <article class="card reveal" data-delay="1">
-            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
-            <h3 style="font-size:1.15rem">Kapacita</h3>
-            <p>Počet míst je omezený, aby měl každý účastník dostatek prostoru.</p>
-          </article>
-          <article class="card reveal" data-delay="2">
-            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a4 4 0 100-8 4 4 0 000 8z"/><path d="M8.5 13.5L7 22l5-3 5 3-1.5-8.5"/></svg></div>
-            <h3 style="font-size:1.15rem">Certifikát</h3>
-            <p>Po absolvování získáte certifikát o dokončení kurzu.</p>
-          </article>
-          <article class="card reveal" data-delay="3">
-            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7h-9M14 17H5M5 7l3 3-3 3M19 17l-3-3 3-3"/></svg></div>
-            <h3 style="font-size:1.15rem">Termíny</h3>
-            <p>Aktuální termíny rádi pošleme — napište nám přes formulář nebo WhatsApp.</p>
-          </article>
-        </div>
+        <p class="lead reveal" style="text-align:center;max-width:64ch;margin-inline:auto">Na našem kurzu se věnujeme technikám prodlužování vlasů i mindsetu pro úspěch. Velkou část věnujeme tomu, jak přemýšlet jako úspěšná podnikatelka. Protože úspěch není jen o tom, co umíte rukama, ale také o tom, jak přemýšlíte, jak si věříte a jestli dokážete jít dál i ve chvíli, kdy si nejste úplně jistá.</p>
+        <p class="reveal" style="text-align:center;max-width:64ch;margin:var(--sp-4) auto 0">Po absolvování našeho kurzu tak budete umět prodlužovat vlasy a dostanete informace o tom, jak si vybudovat úspěšné podnikání a stabilní klientelu.</p>
       </div>
     </section>
 
-    <!-- INSTRUCTORS -->
+    <!-- INVESTICE -->
     <section class="section bg-cream2">
       <div class="container">
         <div class="section-head center reveal">
-          <span class="eyebrow center">Vaše lektorky</span>
-          <h2>Učí vás spoluzakladatelky Silki</h2>
+          <span class="eyebrow center">Investice do kurzu</span>
+          <h2>Cena kurzu</h2>
+          <p>Na našich kurzech nám jde primárně o to, předat vám to nejlepší, co můžeme. Všechny zkušenosti, které jsme obě za 12 let praxe nasbíraly. Naučit vás dokonalou techniku tak, aby klientky milovaly vaši práci, protože víme, jak je to důležité. A také vám dodat sebevědomí na to, abyste se dostaly tam, kde chcete být.</p>
+        </div>
+
+        <div class="price-grid">
+          <div class="plan reveal">
+            <h3>Základní cena</h3>
+            <p>Kompletní kurz — teorie i praxe pod vedením obou lektorek.</p>
+            <div><span class="amt">10&nbsp;000</span> <span class="per">Kč</span></div>
+            <a href="#prihlaska" class="btn btn-outline btn-block">Mám zájem o kurz</a>
+          </div>
+
+          <div class="plan featured reveal" data-delay="1">
+            <span class="ribbon">Doporučujeme</span>
+            <h3>Se startovacím balíčkem</h3>
+            <p>Kurz včetně kompletního vybavení, se kterým můžete rovnou začít pracovat.</p>
+            <div><span class="amt">13&nbsp;000</span> <span class="per">Kč</span></div>
+            <ul class="plan-list">
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Tavící kleště</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Kleště na sundavání</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Terčíky</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Keratin</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Cvičný culík</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Špicka</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Gumičky</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Sponky</li>
+            </ul>
+            <a href="#prihlaska" class="btn btn-gold btn-block">Mám zájem o kurz</a>
+          </div>
+        </div>
+        <p class="form-note" style="text-align:center;margin-top:var(--sp-6)">Jedině tak nám to totiž dává smysl a dělá nám práce radost. Těšíme se na vás.</p>
+      </div>
+    </section>
+
+    <!-- NÁŠ TÝM -->
+    <section class="section">
+      <div class="container">
+        <div class="section-head center reveal">
+          <span class="eyebrow center">Náš tým</span>
+          <h2>Vaše lektorky</h2>
         </div>
         <div class="grid grid-2" style="max-width:840px;margin-inline:auto">
           <article class="card reveal">
             <h3>Markéta Krásová</h3>
-            <p style="margin-top:var(--sp-2)">Vlasová stylistka s <strong>10 lety praxe</strong> a spoluzakladatelka Silki hair. Specialistka na keratinové prodlužování a precizní finální styling.</p>
+            <ul class="plan-list" style="margin-top:var(--sp-4)">
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>vlasová stylistka</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>12 let praxe v prodlužování vlasů</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>zakladatelka značky SILKI hair</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>školení prodlužování vlasů / prodej vlasů</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>mentorka mindset / transformace</li>
+            </ul>
           </article>
           <article class="card reveal" data-delay="1">
             <h3>Tereza Čeledová</h3>
-            <p style="margin-top:var(--sp-2)">Beauty školitelka s <strong>10 lety praxe</strong>, spoluzakladatelka Silki hair a AURALA beauty. Provede vás technikou i podnikatelským mindsetem.</p>
+            <ul class="plan-list" style="margin-top:var(--sp-4)">
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>beauty školitelka</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>10 let praxe v beauty oboru</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>zakladatelka značky SILKI hair a AURALA beauty</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>mentorka mindset pro úspěch</li>
+            </ul>
           </article>
         </div>
       </div>
     </section>
 
-    <!-- UPCOMING COURSES -->
-    <section class="section" id="terminy">
+    <!-- TERMÍN -->
+    <section class="section bg-ivory" id="terminy">
       <div class="container">
         <div class="section-head center reveal">
-          <span class="eyebrow center">Nadcházející kurzy</span>
-          <h2>Nejbližší termín</h2>
+          <span class="eyebrow center">Nadcházející kurz</span>
+          <h2>Informace o aktuálním konání</h2>
         </div>
         <div class="upcoming reveal">
           <div class="upcoming-card">
@@ -252,11 +248,12 @@
               <span class="y">2026</span>
             </div>
             <div class="upcoming-info">
-              <h3>Kurz prodlužování keratinem</h3>
-              <p>Praha · omezený počet míst. Rezervujte si své místo — potvrdíme obratem.</p>
+              <h3>Praha · 10:30–16:30</h3>
+              <p>Beauty Coworking, Voctářova 18, Praha 8 — Palmovka<br>
+                 Záloha na kurz <strong>3&nbsp;000&nbsp;Kč</strong> · počet míst omezen</p>
               <div style="display:flex;flex-wrap:wrap;gap:var(--sp-4);align-items:center;margin-top:var(--sp-5)">
-                <a href="https://wa.me/420608784440?text=Dobr%C3%BD%20den%2C%20m%C3%A1m%20z%C3%A1jem%20o%20kurz%20prodlu%C5%BEov%C3%A1n%C3%AD%20keratinem%2025.%209.%202026." target="_blank" rel="noopener" class="btn btn-gold">Rezervovat přes WhatsApp</a>
-                <a href="#prihlaska" class="link-arrow" style="display:inline-flex;color:#D8B884">Vyplnit poptávku <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                <a href="https://wa.me/420608784440?text=Dobr%C3%BD%20den%2C%20m%C3%A1m%20z%C3%A1jem%20o%20kurz%20prodlu%C5%BEov%C3%A1n%C3%AD%20vlas%C5%AF%2025.%209.%202026." target="_blank" rel="noopener" class="btn btn-gold">Rezervovat přes WhatsApp</a>
+                <a href="#prihlaska" class="link-arrow" style="display:inline-flex;color:#D8B884">Mám zájem o kurz <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
               </div>
             </div>
           </div>
@@ -270,7 +267,7 @@
         <div class="section-head center reveal">
           <span class="eyebrow center">Nezávazně poptat</span>
           <h2>Mám zájem o kurz</h2>
-          <p>Vyplňte poptávku a my se vám ozveme s nejbližšími termíny a detaily. Pole označená <span class="serif-accent">*</span> jsou povinná.</p>
+          <p>Vyplňte poptávku a my se vám ozveme s potvrzením místa a detaily ke kurzu. Pole označená <span class="serif-accent">*</span> jsou povinná.</p>
         </div>
 
         <div class="form-card reveal" data-delay="1">
@@ -301,18 +298,9 @@
                 <label for="course">Vyberte kurz <span class="req">*</span></label>
                 <select id="course" name="course" required>
                   <option value="" disabled selected>—</option>
-                  <option value="kurz">Kurz prodlužování keratinem (25.&nbsp;9.&nbsp;2026)</option>
-                  <option value="individual">Individuál — Salony &amp; Školy</option>
+                  <option value="kurz">Kurz prodlužování vlasů — 25.&nbsp;9.&nbsp;2026, Praha</option>
                 </select>
                 <span class="err">Vyberte prosím kurz.</span>
-              </div>
-              <div class="field">
-                <label for="city">Preferovaná lokace</label>
-                <select id="city" name="city">
-                  <option value="praha">Praha</option>
-                  <option value="cr">Jinde v ČR (po domluvě)</option>
-                </select>
-                <span class="hint">U salonů a škol domluvíme místo individuálně.</span>
               </div>
             </div>
 
@@ -331,13 +319,13 @@
             </div>
 
             <button type="submit" class="btn btn-primary btn-block" data-loading-cs="Odesílám…">Nezávazně poptat</button>
-            <p class="form-note">Přihláška je nezávazná. Ozveme se vám s termíny a potvrzením. Údaje nikdy nesdílíme.</p>
+            <p class="form-note">Přihláška je nezávazná. Ozveme se vám s potvrzením místa a údaji k záloze 3 000 Kč. Údaje nikdy nesdílíme.</p>
           </form>
 
           <div class="form-success" role="status">
             <div class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
             <h3>Děkujeme!</h3>
-            <p style="margin-top:var(--sp-3)">Vaše přihláška dorazila. Brzy se vám ozveme s nejbližšími termíny a všemi detaily kurzu.</p>
+            <p style="margin-top:var(--sp-3)">Vaše přihláška dorazila. Brzy se vám ozveme s potvrzením místa na kurzu a všemi detaily.</p>
           </div>
         </div>
 
