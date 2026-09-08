@@ -479,8 +479,8 @@ body.menu-open .drawer-panel { transform: translateX(0); }
 .footer-bottom a:hover { color: var(--ivory); }
 
 /* ---------- Toast ---------- */
-.toast { position: fixed; left: 50%; bottom: 28px; transform: translate(-50%, 120%); z-index: var(--z-toast); background: var(--ink); color: var(--ivory); padding: var(--sp-4) var(--sp-5); border-radius: var(--radius-pill); box-shadow: var(--shadow-lg); font-size: .94rem; display: flex; align-items: center; gap: var(--sp-3); transition: transform var(--dur-3) var(--ease-out); max-width: 90vw; }
-.toast.show { transform: translate(-50%, 0); }
+.toast { position: fixed; left: 50%; bottom: 28px; transform: translate(-50%, calc(100% + 28px)); opacity: 0; visibility: hidden; pointer-events: none; z-index: var(--z-toast); background: var(--ink); color: var(--ivory); padding: var(--sp-4) var(--sp-5); border-radius: var(--radius-pill); box-shadow: var(--shadow-lg); font-size: .94rem; display: flex; align-items: center; gap: var(--sp-3); transition: transform var(--dur-3) var(--ease-out), opacity var(--dur-3) var(--ease-out), visibility 0s linear var(--dur-3); max-width: 90vw; }
+.toast.show { transform: translate(-50%, 0); opacity: 1; visibility: visible; pointer-events: auto; transition: transform var(--dur-3) var(--ease-out), opacity var(--dur-3) var(--ease-out), visibility 0s; }
 .toast svg { width: 20px; height: 20px; color: var(--gold); flex: none; }
 
 /* ---------- Scroll reveal ---------- */
