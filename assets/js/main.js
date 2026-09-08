@@ -139,6 +139,19 @@
   }
 
   /* ---------- 8. Booking / contact form ---------- */
+  /* Verejny klic Web3Forms - urceny primo do klientskeho kodu (viz web3forms.com/docs). */
+  var WEB3FORMS_KEY = "51ca21f5-d179-431f-a358-128b091d3054";
+  var FORM_SUBJECTS = {
+    "poptavka": "Nová poptávka z webu — silkihair.cz",
+    "poptavka-kurz": "Přihláška na kurz — silkihair.cz",
+    "registrace-kadernice": "Registrace kadeřnice — silkihair.cz"
+  };
+  /* Aby e-mail nechodil s anglickymi nazvy poli. */
+  var FIELD_LABELS = {
+    name: "Jméno", salon: "Salon", phone: "Telefon", email: "E-mail",
+    shade: "Odstín", length: "Délka", course: "Kurz", experience: "Zkušenosti",
+    city: "Město", ico: "IČO", interest: "Zájem", message: "Zpráva"
+  };
   var form = document.querySelector("form[data-booking]");
   if (form) {
     var fields = form.querySelectorAll("input[required], select[required], textarea[required]");
@@ -167,8 +180,9 @@
         firstInvalid.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center" });
         return;
       }
-      // Submit to Netlify Forms via AJAX. The <form> must have name + data-netlify
-      // + a hidden "form-name" input so Netlify captures it and can notify by e-mail.
+      // Odesila se dvema cestami zaroven: Web3Forms doruci poptavku rovnou na
+      // e-mail, Netlify Forms ji ulozi do dashboardu jako archiv. Staci, kdyz
+      // projde jedna z nich - lead se tak neztrati ani pri vypadku jedne sluzby.
       var submitBtn = form.querySelector('[type="submit"]');
       var labelCs = submitBtn ? submitBtn.getAttribute("data-loading-cs") : null;
       var labelEn = submitBtn ? submitBtn.getAttribute("data-loading-en") : null;
@@ -178,15 +192,59 @@
         submitBtn.textContent = (root.getAttribute("lang") === "en" ? labelEn : labelCs) || "…";
       }
       function resetBtn() { if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = submitBtn.dataset.orig; } }
+
+      var fd = new FormData(form);
+      // Honeypot: bot vyplnil skryte pole - tvarime se, ze je odeslano, a nic neposilame.
+      if (String(fd.get("bot-field") || "").trim()) { resetBtn(); return; }
+
+      var formName = form.getAttribute("name") || "silki-form";
+
+      /* 1) Netlify Forms - archiv v dashboardu */
       var body = new URLSearchParams();
-      new FormData(form).forEach(function (v, k) { body.append(k, v); });
-      if (!body.has("form-name")) body.append("form-name", form.getAttribute("name") || "silki-form");
-      fetch("/", {
+      fd.forEach(function (v, k) { body.append(k, v); });
+      if (!body.has("form-name")) body.append("form-name", formName);
+      var toNetlify = fetch("/", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: body.toString()
       }).then(function (r) {
-        if (!r.ok) throw new Error("HTTP " + r.status);
+        if (!r.ok) throw new Error("Netlify HTTP " + r.status);
+        return "netlify";
+      });
+
+      /* 2) Web3Forms - doruceni na e-mail, s citelnymi ceskymi popisky poli */
+      var payload = {
+        access_key: WEB3FORMS_KEY,
+        subject: String(fd.get("subject") || "") || FORM_SUBJECTS[formName] || "Zpráva z webu silkihair.cz",
+        from_name: "silkihair.cz"
+      };
+      var replyTo = String(fd.get("email") || "").trim();
+      if (replyTo) payload.replyto = replyTo;
+      fd.forEach(function (v, k) {
+        if (k === "form-name" || k === "bot-field" || k === "subject") return;
+        var val = String(v || "").trim();
+        if (val) payload[FIELD_LABELS[k] || k] = val;
+      });
+      var toMail = fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify(payload)
+      }).then(function (r) { return r.json(); }).then(function (j) {
+        if (!j || !j.success) throw new Error("Web3Forms: " + ((j && j.message) || "neznama chyba"));
+        return "mail";
+      });
+
+      Promise.all([
+        toMail.catch(function (e) { return e; }),
+        toNetlify.catch(function (e) { return e; })
+      ]).then(function (res) {
+        resetBtn();
+        var en = root.getAttribute("lang") === "en";
+        if (res.indexOf("mail") === -1 && res.indexOf("netlify") === -1) {
+          showToast(en ? "Sending failed — please reach us on WhatsApp." : "Odeslání se nezdařilo — napište nám prosím na WhatsApp.");
+          showDirectContact(form);
+          return;
+        }
         var success = form.parentElement.querySelector(".form-success");
         if (success) {
           form.style.display = "none";
@@ -194,12 +252,7 @@
           success.setAttribute("tabindex", "-1");
           success.focus();
         }
-        showToast(root.getAttribute("lang") === "en" ? "Request sent — we’ll be in touch soon." : "Odesláno — brzy se vám ozveme.");
-        resetBtn();
-      }).catch(function () {
-        showToast(root.getAttribute("lang") === "en" ? "Sending failed — please reach us on WhatsApp." : "Odeslání se nezdařilo — napište nám prosím na WhatsApp.");
-        resetBtn();
-        showDirectContact(form);
+        showToast(en ? "Request sent — we’ll be in touch soon." : "Odesláno — brzy se vám ozveme.");
       });
     });
   }
@@ -219,7 +272,7 @@
       '<div style="display:flex;flex-wrap:wrap;gap:var(--sp-3);margin-top:var(--sp-4)">' +
         '<a class="btn btn-gold" target="_blank" rel="noopener" href="https://wa.me/420608784440">WhatsApp' +
         (tel ? " " + tel : "") + '</a>' +
-        '<a class="btn btn-outline" href="mailto:info@silkihair.cz">info@silkihair.cz</a>' +
+        '<a class="btn btn-outline" href="mailto:tereza.celedova@gmail.com">tereza.celedova@gmail.com</a>' +
       '</div>';
     var btn = form.querySelector('[type="submit"]');
     if (btn && btn.parentNode) btn.parentNode.insertBefore(wrap, btn);

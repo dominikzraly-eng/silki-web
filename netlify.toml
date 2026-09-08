@@ -31,7 +31,7 @@
     # a v HTML je 87 style="..." atributů. Odstranit ho jde až po převodu
     # inline stylů do assets/css/. Skripty jsou jen vlastní, takže
     # script-src zůstává přísný, což je ta část, na které u XSS záleží.
-    Content-Security-Policy = "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://i.ytimg.com; connect-src 'self'; manifest-src 'self'; media-src 'self'; frame-src https://www.youtube.com https://www.youtube-nocookie.com; upgrade-insecure-requests"
+    Content-Security-Policy = "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://i.ytimg.com; connect-src 'self' https://api.web3forms.com; manifest-src 'self'; media-src 'self'; frame-src https://www.youtube.com https://www.youtube-nocookie.com; upgrade-insecure-requests"
 
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
