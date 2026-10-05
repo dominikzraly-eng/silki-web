@@ -1260,6 +1260,11 @@
         <button class="btn primary" type="submit" style="margin-top:14px">Uložit nastavení</button>
       </form>
       <section class="card" style="margin-top:14px">
+        <h2>Napojení pro Claude</h2>
+        <p class="small muted" style="margin-bottom:10px">Klíč, přes který může Claude číst a zapisovat data CRM. Jeho změny jsou v historii pod jménem Claude. Klíč jde kdykoli zrušit.</p>
+        <div data-agent><p class="small muted">Načítám…</p></div>
+      </section>
+      <section class="card">
         <h2>Export a záloha</h2>
         <p class="small muted" style="margin-bottom:10px">Server si dělá jednu zálohu denně. Pro jistotu si jednou za měsíc stáhněte celou zálohu.</p>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -1272,7 +1277,7 @@
       <section class="card">
         <h2>Poslední změny</h2>
         <div class="list">${(state.db.log || []).slice(0, 15).map(l => `<div class="row"><div class="row-main"><div class="row-title small">${esc(l.co)}</div>
-          <div class="row-sub">${esc(PEOPLE[l.u] || l.u)} · ${new Date(l.t).toLocaleString("cs-CZ")}</div></div></div>`).join("") || `<p class="muted small">Zatím nic.</p>`}</div>
+          <div class="row-sub">${esc(l.u === "claude" ? "Claude" : PEOPLE[l.u] || l.u)} · ${new Date(l.t).toLocaleString("cs-CZ")}</div></div></div>`).join("") || `<p class="muted small">Zatím nic.</p>`}</div>
       </section>`;
     $("#set-form").addEventListener("submit", e => {
       e.preventDefault();
@@ -1285,6 +1290,37 @@
       save([{ type: "settings", data }], "Nastavení uloženo");
     });
     $$("[data-exp]").forEach(b => b.addEventListener("click", () => exportData(b.dataset.exp)));
+    agentPanel();
+  }
+
+  async function agentPanel(newKey) {
+    const box = $("[data-agent]");
+    if (!box) return;
+    let st;
+    try { st = await api("agent-key"); } catch (e) { box.innerHTML = `<p class="small muted">${esc(e.message)}</p>`; return; }
+    box.innerHTML = newKey ? `
+        <p class="note">Klíč se ukazuje jen teď. Zkopírujte ho a pošlete Claudovi, uloží si ho jen u vás v počítači.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <input class="search" style="margin:0;flex:1;min-width:200px;font-family:ui-monospace,monospace;font-size:13px" readonly value="${esc(newKey)}" id="agent-key">
+          <button class="btn" data-copy>Kopírovat</button>
+        </div>`
+      : st.active ? `
+        <p class="small" style="margin-bottom:10px"><span class="badge ok">Aktivní</span> vytvořil(a) ${esc(PEOPLE[st.createdBy] || st.createdBy)} ${new Date(st.createdAt).toLocaleDateString("cs-CZ")}</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn danger" data-revoke>Zrušit klíč</button><button class="btn" data-create>Vytvořit nový</button></div>`
+      : `<button class="btn primary" data-create>Vytvořit klíč</button>`;
+    $("[data-create]", box)?.addEventListener("click", async () => {
+      if (st.active && !confirm("Vytvořit nový klíč? Starý přestane fungovat.")) return;
+      try { const r = await api("agent-key", { method: "POST" }); agentPanel(r.key); } catch (e) { toast(e.message, true); }
+    });
+    $("[data-revoke]", box)?.addEventListener("click", async () => {
+      if (!confirm("Zrušit klíč? Claude pak do CRM nebude mít přístup.")) return;
+      try { await api("agent-key", { method: "DELETE" }); toast("Klíč zrušen"); agentPanel(); } catch (e) { toast(e.message, true); }
+    });
+    $("[data-copy]", box)?.addEventListener("click", async () => {
+      const inp = $("#agent-key");
+      try { await navigator.clipboard.writeText(inp.value); } catch { inp.select(); document.execCommand("copy"); }
+      toast("Zkopírováno");
+    });
   }
 
   function exportData(kind) {

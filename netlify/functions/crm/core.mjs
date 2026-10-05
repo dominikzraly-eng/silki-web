@@ -12,6 +12,15 @@ import crypto from "node:crypto";
 
 const COLLECTIONS = ["sklad", "prodeje", "nakupy", "cesty", "zakaznici", "finance"];
 const MAX_BODY = 512 * 1024;
+const AGENT_PREFIX = "sck_";
+const AGENT_USER = "claude";
+
+const sha256 = v => crypto.createHash("sha256").update(String(v)).digest("hex");
+function safeEqual(a, b) {
+  const ha = crypto.createHash("sha256").update(String(a)).digest();
+  const hb = crypto.createHash("sha256").update(String(b)).digest();
+  return crypto.timingSafeEqual(ha, hb);
+}
 
 export const DEFAULT_SETTINGS = {
   provize: { zakaznice: 20, kadernik: 10, dominik: 5 },
@@ -122,9 +131,33 @@ export async function handle(req, { store, verifyUser }) {
   const route = url.pathname.replace(/^\/api\/crm\/?/, "");
 
   const token = (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "").trim();
-  const user = token ? await verifyUser(token) : null;
+  let user = null;
+  if (token.startsWith(AGENT_PREFIX)) {
+    // Klíč pro Clauda: v úložišti je jen jeho otisk, klíč samotný nikde
+    const rec = (await store.get("agent-key"))?.data;
+    if (rec?.hash && safeEqual(rec.hash, sha256(token))) user = AGENT_USER;
+  } else if (token) {
+    user = await verifyUser(token);
+  }
   if (!user) return json(401, { error: "Nejste přihlášeni v administraci." });
   const session = { u: user };
+
+  if (route === "agent-key") {
+    if (user === AGENT_USER) return json(403, { error: "Klíč spravuje jen člověk přihlášený v administraci." });
+    if (req.method === "GET") {
+      const rec = (await store.get("agent-key"))?.data;
+      return json(200, rec?.hash ? { active: true, createdAt: rec.createdAt, createdBy: rec.createdBy } : { active: false });
+    }
+    if (req.method === "POST") {
+      const key = AGENT_PREFIX + crypto.randomBytes(32).toString("base64url");
+      await store.set("agent-key", { hash: sha256(key), createdAt: new Date().toISOString(), createdBy: user });
+      return json(200, { key });
+    }
+    if (req.method === "DELETE") {
+      await store.set("agent-key", { hash: null, revokedAt: new Date().toISOString(), revokedBy: user });
+      return json(200, { active: false });
+    }
+  }
 
   if (req.method === "GET" && route === "data") {
     const cur = await store.get("db");
