@@ -79,6 +79,46 @@
     return db;
   }
 
+  const fotoCache = new Map();
+  async function zmensitFoto(file, max = 1600) {
+    const url = URL.createObjectURL(file);
+    try {
+      const img = await new Promise((ok, err) => { const i = new Image(); i.onload = () => ok(i); i.onerror = err; i.src = url; });
+      const k = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+      const c = document.createElement("canvas");
+      c.width = Math.round(img.naturalWidth * k);
+      c.height = Math.round(img.naturalHeight * k);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      return await new Promise(ok => c.toBlob(ok, "image/jpeg", 0.82));
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }
+  async function nahrajFoto(file) {
+    let blob;
+    try { blob = await zmensitFoto(file); } catch { throw new Error("Tenhle soubor neumím otevřít jako fotku."); }
+    const res = await fetch("/api/crm/foto", { method: "POST", headers: { Authorization: "Bearer " + state.token, "Content-Type": "image/jpeg" }, body: blob });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || "Fotku se nepodařilo nahrát.");
+    fotoCache.set(data.id, URL.createObjectURL(blob));
+    return data.id;
+  }
+  async function fotoSrc(id) {
+    if (fotoCache.has(id)) return fotoCache.get(id);
+    const res = await fetch("/api/crm/foto/" + encodeURIComponent(id), { headers: { Authorization: "Bearer " + state.token } });
+    if (!res.ok) throw new Error("foto");
+    const u = URL.createObjectURL(await res.blob());
+    fotoCache.set(id, u);
+    return u;
+  }
+  function nactiFotky(root) {
+    if (!root) return;
+    $$("img[data-foto]:not([src])", root).forEach(async img => {
+      try { img.src = await fotoSrc(img.dataset.foto); } catch { img.alt = "Fotku nejde načíst"; }
+    });
+  }
+  const thumb = (id, cls = "") => `<img class="thumb ${cls}" data-foto="${esc(id)}" alt="Fotka" loading="lazy">`;
+
   function setSync(cls) { const s = $(".sync"); if (s) s.className = "sync " + (cls || ""); }
 
   async function save(ops, msg) {
@@ -260,10 +300,28 @@
           ${NAV.map(([k, label, cls]) => `<button data-view="${k}" class="${cls}">${ICONS[k]}<span>${label}</span></button>`).join("")}
         </nav>
         <main class="main" id="view"><p class="empty">Načítám…</p></main>
+        <button class="fab" id="fab" aria-label="Přidat">+ Přidat</button>
       </div>`;
+    $("#fab").addEventListener("click", rychlaNabidka);
     $(".nav").addEventListener("click", e => {
       const b = e.target.closest("[data-view]");
       if (b) go(b.dataset.view);
+    });
+  }
+
+  function rychlaNabidka() {
+    openSheet("Přidat", `<div class="quick">
+      <button type="button" data-q="kus">${ICONS.sklad}<span><strong>Culík do skladu</strong><small>Fotka, várka, gramáž</small></span></button>
+      <button type="button" data-q="prodej">${ICONS.prodeje}<span><strong>Prodej</strong><small>Vybrat culíky a zákazníka</small></span></button>
+      <button type="button" data-q="zprava">${ICONS.zpravy}<span><strong>Zpráva</strong><small>Napsat volně, zapíše se do týdne</small></span></button>
+    </div>`, null);
+    $(".quick").addEventListener("click", e => {
+      const b = e.target.closest("[data-q]");
+      if (!b) return;
+      closeSheet();
+      if (b.dataset.q === "kus") kusForm();
+      if (b.dataset.q === "prodej") saleForm();
+      if (b.dataset.q === "zprava") { go("zpravy"); setTimeout(() => $("#zprava-form textarea")?.focus(), 50); }
     });
   }
 
@@ -285,6 +343,7 @@
     });
     const views = { prehled: viewPrehled, prodeje: viewProdeje, sklad: viewSklad, zakaznici: viewZakaznici, zpravy: viewZpravy, nakupy: viewNakupy, finance: viewFinance, nastaveni: viewNastaveni, vice: viewVice };
     (views[state.view] || viewPrehled)();
+    nactiFotky($("#view"));
   }
 
   function chips(name, options, current) {
@@ -364,7 +423,7 @@
         <h2>Poslední prodeje</h2>
         ${posledni.length ? `<div class="list">${posledni.map(saleRow).join("")}</div>` : `<p class="muted small">Zatím žádný prodej.</p>`}
       </section>
-      <button class="fab" data-act="new-sale">+ Prodej</button>`;
+`;
 
     bindChips("period", v => { state.period = v; render(); });
     bindCommon();
@@ -651,7 +710,7 @@
       <input class="search" type="search" placeholder="Hledat číslo, odstín, délku" value="${esc(state.filters.q)}" id="q">
       ${list.length ? `<div class="list boxed">${list.map(k => `
         <button class="row" data-edit="${k.id}">
-          <span class="swatch sw-${esc(k.odstin)}"></span>
+          ${k.foto ? thumb(k.foto) : `<span class="swatch sw-${esc(k.odstin)}"></span>`}
           <div class="row-main"><div class="row-title">${esc(k.cislo || "bez čísla")} · ${ODSTINY[k.odstin] || ""} ${esc(k.delka)} cm</div>
           <div class="row-sub">${num(k.gramaz)} g × ${num(k.cena_g)} Kč/g · nákup ${num(k.nakup_cena) ? fmtKc(k.nakup_cena) : "chybí"}</div></div>
           <div class="row-end"><div class="num"><strong>${fmtKc(kusCena(k))}</strong></div>
@@ -669,41 +728,74 @@
     return "SK-" + String((nums.length ? Math.max(...nums) : 0) + 1).padStart(3, "0");
   }
 
+  // Culík do skladu: na telefonu jen fotka, várka, odstín, délka a gramáž. Zbytek se předvyplní.
   function kusForm(existing, varkaId) {
-    const k = existing ? { ...existing } : { id: uid(), cislo: nextCislo(), odstin: "tmave", delka: S().cenik[0]?.delka || "", gramaz: "", cena_g: cenaZaGram("tmave", S().cenik[0]?.delka), nakup_cena: "", stav: "skladem", poznamka: "", nakup_id: varkaId || "" };
+    let posledni = {};
+    try { posledni = JSON.parse(ls.get("crm_last_kus") || "{}"); } catch { /* nic */ }
     const varky = state.db.nakupy.filter(isVaha).sort((a, b) => b.datum.localeCompare(a.datum));
+    const zbyva = (n, kromeId) => nakupG(n) - odebranoG(n, kromeId);
+    const sVolnem = varky.filter(n => zbyva(n) > 0);
+    const vychoziVarka = varkaId
+      || (sVolnem.some(n => n.id === posledni.varka) ? posledni.varka : "")
+      || sVolnem[0]?.id || "";
+    const delky = S().cenik.map(r => r.delka);
+    const odstin0 = posledni.odstin || "tmave";
+    const delka0 = delky.includes(posledni.delka) ? posledni.delka : delky[0] || "";
+    const k = existing ? { ...existing } : {
+      id: uid(), cislo: nextCislo(), odstin: odstin0, delka: delka0, gramaz: "", cena_g: cenaZaGram(odstin0, delka0),
+      nakup_cena: "", stav: "skladem", poznamka: "", nakup_id: vychoziVarka, foto: ""
+    };
     const puvodniVarka = varky.find(n => n.id === k.nakup_id) ? k.nakup_id : "";
+    let dalsi = false;
+
     const body = `<div class="f">
-      <div class="f2">
-        <label class="field"><span>Číslo kusu</span><input name="cislo" value="${esc(k.cislo)}" required></label>
-        <label class="field"><span>Stav</span><select name="stav" ${k.prodej_id ? "disabled" : ""}>${opts(SKLAD_STAV, k.stav)}</select>
-          ${k.prodej_id ? `<span class="hint">Řídí se prodejem</span>` : ""}</label>
+      <div class="foto-pick">
+        <div data-foto-prev>${k.foto ? thumb(k.foto, "big") : `<div class="ph">Bez fotky</div>`}</div>
+        <div class="acts">
+          <label class="btn">${k.foto ? "Změnit fotku" : "Vyfotit nebo nahrát"}<input type="file" accept="image/*" hidden data-foto-input></label>
+          ${k.foto ? `<button type="button" class="link small" data-foto-del>Odebrat fotku</button>` : ""}
+        </div>
       </div>
-      ${varky.length ? `<label class="field"><span>Z várky (nákup na váhu)</span><select name="varka"><option value="">Ne, kus zvlášť</option>${varky.map(n => `<option value="${n.id}" ${n.id === puvodniVarka ? "selected" : ""}>${esc(n.dodavatel || "Várka")} ${fmtDate(n.datum)} · zbývá ${nakupG(n) - odebranoG(n, k.id)} g</option>`).join("")}</select></label>` : ""}
+      ${varky.length ? `<label class="field"><span>Z várky</span><select name="varka"><option value="">Ne, kus zvlášť</option>${varky.map(n => `<option value="${n.id}" ${n.id === puvodniVarka ? "selected" : ""}>${esc(n.dodavatel || "Várka")} ${fmtDate(n.datum)}, zbývá ${zbyva(n, k.id)} g</option>`).join("")}</select></label>` : ""}
+      <fieldset><legend>Odstín</legend><div class="seg">${segs("odstin", ODSTINY, k.odstin)}</div></fieldset>
       <div class="f2">
-        <label class="field"><span>Odstín</span><select name="odstin">${opts(ODSTINY, k.odstin)}</select></label>
-        <label class="field"><span>Délka cm</span><select name="delka">${S().cenik.map(r => `<option ${r.delka === k.delka ? "selected" : ""}>${esc(r.delka)}</option>`).join("")}</select></label>
+        <label class="field"><span>Délka cm</span><select name="delka">${delky.map(d => `<option ${d === k.delka ? "selected" : ""}>${esc(d)}</option>`).join("")}</select></label>
+        <label class="field"><span>Gramáž g</span><input name="gramaz" inputmode="decimal" value="${esc(k.gramaz)}" placeholder="např. 100"></label>
       </div>
-      <div class="f2">
-        <label class="field"><span>Gramáž g</span><input name="gramaz" inputmode="decimal" value="${esc(k.gramaz)}" required></label>
-        <label class="field"><span>Prodejní Kč/g</span><input name="cena_g" inputmode="decimal" value="${esc(k.cena_g)}"><span class="hint">Doplní se z ceníku</span></label>
-      </div>
-      <label class="field"><span>Nákupní cena kusu Kč</span><input name="nakup_cena" inputmode="decimal" value="${esc(k.nakup_cena)}"><span class="hint" data-nakup-hint>Celkem za kus, i s poměrem dopravy</span></label>
-      <div class="split" data-cena></div>
-      <label class="field"><span>Poznámka</span><textarea name="poznamka">${esc(k.poznamka)}</textarea></label>
+      <div class="cena-big"><span>Cena podle ceníku</span><strong data-cena>0 Kč</strong></div>
+      <p class="small muted" data-nakup-info></p>
+      <details class="more" ${existing ? "" : ""}>
+        <summary>Další údaje (číslo, stav, cena za gram, poznámka)</summary>
+        <div class="f">
+          <div class="f2">
+            <label class="field"><span>Číslo kusu</span><input name="cislo" value="${esc(k.cislo)}"></label>
+            <label class="field"><span>Stav</span><select name="stav" ${k.prodej_id ? "disabled" : ""}>${opts(SKLAD_STAV, k.stav)}</select>
+              ${k.prodej_id ? `<span class="hint">Řídí se prodejem</span>` : ""}</label>
+          </div>
+          <div class="f2">
+            <label class="field"><span>Prodejní Kč/g</span><input name="cena_g" inputmode="decimal" value="${esc(k.cena_g)}"><span class="hint">Z ceníku</span></label>
+            <label class="field"><span>Nákupní cena Kč</span><input name="nakup_cena" inputmode="decimal" value="${esc(k.nakup_cena)}"><span class="hint" data-nakup-hint></span></label>
+          </div>
+          <label class="field"><span>Poznámka</span><textarea name="poznamka">${esc(k.poznamka)}</textarea></label>
+        </div>
+      </details>
+      ${existing ? "" : `<button type="button" class="btn block" data-save-next>Uložit a přidat další</button>`}
     </div>`;
+
     const polozka = rec => ({ sklad_id: rec.id, cislo: rec.cislo, odstin: rec.odstin, delka: rec.delka, gramaz: rec.gramaz });
-    openSheet(existing ? "Kus " + (k.cislo || "") : "Nový kus", body, async () => {
+    openSheet(existing ? "Culík " + (k.cislo || "") : "Nový culík", body, async () => {
+      const chciDalsi = dalsi;
+      dalsi = false;
       const fd = new FormData($("#sheet-form"));
       const varka = varky.find(n => n.id === fd.get("varka"));
-      const rec = { ...k, cislo: fd.get("cislo").trim(), odstin: fd.get("odstin"), delka: fd.get("delka"), gramaz: num(fd.get("gramaz")), cena_g: num(fd.get("cena_g")), nakup_cena: num(fd.get("nakup_cena")), poznamka: fd.get("poznamka") };
-      if (!k.prodej_id) rec.stav = fd.get("stav");
+      const rec = { ...k, cislo: (fd.get("cislo") || "").trim() || nextCislo(), odstin: fd.get("odstin"), delka: fd.get("delka"), gramaz: num(fd.get("gramaz")), cena_g: num(fd.get("cena_g")), nakup_cena: num(fd.get("nakup_cena")), poznamka: fd.get("poznamka") || "" };
+      if (!k.prodej_id) rec.stav = fd.get("stav") || "skladem";
       if (!rec.gramaz) { toast("Doplňte gramáž.", true); return false; }
       if (state.db.sklad.some(x => x.id !== rec.id && x.cislo && x.cislo === rec.cislo)) { toast("Číslo " + rec.cislo + " už ve skladu je.", true); return false; }
       const ops = [];
       if (varka) {
-        const zbyva = nakupG(varka) - odebranoG(varka, rec.id);
-        if (rec.gramaz > zbyva) { toast(`Ve várce zbývá jen ${zbyva} g.`, true); return false; }
+        const volno = zbyva(varka, rec.id);
+        if (rec.gramaz > volno) { toast(`Ve várce zbývá jen ${volno} g.`, true); return false; }
         rec.nakup_id = varka.id;
         rec.nakup_cena = Math.round(vahaCenaG(varka) * rec.gramaz);
         const pol = (varka.polozky || []).filter(x => x.sklad_id !== rec.id);
@@ -711,43 +803,70 @@
       } else if (puvodniVarka) {
         rec.nakup_id = "";
       }
-      // Kus přesunutý z jiné várky (nebo z várky ven) z ní odebrat
       if (puvodniVarka && puvodniVarka !== varka?.id) {
         const stara = varky.find(n => n.id === puvodniVarka);
         ops.push({ type: "upsert", col: "nakupy", rec: { ...stara, polozky: (stara.polozky || []).filter(x => x.sklad_id !== rec.id) } });
       }
       ops.unshift({ type: "upsert", col: "sklad", rec });
-      if (!await save(ops, "Kus uložen")) return false;
-      return varka || puvodniVarka ? prepocitatNaklady() : true;
+      ls.set("crm_last_kus", JSON.stringify({ odstin: rec.odstin, delka: rec.delka, varka: varka?.id || "" }));
+      if (!await save(ops, `Culík ${rec.cislo} uložen`)) return false;
+      if (varka || puvodniVarka) await prepocitatNaklady();
+      if (chciDalsi) setTimeout(() => kusForm(), 0);
+      return true;
     }, existing && !k.prodej_id ? async () => {
-      if (!confirm("Smazat kus " + k.cislo + "?")) return false;
+      if (!confirm("Smazat culík " + k.cislo + "?")) return false;
       const ops = [{ type: "delete", col: "sklad", id: k.id }];
       const stara = varky.find(n => n.id === puvodniVarka);
       if (stara) ops.push({ type: "upsert", col: "nakupy", rec: { ...stara, polozky: (stara.polozky || []).filter(x => x.sklad_id !== k.id) } });
-      return save(ops, "Kus smazán");
+      return save(ops, "Culík smazán");
     } : null);
+
     const root = $(".sheet");
+    const kresliFoto = () => {
+      $("[data-foto-prev]", root).innerHTML = k.foto ? thumb(k.foto, "big") : `<div class="ph">Bez fotky</div>`;
+      $(".foto-pick .acts", root).innerHTML = `<label class="btn">${k.foto ? "Změnit fotku" : "Vyfotit nebo nahrát"}<input type="file" accept="image/*" hidden data-foto-input></label>
+        ${k.foto ? `<button type="button" class="link small" data-foto-del>Odebrat fotku</button>` : ""}`;
+      nactiFotky(root);
+    };
     const upd = () => {
       const fd = new FormData($("#sheet-form"));
       const varka = varky.find(n => n.id === fd.get("varka"));
+      const g = num(fd.get("gramaz"));
       const inp = $("[name=nakup_cena]", root);
       inp.readOnly = !!varka;
       if (varka) {
-        inp.value = Math.round(vahaCenaG(varka) * num(fd.get("gramaz"))) || "";
-        $("[data-nakup-hint]", root).textContent = `Spočítá se z várky: ${fmtKcG(vahaCenaG(varka))} včetně cesty a dopravy. Zbývá ${nakupG(varka) - odebranoG(varka, k.id)} g.`;
+        inp.value = g ? Math.round(vahaCenaG(varka) * g) : "";
+        $("[data-nakup-hint]", root).textContent = "Z várky";
       } else {
-        $("[data-nakup-hint]", root).textContent = "Celkem za kus, i s poměrem dopravy";
+        $("[data-nakup-hint]", root).textContent = "Celkem za kus";
       }
-      const cena = Math.round(num(fd.get("gramaz")) * num(fd.get("cena_g")));
+      const cena = Math.round(g * num(fd.get("cena_g")));
+      $("[data-cena]", root).textContent = fmtKc(cena);
       const nak = num(inp.value);
-      $("[data-cena]", root).innerHTML = `<div class="total"><span>Původní cena</span><span class="num">${fmtKc(cena)}</span></div>
-        ${nak ? `<div><span>Nákupní cena</span><span class="num">${fmtKc(nak)}</span></div><div><span>Marže před provizemi</span><span class="num">${fmtKc(cena - nak)}</span></div>` : ""}`;
+      $("[data-nakup-info]", root).textContent = varka
+        ? `Nákup ${g ? fmtKc(nak) : "se spočítá"} (${fmtKcG(vahaCenaG(varka))} z várky)${g && cena ? `, marže před provizemi ${fmtKc(cena - nak)}` : ""}. Ve várce zbývá ${zbyva(varka, k.id) - g} g.`
+        : (nak && cena ? `Nákup ${fmtKc(nak)}, marže před provizemi ${fmtKc(cena - nak)}.` : "");
     };
-    root.addEventListener("change", e => {
+    root.addEventListener("change", async e => {
+      if (e.target.matches("[data-foto-input]")) {
+        const f = e.target.files[0];
+        if (!f) return;
+        const submit = $("button[type=submit]", root);
+        submit.disabled = true;
+        $("[data-foto-prev]", root).innerHTML = `<div class="ph">Nahrávám…</div>`;
+        try { k.foto = await nahrajFoto(f); } catch (ex) { toast(ex.message, true); }
+        submit.disabled = false;
+        kresliFoto();
+        return;
+      }
       if (e.target.matches("[name=odstin], [name=delka]")) {
-        $("[name=cena_g]", root).value = cenaZaGram($("[name=odstin]", root).value, $("[name=delka]", root).value) || "";
+        $("[name=cena_g]", root).value = cenaZaGram($("[name=odstin]:checked", root).value, $("[name=delka]", root).value) || "";
       }
       upd();
+    });
+    root.addEventListener("click", e => {
+      if (e.target.closest("[data-foto-del]")) { k.foto = ""; kresliFoto(); }
+      if (e.target.closest("[data-save-next]")) { dalsi = true; $("#sheet-form").requestSubmit(); }
     });
     root.addEventListener("input", upd);
     upd();
@@ -1307,9 +1426,13 @@
       <div class="view-head"><h1>Zprávy</h1></div>
       <form class="card" id="zprava-form">
         <label class="field"><span>Co se stalo</span>
-          <textarea name="text" rows="4" required placeholder="např. Terka včera prodala 2 culíky z várky od Turka kadeřnici Janě, 120 g a 95 g, platila převodem"></textarea>
+          <textarea name="text" rows="4" placeholder="např. Terka včera prodala 2 culíky z várky od Turka kadeřnici Janě, 120 g a 95 g, platila převodem"></textarea>
           <span class="hint">Pište volně jako do chatu: prodeje, platby, půjčky, provize, nákupy. Jméno a čas se uloží samy. Jednou týdně to Claude zapíše do CRM a ke zprávě připíše, co udělal.</span></label>
-        <button class="btn primary" type="submit" style="margin-top:10px">Odeslat</button>
+        <div class="zfoto" data-zfoto-list></div>
+        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+          <label class="btn">Přidat fotku<input type="file" accept="image/*" multiple hidden data-zfoto></label>
+          <button class="btn primary" type="submit" style="flex:1">Odeslat</button>
+        </div>
       </form>
       ${ceka || doplnit ? `<p class="note info" style="margin-top:14px">${ceka ? `${ceka} ${plural(ceka, "zpráva čeká", "zprávy čekají", "zpráv čeká")} na zapsání.` : ""} ${doplnit ? `${doplnit} ${plural(doplnit, "zpráva potřebuje", "zprávy potřebují", "zpráv potřebuje")} doplnit.` : ""}</p>` : ""}
       ${list.length ? `<div class="list boxed" style="margin-top:14px">${list.map(z => `
@@ -1317,6 +1440,7 @@
           <div class="row-main">
             <div class="row-sub">${esc(kdo(z.createdBy))} · ${z.createdAt ? new Date(z.createdAt).toLocaleString("cs-CZ", { day: "numeric", month: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" }) : ""}</div>
             <div style="white-space:pre-wrap;margin-top:2px">${esc(z.text)}</div>
+            ${(z.foto || []).length ? `<div class="zfoto">${z.foto.map(id => thumb(id)).join("")}</div>` : ""}
             ${z.odpoved ? `<div class="small" style="margin-top:6px;padding:8px 10px;border-radius:8px;background:var(--cream-2);white-space:pre-wrap"><strong>Claude:</strong> ${esc(z.odpoved)}</div>` : ""}
           </div>
           <div class="row-end" style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
@@ -1327,9 +1451,24 @@
     $("#zprava-form").addEventListener("submit", async e => {
       e.preventDefault();
       const text = new FormData(e.target).get("text").trim();
-      if (!text) return;
+      if (!text && !zFotky.length) { toast("Napište zprávu nebo přidejte fotku.", true); return; }
       $("button[type=submit]", e.target).disabled = true;
-      await save([{ type: "upsert", col: "zpravy", rec: { id: uid(), text, stav: "nova", odpoved: "" } }], "Zpráva uložena");
+      await save([{ type: "upsert", col: "zpravy", rec: { id: uid(), text, foto: zFotky, stav: "nova", odpoved: "" } }], "Zpráva uložena");
+    });
+    const zFotky = [];
+    const kresliZFotky = () => {
+      const box = $("[data-zfoto-list]");
+      box.innerHTML = zFotky.map(id => thumb(id)).join("");
+      nactiFotky(box);
+    };
+    $("[data-zfoto]").addEventListener("change", async e => {
+      const btn = $("#zprava-form button[type=submit]");
+      btn.disabled = true;
+      for (const f of e.target.files) {
+        try { zFotky.push(await nahrajFoto(f)); kresliZFotky(); } catch (ex) { toast(ex.message, true); }
+      }
+      e.target.value = "";
+      btn.disabled = false;
     });
     $$("[data-edit-zprava]").forEach(b => b.addEventListener("click", () => zpravaForm(state.db.zpravy.find(z => z.id === b.dataset.editZprava))));
   }
@@ -1499,12 +1638,12 @@
           <form id="sheet-form" novalidate>
             <div class="sheet-head"><h2 id="sheet-title">${esc(title)}</h2><button type="button" class="close" data-close aria-label="Zavřít">×</button></div>
             ${body}
-            <div class="sheet-foot">
+            ${onSave ? `<div class="sheet-foot">
               ${onDelete ? `<button type="button" class="btn danger" data-del>Smazat</button>` : ""}
               <span class="grow"></span>
               <button type="button" class="btn" data-close>Zrušit</button>
               <button type="submit" class="btn primary">Uložit</button>
-            </div>
+            </div>` : ""}
           </form>
         </div>
       </div>`;
@@ -1513,6 +1652,7 @@
     bd.addEventListener("click", e => { if (e.target === bd || e.target.closest("[data-close]")) closeSheet(); });
     $("#sheet-form").addEventListener("submit", async e => {
       e.preventDefault();
+      if (!onSave) return;
       const btn = $("button[type=submit]", e.target);
       btn.disabled = true;
       const ok = await onSave($(".sheet"));
@@ -1522,6 +1662,7 @@
     if (onDelete) $("[data-del]").addEventListener("click", async () => { if (await onDelete()) closeSheet(); });
     const first = $(".sheet input:not([type=hidden]):not([disabled]), .sheet select");
     if (first && window.innerWidth >= 900) first.focus();
+    nactiFotky($(".sheet"));
   }
 
   function closeSheet() {
@@ -1529,6 +1670,17 @@
     document.body.style.overflow = "";
     if (lastFocus && document.contains(lastFocus)) lastFocus.focus();
   }
+  document.addEventListener("click", e => {
+    const img = e.target.closest("img.thumb[src]");
+    if (!img || e.target.closest("label")) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const big = document.createElement("div");
+    big.className = "foto-full";
+    big.innerHTML = `<img src="${img.src}" alt="Fotka"><button type="button" class="close" aria-label="Zavřít">×</button>`;
+    big.addEventListener("click", () => big.remove());
+    document.body.appendChild(big);
+  }, true);
   document.addEventListener("keydown", e => { if (e.key === "Escape" && $(".sheet")) closeSheet(); });
 
   // Po návratu do záložky načíst čerstvá data (ostatní mezitím mohli něco zapsat)

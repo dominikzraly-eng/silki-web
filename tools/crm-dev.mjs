@@ -30,6 +30,13 @@ const store = {
     if (etag && (!cur || cur.etag !== etag)) return false;
     fs.writeFileSync(file(key), JSON.stringify(data));
     return true;
+  },
+  async getBinary(key) {
+    const f = file(key) + ".bin";
+    return fs.existsSync(f) ? fs.readFileSync(f) : null;
+  },
+  async setBinary(key, buf) {
+    fs.writeFileSync(file(key) + ".bin", buf);
   }
 };
 

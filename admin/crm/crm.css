@@ -68,7 +68,7 @@ h1, h2, h3 { font-weight: 600; line-height: 1.2; }
 .topbar {
   position: sticky; top: 0; z-index: 20;
   display: flex; align-items: center; gap: 12px;
-  padding: 10px 16px;
+  padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
   background: rgba(250, 246, 241, .94);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--line-2);
@@ -138,7 +138,7 @@ h1, h2, h3 { font-weight: 600; line-height: 1.2; }
 .chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; margin-bottom: 14px; scrollbar-width: none; }
 .chips button {
   flex: none; border: 1px solid var(--line); background: var(--ivory);
-  border-radius: 999px; padding: 6px 14px; font-size: 13px;
+  border-radius: 999px; padding: 8px 14px; font-size: 14px; min-height: 38px;
 }
 .chips button[aria-pressed="true"] { background: var(--ink); color: var(--ivory); border-color: var(--ink); }
 
@@ -280,3 +280,27 @@ legend { font-size: 13px; font-weight: 550; color: var(--ink-2); margin-bottom: 
 @media (min-width: 900px) { .fab { display: none; } }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* ---------- Fotky a rychlé přidání ---------- */
+.thumb { width: 44px; height: 44px; object-fit: cover; border-radius: 8px; flex: none; background: var(--cream-2); cursor: zoom-in; }
+.thumb.big { width: 96px; height: 96px; border-radius: 12px; }
+.zfoto { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.zfoto:empty { display: none; }
+.foto-pick { display: flex; align-items: center; gap: 12px; }
+.foto-pick .ph { width: 96px; height: 96px; border-radius: 12px; border: 1px dashed var(--line); display: grid; place-items: center; color: var(--ink-3); font-size: 12px; text-align: center; background: var(--ivory); flex: none; }
+.foto-pick .acts { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.foto-full { position: fixed; inset: 0; z-index: 200; background: rgba(20,16,13,.92); display: grid; place-items: center; padding: calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom)); }
+.foto-full img { max-width: 100%; max-height: 100%; border-radius: 10px; }
+.foto-full .close { position: absolute; top: calc(10px + env(safe-area-inset-top)); right: 10px; color: #fff; }
+.quick { display: grid; gap: 10px; padding-bottom: 8px; }
+.quick button { display: flex; align-items: center; gap: 14px; min-height: 68px; padding: 0 16px; text-align: left; border: 1px solid var(--line); border-radius: 14px; background: var(--ivory); }
+.quick button svg { width: 26px; height: 26px; color: var(--gold-deep); flex: none; }
+.quick strong { display: block; font-size: 16px; }
+.quick small { display: block; color: var(--ink-2); font-size: 13px; }
+details.more { border-top: 1px solid var(--line-2); padding-top: 10px; }
+details.more summary { cursor: pointer; color: var(--ink-2); font-size: 14px; padding: 6px 0; }
+details.more[open] summary { margin-bottom: 10px; }
+.cena-big { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 14px; border-radius: 12px; background: var(--ivory); border: 1px solid var(--line); }
+.cena-big strong { font-size: 22px; font-variant-numeric: tabular-nums; }
+
+a.btn { color: inherit; text-decoration: none; }

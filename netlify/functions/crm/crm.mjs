@@ -49,6 +49,12 @@ export default async (req) => {
       const opts = etag === undefined ? {} : etag === null ? { onlyIfNew: true } : { onlyIfMatch: etag };
       const r = await blobs.setJSON(key, data, opts);
       return r?.modified !== false;
+    },
+    async getBinary(key) {
+      return blobs.get(key, { type: "arrayBuffer" });
+    },
+    async setBinary(key, buf) {
+      await blobs.set(key, buf);
     }
   };
   return handle(req, { store, verifyUser });

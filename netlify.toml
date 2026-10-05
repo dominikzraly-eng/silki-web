@@ -70,7 +70,7 @@
   for = "/admin/crm/*"
 
   [headers.values]
-    Content-Security-Policy = "default-src 'self'; base-uri 'none'; frame-ancestors 'none'; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; form-action 'none'"
+    Content-Security-Policy = "default-src 'self'; base-uri 'none'; frame-ancestors 'none'; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; manifest-src 'self'; form-action 'none'"
     X-Robots-Tag = "noindex, nofollow"
     Referrer-Policy = "no-referrer"
     Cache-Control = "no-store"

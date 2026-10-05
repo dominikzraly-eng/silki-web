@@ -12,6 +12,7 @@ import crypto from "node:crypto";
 
 const COLLECTIONS = ["sklad", "prodeje", "nakupy", "cesty", "zakaznici", "finance", "zpravy"];
 const MAX_BODY = 512 * 1024;
+const MAX_FOTO = 4 * 1024 * 1024;
 const AGENT_PREFIX = "sck_";
 const AGENT_USER = "claude";
 
@@ -123,7 +124,8 @@ function applyOps(db, ops, user) {
 }
 
 /*
- * store:      { get(key) -> {data, etag} | null, set(key, data, etag?) -> boolean (false = konflikt) }
+ * store:      { get(key) -> {data, etag} | null, set(key, data, etag?) -> boolean (false = konflikt),
+ *               getBinary(key) -> ArrayBuffer | null, setBinary(key, buffer) }
  * verifyUser: async (token) -> jméno uživatele | null
  */
 export async function handle(req, { store, verifyUser }) {
@@ -157,6 +159,23 @@ export async function handle(req, { store, verifyUser }) {
       await store.set("agent-key", { hash: null, revokedAt: new Date().toISOString(), revokedBy: user });
       return json(200, { active: false });
     }
+  }
+
+  if (req.method === "POST" && route === "foto") {
+    const buf = Buffer.from(await req.arrayBuffer());
+    if (buf.length < 100 || buf.length > MAX_FOTO) return json(413, { error: "Fotka musí mít do 4 MB." });
+    if (buf[0] !== 0xff || buf[1] !== 0xd8 || buf[2] !== 0xff) return json(415, { error: "Fotka musí být JPEG." });
+    const id = crypto.randomUUID();
+    await store.setBinary("foto/" + id, buf);
+    return json(200, { id });
+  }
+
+  if (req.method === "GET" && route.startsWith("foto/")) {
+    const id = route.slice(5);
+    if (!/^[A-Za-z0-9-]{1,64}$/.test(id)) return json(400, { error: "Neplatná fotka." });
+    const buf = await store.getBinary("foto/" + id);
+    if (!buf) return json(404, { error: "Fotka nenalezena." });
+    return new Response(buf, { status: 200, headers: { "Content-Type": "image/jpeg", "Cache-Control": "private, max-age=31536000, immutable", "X-Content-Type-Options": "nosniff" } });
   }
 
   if (req.method === "GET" && route === "data") {
