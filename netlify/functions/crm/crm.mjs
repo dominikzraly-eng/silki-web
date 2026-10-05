@@ -37,7 +37,7 @@ async function verifyUser(token) {
   return user;
 }
 
-export default async (req) => {
+export default async (req, context) => {
   const blobs = getStore({ name: "crm", consistency: "strong" });
   const store = {
     async get(key) {
@@ -57,7 +57,7 @@ export default async (req) => {
       await blobs.set(key, buf);
     }
   };
-  return handle(req, { store, verifyUser });
+  return handle(req, { store, verifyUser, ip: context?.ip });
 };
 
 export const config = { path: "/api/crm/*" };

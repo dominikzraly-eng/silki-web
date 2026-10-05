@@ -180,9 +180,9 @@
         firstInvalid.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center" });
         return;
       }
-      // Odesila se dvema cestami zaroven: Web3Forms doruci poptavku rovnou na
-      // e-mail, Netlify Forms ji ulozi do dashboardu jako archiv. Staci, kdyz
-      // projde jedna z nich - lead se tak neztrati ani pri vypadku jedne sluzby.
+      // Odesila se tremi cestami zaroven: Web3Forms doruci poptavku rovnou na
+      // e-mail, Netlify Forms ji ulozi do dashboardu jako archiv a interni CRM
+      // ji zaradi do Poptavek z webu. Staci, kdyz projde jedna z nich.
       var submitBtn = form.querySelector('[type="submit"]');
       var labelCs = submitBtn ? submitBtn.getAttribute("data-loading-cs") : null;
       var labelEn = submitBtn ? submitBtn.getAttribute("data-loading-en") : null;
@@ -234,13 +234,26 @@
         return "mail";
       });
 
+      /* 3) Interní CRM - poptávka se objeví v evidenci (Poptávky z webu) */
+      var crmPole = {};
+      fd.forEach(function (v, k) { if (k !== "form-name") crmPole[k] = String(v || ""); });
+      var toCrm = fetch("/api/crm/lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ form: formName, fields: crmPole })
+      }).then(function (r) {
+        if (!r.ok) throw new Error("CRM HTTP " + r.status);
+        return "crm";
+      });
+
       Promise.all([
         toMail.catch(function (e) { return e; }),
-        toNetlify.catch(function (e) { return e; })
+        toNetlify.catch(function (e) { return e; }),
+        toCrm.catch(function (e) { return e; })
       ]).then(function (res) {
         resetBtn();
         var en = root.getAttribute("lang") === "en";
-        if (res.indexOf("mail") === -1 && res.indexOf("netlify") === -1) {
+        if (res.indexOf("mail") === -1 && res.indexOf("netlify") === -1 && res.indexOf("crm") === -1) {
           showToast(en ? "Sending failed — please reach us on WhatsApp." : "Odeslání se nezdařilo — napište nám prosím na WhatsApp.");
           showDirectContact(form);
           return;

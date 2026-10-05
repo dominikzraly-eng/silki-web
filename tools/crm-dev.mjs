@@ -49,7 +49,7 @@ http.createServer(async (req, res) => {
     for await (const c of req) chunks.push(c);
     const body = chunks.length ? Buffer.concat(chunks) : undefined;
     const request = new Request(url, { method: req.method, headers: req.headers, body: req.method === "GET" ? undefined : body });
-    const r = await handle(request, { store, verifyUser });
+    const r = await handle(request, { store, verifyUser, ip: req.socket.remoteAddress });
     res.writeHead(r.status, Object.fromEntries(r.headers));
     res.end(await r.text());
     return;

@@ -36,6 +36,7 @@
     prehled: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
     prodeje: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg>',
     sklad: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg>',
+    poptavky: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5.1 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.9A2 2 0 0 0 16.8 4H7.2a2 2 0 0 0-1.7 1.1z"/></svg>',
     zpravy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M8 10h8M8 14h5"/></svg>',
     zakaznici: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M17 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-4-6.3"/></svg>',
     nakupy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h2l2.4 12.2a2 2 0 0 0 2 1.8h8.2a2 2 0 0 0 2-1.6L21 8H6"/><circle cx="10" cy="21" r="1"/><circle cx="18" cy="21" r="1"/></svg>',
@@ -75,7 +76,7 @@
   }
 
   function normDb(db) {
-    for (const c of ["sklad", "prodeje", "nakupy", "cesty", "zakaznici", "finance", "zpravy"]) if (!Array.isArray(db[c])) db[c] = [];
+    for (const c of ["sklad", "prodeje", "nakupy", "cesty", "zakaznici", "finance", "zpravy", "poptavky"]) if (!Array.isArray(db[c])) db[c] = [];
     return db;
   }
 
@@ -279,6 +280,7 @@
     ["prodeje", "Prodeje", ""],
     ["sklad", "Sklad", ""],
     ["zpravy", "Zprávy", ""],
+    ["poptavky", "Poptávky", "desk-only"],
     ["zakaznici", "Zákazníci", "desk-only"],
     ["nakupy", "Nákupy", "desk-only"],
     ["finance", "Finance", "desk-only"],
@@ -335,13 +337,13 @@
 
   function render() {
     if (!state.db) return;
-    const moreViews = ["nakupy", "finance", "nastaveni", "vice", "zakaznici"];
+    const moreViews = ["nakupy", "finance", "nastaveni", "vice", "zakaznici", "poptavky"];
     $$(".nav [data-view]").forEach(b => {
       const active = b.dataset.view === state.view || (b.dataset.view === "vice" && moreViews.includes(state.view) && window.innerWidth < 900);
       b.toggleAttribute("aria-current", false);
       if (active) b.setAttribute("aria-current", "page");
     });
-    const views = { prehled: viewPrehled, prodeje: viewProdeje, sklad: viewSklad, zakaznici: viewZakaznici, zpravy: viewZpravy, nakupy: viewNakupy, finance: viewFinance, nastaveni: viewNastaveni, vice: viewVice };
+    const views = { prehled: viewPrehled, prodeje: viewProdeje, sklad: viewSklad, zakaznici: viewZakaznici, zpravy: viewZpravy, poptavky: viewPoptavky, nakupy: viewNakupy, finance: viewFinance, nastaveni: viewNastaveni, vice: viewVice };
     (views[state.view] || viewPrehled)();
     nactiFotky($("#view"));
   }
@@ -370,6 +372,7 @@
     $("#view").innerHTML = `
       <div class="view-head"><h1>Přehled</h1><button class="btn primary desk-btn" data-act="new-sale">+ Nový prodej</button></div>
       ${chips("period", { mesic: "Tento měsíc", minuly: "Minulý měsíc", rok: "Letos", vse: "Od začátku" }, state.period)}
+      ${nove() ? `<button class="note" data-go="poptavky" style="display:block;width:100%;text-align:left;border:0;cursor:pointer;background:var(--ok-bg);color:var(--ok)"><strong>${nove()} ${plural(nove(), "nová poptávka", "nové poptávky", "nových poptávek")} z webu</strong>, otevřít ›</button>` : ""}
       ${db.cesty.filter(c => !db.nakupy.some(n => n.cesta_id === c.id)).map(c => `<p class="note">Cesta ${esc(c.nazev)} nemá připojený nákup, její náklady se zatím nepočítají do zisku. <button class="link" data-go="nakupy">Připojit</button></p>`).join("")}
       ${bezNakupu ? `<p class="note">U ${bezNakupu} ks ve skladu chybí nákupní cena, takže zisk vychází vyšší, než je. <button class="link" data-go="sklad">Doplnit</button></p>` : ""}
       <div class="grid kpis">
@@ -1486,11 +1489,83 @@
     }, () => confirm("Smazat zprávu?") && save([{ type: "delete", col: "zpravy", id: z.id }], "Zpráva smazána"));
   }
 
+  // ---------- Poptávky z webu (formuláře na silkihair.cz)
+  const POPT_TYP = { poptavka: "Culík", "registrace-kadernice": "Kadeřnice / salon", "poptavka-kurz": "Kurz" };
+  const POPT_STAV = { nova: "Nová", resi: "Řeší se", vyrizeno: "Vyřízeno", zamitnuto: "Nezájem" };
+  const POPT_POLE = { name: "Jméno", salon: "Salon", phone: "Telefon", email: "E-mail", city: "Město", ico: "IČO", shade: "Odstín", length: "Délka", interest: "Zájem", course: "Kurz", experience: "Zkušenosti", subject: "Předmět", message: "Zpráva" };
+  const nove = () => state.db.poptavky.filter(x => x.stav === "nova").length;
+  const telLink = t => String(t || "").replace(/[^\d+]/g, "");
+  const waLink = t => { let d = String(t || "").replace(/\D/g, ""); if (d.length === 9) d = "420" + d; return d ? "https://wa.me/" + d : ""; };
+
+  function viewPoptavky() {
+    const f = state.filters.poptavky || "otevrene";
+    // Prodej vlasů má přednost: poptávky culíků a kadeřnic před kurzy
+    const poradi = { poptavka: 0, "registrace-kadernice": 1, "poptavka-kurz": 2 };
+    const list = state.db.poptavky
+      .filter(x => f === "vse" || (f === "otevrene" ? ["nova", "resi"].includes(x.stav) : ["vyrizeno", "zamitnuto"].includes(x.stav)))
+      .sort((a, b) => (a.stav === "nova" ? 0 : 1) - (b.stav === "nova" ? 0 : 1) || poradi[a.form] - poradi[b.form] || (b.createdAt || "").localeCompare(a.createdAt || ""));
+    $("#view").innerHTML = `
+      <div class="view-head"><h1>Poptávky</h1></div>
+      ${chips("pf2", { otevrene: "Otevřené", hotove: "Vyřízené", vse: "Vše" }, f)}
+      <p class="small muted" style="margin-bottom:12px">Chodí sem samy z formulářů na webu. Nezávazné poptávky bez objednávky po vyřízení smažte (zásady ochrany osobních údajů).</p>
+      ${list.length ? `<div class="list boxed">${list.map(x => `
+        <button class="row" data-popt="${x.id}">
+          <div class="row-main"><div class="row-title">${esc(x.pole?.salon || x.pole?.name || x.pole?.email || "Bez jména")}</div>
+          <div class="row-sub">${POPT_TYP[x.form] || ""} · ${new Date(x.createdAt).toLocaleDateString("cs-CZ")}${x.vyrizuje ? " · " + esc(PEOPLE[x.vyrizuje] || "") : ""}${x.pole?.shade || x.pole?.length ? " · " + esc([x.pole.shade, x.pole.length].filter(Boolean).join(", ")) : ""}</div></div>
+          <span class="badge ${x.stav === "nova" ? "ok" : x.stav === "resi" ? "warn" : ""}">${POPT_STAV[x.stav]}</span>
+        </button>`).join("")}</div>` : `<p class="empty">${f === "otevrene" ? "Žádná otevřená poptávka." : "Nic tu není."}</p>`}`;
+    bindChips("pf2", v => { state.filters.poptavky = v; render(); });
+    $$("[data-popt]").forEach(b => b.addEventListener("click", () => poptavkaForm(state.db.poptavky.find(x => x.id === b.dataset.popt))));
+  }
+
+  function poptavkaForm(x) {
+    const p = x.pole || {};
+    const zak = state.db.zakaznici.find(z => z.id === x.zakaznik_id);
+    const tel = telLink(p.phone), wa = waLink(p.phone);
+    const body = `<div class="f">
+      <p class="small muted">${POPT_TYP[x.form] || ""} · ${new Date(x.createdAt).toLocaleString("cs-CZ")}</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${tel ? `<a class="btn primary" href="tel:${esc(tel)}">Zavolat</a>` : ""}
+        ${wa ? `<a class="btn" href="${esc(wa)}" target="_blank" rel="noopener">WhatsApp</a>` : ""}
+        ${p.email ? `<a class="btn" href="mailto:${esc(p.email)}">E-mail</a>` : ""}
+      </div>
+      <div class="split">${Object.entries(POPT_POLE).filter(([k]) => p[k]).map(([k, v]) => `<div><span class="muted">${v}</span><span style="text-align:right;white-space:pre-wrap;overflow-wrap:anywhere">${esc(p[k])}</span></div>`).join("")}</div>
+      <div class="f2">
+        <label class="field"><span>Vyřizuje</span><select name="vyrizuje"><option value="">Nikdo</option>${Object.entries(PEOPLE).map(([k, v]) => `<option value="${k}" ${k === (x.vyrizuje || (x.stav === "nova" ? state.user : "")) ? "selected" : ""}>${v}</option>`).join("")}</select></label>
+        <label class="field"><span>Stav</span><select name="stav">${opts(POPT_STAV, x.stav === "nova" ? "resi" : x.stav)}</select></label>
+      </div>
+      <label class="field"><span>Poznámka</span><textarea name="poznamka" placeholder="např. volala jsem, chce 2 culíky blond 55 cm">${esc(x.poznamka)}</textarea></label>
+      ${zak ? `<p class="small">Zákazník v CRM: <button type="button" class="link" data-zak>${esc(zak.jmeno)}</button></p>`
+        : `<button type="button" class="btn block" data-prevest>Převést na zákazníka</button>`}
+    </div>`;
+    openSheet(p.salon || p.name || "Poptávka", body, () => {
+      const fd = new FormData($("#sheet-form"));
+      return save([{ type: "upsert", col: "poptavky", rec: { ...x, vyrizuje: fd.get("vyrizuje"), stav: fd.get("stav"), poznamka: fd.get("poznamka") } }], "Poptávka uložena");
+    }, () => confirm("Smazat poptávku? Osobní údaje z ní zmizí.") && save([{ type: "delete", col: "poptavky", id: x.id }], "Poptávka smazána"));
+    const root = $(".sheet");
+    $("[data-zak]", root)?.addEventListener("click", () => { closeSheet(); zakForm(zak); });
+    $("[data-prevest]", root)?.addEventListener("click", async () => {
+      const fd = new FormData($("#sheet-form"));
+      const kadernice = x.form === "registrace-kadernice";
+      const z = {
+        id: uid(), jmeno: p.salon || p.name || p.email || "Bez jména", typ: kadernice ? (p.salon ? "salon" : "kadernik") : "zakaznice",
+        telefon: p.phone || "", email: p.email || "", ico: p.ico || "", mesto: p.city || "",
+        sleva: kadernice ? 10 : 0, vip: false, spravce: fd.get("vyrizuje") || state.user, stav: "lead", podminky: "",
+        poznamka: ["Z poptávky na webu " + new Date(x.createdAt).toLocaleDateString("cs-CZ"), p.name && p.salon ? "Kontakt: " + p.name : "", p.shade ? "Odstín: " + p.shade : "", p.length ? "Délka: " + p.length : "", p.interest ? "Zájem: " + p.interest : "", p.message ? "Zpráva: " + p.message : ""].filter(Boolean).join("\n")
+      };
+      const ok = await save([
+        { type: "upsert", col: "zakaznici", rec: z },
+        { type: "upsert", col: "poptavky", rec: { ...x, zakaznik_id: z.id, vyrizuje: fd.get("vyrizuje"), stav: fd.get("stav"), poznamka: fd.get("poznamka") } }
+      ], "Zákazník založen");
+      if (ok) { closeSheet(); zakForm(state.db.zakaznici.find(y => y.id === z.id)); }
+    });
+  }
+
   function viewVice() {
     $("#view").innerHTML = `
       <div class="view-head"><h1>Více</h1></div>
       <div class="list boxed">
-        ${[["zakaznici", "Zákazníci", "Kadeřnice, salony, zákaznice"], ["nakupy", "Nákupy", "Nákupy vlasů a jejich náklady"], ["finance", "Finance", "Příjmy, výdaje, výplaty provizí"], ["nastaveni", "Nastavení", "Provize, slevy, ceník, export"]].map(([k, t, s]) => `
+        ${[["poptavky", "Poptávky z webu", nove() ? nove() + " nových" : "Formuláře z webu"], ["zakaznici", "Zákazníci", "Kadeřnice, salony, zákaznice"], ["nakupy", "Nákupy", "Nákupy vlasů a jejich náklady"], ["finance", "Finance", "Příjmy, výdaje, výplaty provizí"], ["nastaveni", "Nastavení", "Provize, slevy, ceník, export"]].map(([k, t, s]) => `
           <button class="row" data-go="${k}"><span style="width:22px;color:var(--gold-deep)">${ICONS[k]}</span>
           <div class="row-main"><div class="row-title">${t}</div><div class="row-sub">${s}</div></div><span aria-hidden="true">›</span></button>`).join("")}
       </div>`;

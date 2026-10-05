@@ -10,7 +10,13 @@
  */
 import crypto from "node:crypto";
 
-const COLLECTIONS = ["sklad", "prodeje", "nakupy", "cesty", "zakaznici", "finance", "zpravy"];
+const COLLECTIONS = ["sklad", "prodeje", "nakupy", "cesty", "zakaznici", "finance", "zpravy", "poptavky"];
+
+// Veřejný vstup z formulářů na webu: jen tyto formuláře a pole, nic jiného se přes něj zapsat nedá.
+const LEAD_FORMS = ["poptavka", "registrace-kadernice", "poptavka-kurz"];
+const LEAD_FIELDS = ["name", "salon", "phone", "email", "shade", "length", "course", "experience", "city", "ico", "interest", "message", "subject"];
+const LEAD_LIMIT = 5;            // poptávek z jedné IP
+const LEAD_WINDOW = 60 * 60e3;   // za hodinu
 const MAX_BODY = 512 * 1024;
 const MAX_FOTO = 4 * 1024 * 1024;
 const AGENT_PREFIX = "sck_";
@@ -123,14 +129,56 @@ function applyOps(db, ops, user) {
   return db;
 }
 
+async function lead(req, url, store, ip) {
+  if (req.method !== "POST") return json(405, { error: "Jen POST." });
+  // Jen z vlastního webu (prohlížeč posílá Origin; jiný web sem formulář neodešle)
+  const origin = req.headers.get("origin");
+  if (origin && new URL(origin).host !== url.host) return json(403, { error: "Nepovolený původ." });
+  const text = await req.text();
+  if (text.length > 20000) return json(413, { error: "Moc dlouhé." });
+  let body;
+  try { body = JSON.parse(text); } catch { return json(400, { error: "Neplatný JSON." }); }
+  if (!LEAD_FORMS.includes(body.form)) return json(400, { error: "Neznámý formulář." });
+  if (String(body.fields?.["bot-field"] || "").trim()) return json(200, { ok: true });
+  const pole = {};
+  for (const k of LEAD_FIELDS) {
+    const v = String(body.fields?.[k] ?? "").trim().slice(0, 1500);
+    if (v) pole[k] = v;
+  }
+  if (!pole.name && !pole.phone && !pole.email) return json(400, { error: "Chybí kontakt." });
+
+  const rlKey = "rl-lead/" + crypto.createHash("sha256").update(ip || "?").digest("hex").slice(0, 24);
+  const rl = (await store.get(rlKey))?.data || { n: 0, t: Date.now() };
+  if (Date.now() - rl.t > LEAD_WINDOW) { rl.n = 0; rl.t = Date.now(); }
+  if (rl.n >= LEAD_LIMIT) return json(429, { error: "Příliš mnoho poptávek, zkuste to později." });
+  rl.n++;
+  await store.set(rlKey, rl);
+
+  const now = new Date().toISOString();
+  const rec = { id: crypto.randomUUID(), form: body.form, pole, stav: "nova", vyrizuje: "", poznamka: "", zakaznik_id: "", createdAt: now, createdBy: "web", updatedAt: now, updatedBy: "web" };
+  for (let attempt = 0; attempt < 10; attempt++) {
+    if (attempt) await new Promise(r => setTimeout(r, 20 + Math.random() * 80 * attempt));
+    const cur = await store.get("db");
+    const db = normalize(cur?.data || emptyDb());
+    db.poptavky.push(rec);
+    db.poptavky = db.poptavky.slice(-2000);
+    db.log.unshift({ t: now, u: "web", co: "nová poptávka z webu" });
+    db.log = db.log.slice(0, 300);
+    if (await store.set("db", db, cur?.etag ?? null)) return json(200, { ok: true });
+  }
+  return json(503, { error: "Zkuste to znovu." });
+}
+
 /*
  * store:      { get(key) -> {data, etag} | null, set(key, data, etag?) -> boolean (false = konflikt),
  *               getBinary(key) -> ArrayBuffer | null, setBinary(key, buffer) }
  * verifyUser: async (token) -> jméno uživatele | null
  */
-export async function handle(req, { store, verifyUser }) {
+export async function handle(req, { store, verifyUser, ip }) {
   const url = new URL(req.url);
   const route = url.pathname.replace(/^\/api\/crm\/?/, "");
+
+  if (route === "lead") return lead(req, url, store, ip);
 
   const token = (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "").trim();
   let user = null;
