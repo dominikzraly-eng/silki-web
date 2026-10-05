@@ -72,13 +72,18 @@
     return data;
   }
 
+  function normDb(db) {
+    for (const c of ["sklad", "prodeje", "nakupy", "cesty", "zakaznici", "finance"]) if (!Array.isArray(db[c])) db[c] = [];
+    return db;
+  }
+
   function setSync(cls) { const s = $(".sync"); if (s) s.className = "sync " + (cls || ""); }
 
   async function save(ops, msg) {
     setSync("busy");
     try {
       const r = await api("ops", { method: "POST", body: { ops } });
-      state.db = r.db;
+      state.db = normDb(r.db);
       setSync("");
       toast(msg || "Uloženo");
       render();
@@ -94,7 +99,7 @@
     setSync("busy");
     try {
       const r = await api("data");
-      state.db = r.db;
+      state.db = normDb(r.db);
       state.user = r.user;
       const me = $(".me"); if (me) me.textContent = PEOPLE[r.user] || r.user;
       setSync("");
@@ -198,6 +203,7 @@
     const kasa = sum(placene, p => p.split?.celkem)
       + sum(db.finance.filter(f => f.typ === "prijem"), f => f.castka)
       - sum(db.nakupy, n => n.celkem)
+      - sum(db.cesty, c => (c.naklady || []).reduce((a, x) => a + num(x.castka), 0))
       - sum(db.finance.filter(f => f.typ === "vydaj" || f.typ === "vyplata"), f => f.castka);
 
     return { trzby, firmaPrijem, naklad, prijmy, vydaje, kusy, zisk: firmaPrijem - naklad + prijmy - vydaje, provize, kasa, pocet: vObdobi.length };
@@ -302,6 +308,7 @@
     $("#view").innerHTML = `
       <div class="view-head"><h1>Přehled</h1><button class="btn primary desk-btn" data-act="new-sale">+ Nový prodej</button></div>
       ${chips("period", { mesic: "Tento měsíc", minuly: "Minulý měsíc", rok: "Letos", vse: "Od začátku" }, state.period)}
+      ${db.cesty.filter(c => !db.nakupy.some(n => n.cesta_id === c.id)).map(c => `<p class="note">Cesta ${esc(c.nazev)} nemá připojený nákup, její náklady se zatím nepočítají do zisku. <button class="link" data-go="nakupy">Připojit</button></p>`).join("")}
       ${bezNakupu ? `<p class="note">U ${bezNakupu} ks ve skladu chybí nákupní cena, takže zisk vychází vyšší, než je. <button class="link" data-go="sklad">Doplnit</button></p>` : ""}
       <div class="grid kpis">
         ${kpi("Tržby", fmtKc(st.trzby), st.pocet + " " + plural(st.pocet, "prodej", "prodeje", "prodejů"))}
@@ -725,38 +732,114 @@
   }
 
   // ================================================================
-  // 9. Nákupy
+  // 9. Nákupy a cesty
   // ================================================================
-  function viewNakupy() {
-    const list = [...state.db.nakupy].sort((a, b) => b.datum.localeCompare(a.datum));
-    const letos = list.filter(n => n.datum.startsWith(String(new Date().getFullYear())));
-    $("#view").innerHTML = `
-      <div class="view-head"><h1>Nákupy</h1><button class="btn primary" data-new>+ Nákup</button></div>
-      <div class="grid kpis">
-        ${kpi("Letos nakoupeno", fmtKc(letos.reduce((a, n) => a + num(n.celkem), 0)), letos.length + " " + plural(letos.length, "nákup", "nákupy", "nákupů"))}
-        ${kpi("Kusů letos", letos.reduce((a, n) => a + (n.polozky || []).length, 0) + " ks", "")}
-      </div>
-      <p class="note info" style="margin-top:14px">Nákup zapíše kusy rovnou do skladu i s nákupní cenou. Cesta (letenky, ubytování), doprava a clo se rozpočítají na kusy podle gramáže.</p>
-      ${list.length ? `<div class="list boxed">${list.map(n => `
-        <button class="row" data-edit="${n.id}">
-          <div class="row-main"><div class="row-title">${esc(n.dodavatel || "Dodavatel neuveden")}</div>
-          <div class="row-sub">${fmtDate(n.datum)} · ${(n.polozky || []).length} ks · ${(n.polozky || []).reduce((a, k) => a + num(k.gramaz), 0)} g</div></div>
-          <div class="row-end num"><strong>${fmtKc(n.celkem)}</strong></div>
-        </button>`).join("")}</div>` : `<p class="empty">Zatím žádný nákup.</p>`}`;
-    $("[data-new]").addEventListener("click", () => nakupForm());
-    $$("[data-edit]").forEach(b => b.addEventListener("click", () => nakupForm(state.db.nakupy.find(n => n.id === b.dataset.edit))));
+  const DRUHY = { letenky: "Letenky", ubytovani: "Ubytování", doprava: "Doprava na místě", jidlo: "Jídlo", ostatni: "Ostatní" };
+  const cestaCelkem = c => (c.naklady || []).reduce((a, x) => a + num(x.castka), 0);
+  const nakupG = n => (n.polozky || []).reduce((a, k) => a + num(k.gramaz), 0);
+
+  // Nákupní cena kusu = cena kusu + jeho podíl na dopravě nákupu + podíl na nákladech cesty.
+  // Podíly se dělí podle gramáže; u cesty přes všechny kusy ze všech jejích nákupů.
+  function ocekavaneNaklady(db) {
+    const gCesty = {};
+    for (const n of db.nakupy) if (n.cesta_id) gCesty[n.cesta_id] = (gCesty[n.cesta_id] || 0) + nakupG(n);
+    const sumCesty = Object.fromEntries(db.cesty.map(c => [c.id, cestaCelkem(c)]));
+    const out = {};
+    for (const n of db.nakupy) {
+      const g = nakupG(n) || 1;
+      for (const k of n.polozky || []) {
+        if (!k.sklad_id) continue;
+        let cena = num(k.cena) + num(n.doprava) * num(k.gramaz) / g;
+        if (n.cesta_id && sumCesty[n.cesta_id] && gCesty[n.cesta_id]) cena += sumCesty[n.cesta_id] * num(k.gramaz) / gCesty[n.cesta_id];
+        out[k.sklad_id] = Math.round(cena);
+      }
+    }
+    return out;
   }
 
+  // Po změně nákupu nebo cesty dorovná nákupní ceny ve skladu i v uložených prodejích.
+  async function prepocitatNaklady() {
+    const db = state.db;
+    const exp = ocekavaneNaklady(db);
+    const ops = [];
+    for (const k of db.sklad) {
+      if (k.id in exp && num(k.nakup_cena) !== exp[k.id]) ops.push({ type: "upsert", col: "sklad", rec: { ...k, nakup_cena: exp[k.id] } });
+    }
+    for (const p of db.prodeje) {
+      if (!(p.polozky || []).some(k => k.sklad_id in exp && num(k.nakup_cena) !== exp[k.sklad_id])) continue;
+      const polozky = p.polozky.map(k => k.sklad_id in exp ? { ...k, nakup_cena: exp[k.sklad_id] } : k);
+      const naklad = polozky.reduce((a, k) => a + num(k.nakup_cena), 0);
+      ops.push({ type: "upsert", col: "prodeje", rec: { ...p, polozky, split: { ...p.split, naklad, zisk: num(p.split?.firma) - naklad } } });
+    }
+    for (let i = 0; i < ops.length; i += 50) await save(ops.slice(i, i + 50), "Nákupní ceny kusů přepočítány");
+    return true;
+  }
+
+  function viewNakupy() {
+    const tab = state.filters.nakupyTab || "nakupy";
+    const rok = String(new Date().getFullYear());
+    const letos = state.db.nakupy.filter(n => n.datum.startsWith(rok));
+    const cestyLetos = state.db.cesty.filter(c => (c.datum_od || "").startsWith(rok));
+    $("#view").innerHTML = `
+      <div class="view-head"><h1>Nákupy</h1>
+        ${tab === "nakupy" ? `<button class="btn primary" data-new>+ Nákup</button>` : `<button class="btn primary" data-new-cesta>+ Cesta</button>`}</div>
+      ${chips("nt", { nakupy: "Nákupy vlasů", cesty: "Cesty" }, tab)}
+      <div class="grid kpis">
+        ${kpi("Letos za vlasy", fmtKc(letos.reduce((a, n) => a + num(n.celkem), 0)), letos.length + " " + plural(letos.length, "nákup", "nákupy", "nákupů"))}
+        ${kpi("Letos za cesty", fmtKc(cestyLetos.reduce((a, c) => a + cestaCelkem(c), 0)), cestyLetos.length + " " + plural(cestyLetos.length, "cesta", "cesty", "cest"))}
+        ${kpi("Kusů letos", letos.reduce((a, n) => a + (n.polozky || []).length, 0) + " ks", letos.reduce((a, n) => a + nakupG(n), 0) + " g")}
+      </div>
+      ${tab === "nakupy" ? listNakupy() : listCesty()}`;
+    bindChips("nt", v => { state.filters.nakupyTab = v; render(); });
+    $("[data-new]")?.addEventListener("click", () => nakupForm());
+    $("[data-new-cesta]")?.addEventListener("click", () => cestaForm());
+    $$("[data-edit]").forEach(b => b.addEventListener("click", () => nakupForm(state.db.nakupy.find(n => n.id === b.dataset.edit))));
+    $$("[data-edit-cesta]").forEach(b => b.addEventListener("click", () => cestaForm(state.db.cesty.find(c => c.id === b.dataset.editCesta))));
+  }
+
+  function listNakupy() {
+    const list = [...state.db.nakupy].sort((a, b) => b.datum.localeCompare(a.datum));
+    return `<p class="note info" style="margin-top:14px">Nákup zapíše kusy rovnou do skladu. Letenky a ubytování zapisujte do <strong>Cesty</strong> a nákupy k ní připojte, náklady se rozdělí mezi všechny kusy.</p>
+      ${list.length ? `<div class="list boxed">${list.map(n => {
+        const c = state.db.cesty.find(x => x.id === n.cesta_id);
+        return `<button class="row" data-edit="${n.id}">
+          <div class="row-main"><div class="row-title">${esc(n.dodavatel || "Dodavatel neuveden")}</div>
+          <div class="row-sub">${fmtDate(n.datum)} · ${(n.polozky || []).length} ks · ${nakupG(n)} g${c ? " · " + esc(c.nazev) : ""}</div></div>
+          <div class="row-end num"><strong>${fmtKc(n.celkem)}</strong></div>
+        </button>`;
+      }).join("")}</div>` : `<p class="empty">Zatím žádný nákup.</p>`}`;
+  }
+
+  function listCesty() {
+    const list = [...state.db.cesty].sort((a, b) => (b.datum_od || "").localeCompare(a.datum_od || ""));
+    return `<p class="note info" style="margin-top:14px">Cesta za nákupem: letenky, ubytování, doprava na místě. Připojte k ní nákupy a náklady se rozpočítají do ceny kusů podle gramáže.</p>
+      ${list.length ? `<div class="list boxed">${list.map(c => {
+        const nak = state.db.nakupy.filter(n => n.cesta_id === c.id);
+        return `<button class="row" data-edit-cesta="${c.id}">
+          <div class="row-main"><div class="row-title">${esc(c.nazev || "Cesta")}</div>
+          <div class="row-sub">${fmtDate(c.datum_od)}${c.datum_do && c.datum_do !== c.datum_od ? " až " + fmtDate(c.datum_do) : ""} · ${nak.length ? nak.length + " " + plural(nak.length, "nákup", "nákupy", "nákupů") : "bez nákupu"}</div></div>
+          <div class="row-end"><div class="num"><strong>${fmtKc(cestaCelkem(c))}</strong></div>
+          ${nak.length ? "" : `<span class="badge warn">Připojit nákup</span>`}</div>
+        </button>`;
+      }).join("")}</div>` : `<p class="empty">Zatím žádná cesta.</p>`}`;
+  }
+
+  const cestaOptions = cur => `<option value="">Bez cesty</option>` + [...state.db.cesty]
+    .sort((a, b) => (b.datum_od || "").localeCompare(a.datum_od || ""))
+    .map(c => `<option value="${c.id}" ${c.id === cur ? "selected" : ""}>${esc(c.nazev || "Cesta")} (${fmtDate(c.datum_od)})</option>`).join("");
+
   function nakupForm(existing) {
-    const n = existing ? structuredClone(existing) : { id: uid(), datum: today(), dodavatel: "", doprava: 0, polozky: [{ odstin: "tmave", delka: S().cenik[0]?.delka || "", gramaz: "", cena: "" }], poznamka: "" };
+    const n = existing ? structuredClone(existing) : { id: uid(), datum: today(), dodavatel: "", doprava: 0, cesta_id: "", polozky: [{ odstin: "tmave", delka: S().cenik[0]?.delka || "", gramaz: "", cena: "" }], poznamka: "" };
     const lock = !!existing;
     const body = `<div class="f">
       <div class="f2">
         <label class="field"><span>Datum</span><input type="date" name="datum" value="${esc(n.datum)}" required></label>
         <label class="field"><span>Dodavatel</span><input name="dodavatel" value="${esc(n.dodavatel)}"></label>
       </div>
-      <label class="field"><span>Cesta a doprava Kč</span><input name="doprava" inputmode="decimal" value="${n.doprava || ""}">
-        <span class="hint">Letenky, ubytování, cesta, poštovné, clo. Rozpočítá se do nákupní ceny kusů podle gramáže. Jde doplnit i později.</span></label>
+      <label class="field"><span>Cesta</span><select name="cesta_id">${cestaOptions(n.cesta_id)}</select>
+        <span class="hint">Letenky a ubytování z cesty se rozdělí mezi všechny její nákupy. Novou cestu založíte v Nákupy → Cesty.</span></label>
+      <label class="field"><span>Doprava a clo k tomuto nákupu Kč</span><input name="doprava" inputmode="decimal" value="${n.doprava || ""}">
+        <span class="hint">Poštovné, clo, poplatky jen za tenhle nákup. Rozpočítá se do ceny kusů podle gramáže.</span></label>
       <div class="field"><span>Kusy</span>
         ${lock ? `<p class="small muted">Kusy jsou už ve skladu, upravují se tam.</p>` : ""}
         <div class="items" data-items></div>
@@ -765,52 +848,32 @@
       <div class="split" data-sum></div>
       <label class="field"><span>Poznámka</span><textarea name="poznamka">${esc(n.poznamka)}</textarea></label>
     </div>`;
-    openSheet(existing ? "Nákup" : "Nový nákup", body, () => {
+    openSheet(existing ? "Nákup" : "Nový nákup", body, async () => {
       read();
       const fd = new FormData($("#sheet-form"));
       n.datum = fd.get("datum"); n.dodavatel = fd.get("dodavatel"); n.poznamka = fd.get("poznamka");
-      if (lock) {
-        // Změna nákladů cesty se přepočítá do nákupní ceny kusů i do už uložených prodejů
-        const doprava = num(fd.get("doprava"));
-        const ops = [];
-        if (doprava !== num(n.doprava)) {
-          const totalG = n.polozky.reduce((a, k) => a + num(k.gramaz), 0) || 1;
-          const nove = {};
-          for (const k of n.polozky) {
-            if (!k.sklad_id) continue;
-            nove[k.sklad_id] = Math.round(num(k.cena) + doprava * num(k.gramaz) / totalG);
-            const kus = state.db.sklad.find(x => x.id === k.sklad_id);
-            if (kus) ops.push({ type: "upsert", col: "sklad", rec: { ...kus, nakup_cena: nove[k.sklad_id] } });
-          }
-          for (const p of state.db.prodeje) {
-            if (!(p.polozky || []).some(k => k.sklad_id in nove)) continue;
-            const polozky = p.polozky.map(k => k.sklad_id in nove ? { ...k, nakup_cena: nove[k.sklad_id] } : k);
-            const naklad = polozky.reduce((a, k) => a + num(k.nakup_cena), 0);
-            ops.push({ type: "upsert", col: "prodeje", rec: { ...p, polozky, split: { ...p.split, naklad, zisk: num(p.split?.firma) - naklad } } });
-          }
-          n.doprava = doprava;
-          n.celkem = Math.round(n.polozky.reduce((a, k) => a + num(k.cena), 0) + doprava);
-        }
-        ops.unshift({ type: "upsert", col: "nakupy", rec: n });
-        return save(ops, ops.length > 1 ? "Nákup upraven, ceny kusů přepočítány" : "Nákup upraven");
-      }
-      n.polozky = n.polozky.filter(k => num(k.gramaz) > 0);
-      if (!n.polozky.length) { toast("Zadejte aspoň jeden kus s gramáží.", true); return false; }
-      n.doprava = num(fd.get("doprava"));
-      const totalG = n.polozky.reduce((a, k) => a + num(k.gramaz), 0);
-      n.celkem = Math.round(n.polozky.reduce((a, k) => a + num(k.cena), 0) + n.doprava);
+      n.cesta_id = fd.get("cesta_id"); n.doprava = num(fd.get("doprava"));
       const ops = [];
-      let cisloBase = parseInt(nextCislo().replace(/\D/g, ""), 10);
-      n.polozky = n.polozky.map(k => {
-        const cislo = "SK-" + String(cisloBase++).padStart(3, "0");
-        const nakup = Math.round(num(k.cena) + n.doprava * num(k.gramaz) / totalG);
-        const skladId = uid();
-        ops.push({ type: "upsert", col: "sklad", rec: { id: skladId, cislo, odstin: k.odstin, delka: k.delka, gramaz: num(k.gramaz), cena_g: cenaZaGram(k.odstin, k.delka), nakup_cena: nakup, stav: "skladem", nakup_id: n.id, poznamka: "" } });
-        return { ...k, cislo, sklad_id: skladId };
-      });
+      if (!lock) {
+        n.polozky = n.polozky.filter(k => num(k.gramaz) > 0);
+        if (!n.polozky.length) { toast("Zadejte aspoň jeden kus s gramáží.", true); return false; }
+        let cisloBase = parseInt(nextCislo().replace(/\D/g, ""), 10);
+        n.polozky = n.polozky.map(k => {
+          const cislo = "SK-" + String(cisloBase++).padStart(3, "0");
+          const skladId = uid();
+          ops.push({ type: "upsert", col: "sklad", rec: { id: skladId, cislo, odstin: k.odstin, delka: k.delka, gramaz: num(k.gramaz), cena_g: cenaZaGram(k.odstin, k.delka), nakup_cena: num(k.cena), stav: "skladem", nakup_id: n.id, poznamka: "" } });
+          return { ...k, cislo, sklad_id: skladId };
+        });
+      }
+      n.celkem = Math.round(n.polozky.reduce((a, k) => a + num(k.cena), 0) + n.doprava);
       ops.unshift({ type: "upsert", col: "nakupy", rec: n });
-      return save(ops, `Nákup uložen, ${n.polozky.length} ks ve skladu`);
-    }, existing ? () => confirm("Smazat záznam o nákupu? Kusy ve skladu zůstanou.") && save([{ type: "delete", col: "nakupy", id: n.id }], "Nákup smazán") : null);
+      if (!await save(ops, lock ? "Nákup upraven" : `Nákup uložen, ${n.polozky.length} ks ve skladu`)) return false;
+      return prepocitatNaklady();
+    }, existing ? async () => {
+      if (!confirm("Smazat záznam o nákupu? Kusy ve skladu zůstanou.")) return false;
+      if (!await save([{ type: "delete", col: "nakupy", id: n.id }], "Nákup smazán")) return false;
+      return prepocitatNaklady();
+    } : null);
 
     const root = $(".sheet");
     function draw() {
@@ -831,12 +894,22 @@
       const doprava = num($("[name=doprava]", root).value);
       const zbozi = n.polozky.reduce((a, k) => a + num(k.cena), 0);
       const g = n.polozky.reduce((a, k) => a + num(k.gramaz), 0);
-      const ceník = n.polozky.reduce((a, k) => a + num(k.gramaz) * cenaZaGram(k.odstin, k.delka), 0);
+      const cenik = n.polozky.reduce((a, k) => a + num(k.gramaz) * cenaZaGram(k.odstin, k.delka), 0);
+      // Podíl cesty: gramáž tohoto nákupu proti ostatním nákupům téže cesty
+      const cId = $("[name=cesta_id]", root).value;
+      const c = state.db.cesty.find(x => x.id === cId);
+      let podil = 0;
+      if (c) {
+        const gOstatni = state.db.nakupy.filter(x => x.cesta_id === cId && x.id !== n.id).reduce((a, x) => a + nakupG(x), 0);
+        podil = g ? cestaCelkem(c) * g / (g + gOstatni) : 0;
+      }
       $("[data-sum]", root).innerHTML = `
         <div><span>Zboží (${n.polozky.length} ks, ${g} g)</span><span class="num">${fmtKc(zbozi)}</span></div>
-        <div><span>Cesta a doprava</span><span class="num">${fmtKc(doprava)}</span></div>
-        <div class="total"><span>Celkem</span><span class="num">${fmtKc(zbozi + doprava)}</span></div>
-        <div><span>Hodnota v ceníku</span><span class="num">${fmtKc(ceník)}</span></div>`;
+        <div><span>Doprava a clo</span><span class="num">${fmtKc(doprava)}</span></div>
+        <div class="total"><span>Zaplaceno za nákup</span><span class="num">${fmtKc(zbozi + doprava)}</span></div>
+        ${c ? `<div><span>Podíl na cestě ${esc(c.nazev)}</span><span class="num">${fmtKc(podil)}</span></div>
+        <div class="firm"><span>Skutečná cena kusů</span><span class="num">${fmtKc(zbozi + doprava + podil)}</span></div>` : ""}
+        <div><span>Hodnota v ceníku</span><span class="num">${fmtKc(cenik)}</span></div>`;
     }
     root.addEventListener("click", e => {
       if (e.target.closest("[data-add]")) { read(); const last = n.polozky[n.polozky.length - 1] || {}; n.polozky.push({ odstin: last.odstin || "tmave", delka: last.delka || S().cenik[0]?.delka, gramaz: "", cena: "" }); draw(); read(); }
@@ -847,6 +920,125 @@
     root.addEventListener("change", read);
     draw();
     read();
+  }
+
+  function cestaForm(existing) {
+    const c = existing ? structuredClone(existing) : { id: uid(), nazev: "", datum_od: today(), datum_do: today(), naklady: [{ druh: "letenky", castka: "", poznamka: "" }], poznamka: "" };
+    const pripojene = new Set(state.db.nakupy.filter(n => n.cesta_id === c.id).map(n => n.id));
+    const kandidati = [...state.db.nakupy].sort((a, b) => b.datum.localeCompare(a.datum)).slice(0, 40);
+    const body = `<div class="f">
+      <label class="field"><span>Název cesty</span><input name="nazev" value="${esc(c.nazev)}" placeholder="např. Kyjev říjen" required></label>
+      <div class="f2">
+        <label class="field"><span>Od</span><input type="date" name="datum_od" value="${esc(c.datum_od)}"></label>
+        <label class="field"><span>Do</span><input type="date" name="datum_do" value="${esc(c.datum_do)}"></label>
+      </div>
+      <div class="field"><span>Náklady</span><div class="items" data-nakl></div>
+        <button type="button" class="btn small" data-add-nakl style="justify-self:start;margin-top:4px">+ Další náklad</button></div>
+      <div class="field"><span>Nákupy z této cesty</span>
+        ${kandidati.length ? `<div class="pick" data-pick>${kandidati.map(n => `<label><input type="checkbox" value="${n.id}" ${pripojene.has(n.id) ? "checked" : ""}>
+          <span class="row-main"><span class="row-title" style="display:block">${esc(n.dodavatel || "Dodavatel neuveden")}</span>
+          <span class="row-sub" style="display:block">${fmtDate(n.datum)} · ${(n.polozky || []).length} ks · ${nakupG(n)} g</span></span>
+          <span class="num" data-podil="${n.id}"></span></label>`).join("")}</div>` : `<p class="small muted">Zatím žádný nákup. Až ho zapíšete, vyberte u něj tuto cestu.</p>`}
+      </div>
+      <div class="split" data-sum></div>
+      <label class="field"><span>Poznámka</span><textarea name="poznamka">${esc(c.poznamka)}</textarea></label>
+    </div>`;
+    openSheet(existing ? c.nazev || "Cesta" : "Nová cesta", body, async () => {
+      read();
+      const fd = new FormData($("#sheet-form"));
+      c.nazev = fd.get("nazev").trim(); c.datum_od = fd.get("datum_od"); c.datum_do = fd.get("datum_do") || c.datum_od; c.poznamka = fd.get("poznamka");
+      c.naklady = c.naklady.filter(x => num(x.castka) > 0);
+      if (!c.nazev) { toast("Doplňte název cesty.", true); return false; }
+      const ops = [{ type: "upsert", col: "cesty", rec: c }];
+      for (const n of state.db.nakupy) {
+        const chce = pripojene.has(n.id);
+        if (chce && n.cesta_id !== c.id) ops.push({ type: "upsert", col: "nakupy", rec: { ...n, cesta_id: c.id } });
+        if (!chce && n.cesta_id === c.id) ops.push({ type: "upsert", col: "nakupy", rec: { ...n, cesta_id: "" } });
+      }
+      if (!await save(ops, "Cesta uložena")) return false;
+      return prepocitatNaklady();
+    }, existing ? async () => {
+      if (!confirm("Smazat cestu? Nákupy zůstanou, jen se od ní odpojí.")) return false;
+      const ops = [{ type: "delete", col: "cesty", id: c.id }];
+      state.db.nakupy.filter(n => n.cesta_id === c.id).forEach(n => ops.push({ type: "upsert", col: "nakupy", rec: { ...n, cesta_id: "" } }));
+      if (!await save(ops, "Cesta smazána")) return false;
+      return prepocitatNaklady();
+    } : null);
+
+    const root = $(".sheet");
+    function draw() {
+      $("[data-nakl]", root).innerHTML = c.naklady.map((x, i) => `<div class="item-row">
+        <label class="field"><span>Druh</span><select name="druh">${opts(DRUHY, x.druh)}</select></label>
+        <label class="field"><span>Částka Kč</span><input name="castka" inputmode="decimal" value="${esc(x.castka)}"></label>
+        <label class="field" style="grid-column:span 2"><span>Poznámka</span><input name="pozn" value="${esc(x.poznamka)}"></label>
+        <button type="button" class="close rm" data-rm="${i}" aria-label="Odebrat náklad">×</button>
+      </div>`).join("");
+    }
+    function read() {
+      $$("[data-nakl] .item-row", root).forEach((row, i) => {
+        c.naklady[i] = { druh: $("[name=druh]", row).value, castka: num($("[name=castka]", row).value) || "", poznamka: $("[name=pozn]", row).value };
+      });
+      const total = cestaCelkem(c);
+      const vybrane = state.db.nakupy.filter(n => pripojene.has(n.id));
+      const g = vybrane.reduce((a, n) => a + nakupG(n), 0);
+      $$("[data-podil]", root).forEach(el => {
+        const n = vybrane.find(x => x.id === el.dataset.podil);
+        el.textContent = n && g ? fmtKc(total * nakupG(n) / g) : "";
+      });
+      const poDruhu = Object.entries(DRUHY).map(([k, v]) => [v, c.naklady.filter(x => x.druh === k).reduce((a, x) => a + num(x.castka), 0)]).filter(([, sum]) => sum);
+      $("[data-sum]", root).innerHTML = `
+        ${poDruhu.map(([v, sum]) => `<div><span>${v}</span><span class="num">${fmtKc(sum)}</span></div>`).join("")}
+        <div class="total"><span>Cesta celkem</span><span class="num">${fmtKc(total)}</span></div>
+        <div><span>${vybrane.length ? `Rozdělí se na ${vybrane.length} ${plural(vybrane.length, "nákup", "nákupy", "nákupů")} (${g} g)` : "Bez nákupu se do ceny kusů zatím nepočítá"}</span>
+        <span class="num">${g ? fmtKc(total / g) + "/g" : ""}</span></div>`;
+    }
+    root.addEventListener("click", e => {
+      if (e.target.closest("[data-add-nakl]")) { read(); c.naklady.push({ druh: "ubytovani", castka: "", poznamka: "" }); draw(); read(); }
+      const rm = e.target.closest("[data-rm]");
+      if (rm) { read(); c.naklady.splice(+rm.dataset.rm, 1); draw(); read(); }
+    });
+    root.addEventListener("change", e => {
+      if (e.target.matches("[data-pick] input")) e.target.checked ? pripojene.add(e.target.value) : pripojene.delete(e.target.value);
+      read();
+    });
+    root.addEventListener("input", read);
+    draw();
+    read();
+  }
+
+  // Výdaj zapsaný ve Financích (letenka, hotel) přesune do cesty, ať se počítá do ceny kusů.
+  function presunDoCesty(f) {
+    const txt = (f.poznamka || "") + " " + (f.kategorie || "");
+    const druh = /ubyt|hotel|airbnb/i.test(txt) ? "ubytovani" : /let|flight|ryanair|wizz/i.test(txt) ? "letenky" : /doprav|vlak|bus|taxi|uber/i.test(txt) ? "doprava" : "ostatni";
+    const body = `<div class="f">
+      <p class="small muted">${fmtDate(f.datum)} · ${esc(f.kategorie)} · <strong class="num">${fmtKc(f.castka)}</strong>${f.poznamka ? " · " + esc(f.poznamka) : ""}</p>
+      <label class="field"><span>Do které cesty</span><select name="cesta"><option value="__nova">Nová cesta</option>${state.db.cesty.map(c => `<option value="${c.id}">${esc(c.nazev)} (${fmtDate(c.datum_od)})</option>`).join("")}</select></label>
+      <label class="field" data-nova><span>Název nové cesty</span><input name="nazev" placeholder="např. Kyjev říjen"></label>
+      <label class="field"><span>Druh nákladu</span><select name="druh">${opts(DRUHY, druh)}</select></label>
+      <p class="small muted">Záznam se z Financí odebere a objeví se v cestě. Pak k cestě připojte nákup.</p>
+    </div>`;
+    openSheet("Přesunout do cesty", body, async () => {
+      const fd = new FormData($("#sheet-form"));
+      const naklad = { druh: fd.get("druh"), castka: num(f.castka), poznamka: f.poznamka || "" };
+      let cesta;
+      if (fd.get("cesta") === "__nova") {
+        if (!fd.get("nazev").trim()) { toast("Doplňte název cesty.", true); return false; }
+        cesta = { id: uid(), nazev: fd.get("nazev").trim(), datum_od: f.datum, datum_do: f.datum, naklady: [naklad], poznamka: "" };
+      } else {
+        const c = state.db.cesty.find(x => x.id === fd.get("cesta"));
+        cesta = { ...c, naklady: [...(c.naklady || []), naklad] };
+      }
+      if (!await save([{ type: "upsert", col: "cesty", rec: cesta }, { type: "delete", col: "finance", id: f.id }], "Přesunuto do cesty " + cesta.nazev)) return false;
+      return prepocitatNaklady();
+    });
+    const root = $(".sheet");
+    const upd = () => $("[data-nova]", root).classList.toggle("hidden", $("[name=cesta]", root).value !== "__nova");
+    root.addEventListener("change", upd);
+    if (state.db.cesty.length) {
+      const nejnovejsi = [...state.db.cesty].sort((a, b) => (b.datum_od || "").localeCompare(a.datum_od || ""))[0];
+      $("[name=cesta]", root).value = nejnovejsi.id;
+    }
+    upd();
   }
 
   // ================================================================
@@ -942,6 +1134,7 @@
     const st = stats(range);
     const list = state.db.finance.filter(f => inRange(f.datum, range)).sort((a, b) => b.datum.localeCompare(a.datum));
     const nakupy = state.db.nakupy.filter(n => inRange(n.datum, range));
+    const cesty = state.db.cesty.filter(c => inRange(c.datum_od || "", range));
     const typLabel = { prijem: "Příjem", vydaj: "Výdaj", vyplata: "Výplata provize" };
     $("#view").innerHTML = `
       <div class="view-head"><h1>Finance</h1><button class="btn" data-new="vyplata">Vyplatit provizi</button><button class="btn primary" data-new="vydaj">+ Záznam</button></div>
@@ -952,15 +1145,17 @@
         ${kpi("Ostatní výdaje", fmtKc(st.vydaje), "bez nákupu vlasů")}
         ${kpi("Peníze firmy", fmtKc(st.kasa), "od začátku")}
       </div>
-      <p class="note info" style="margin-top:14px">Prodeje a nákupy se sem počítají samy. Zapisujte jen ostatní: kurzy, reklamu, poštovné, materiál a výplaty provizí.</p>
+      <p class="note info" style="margin-top:14px">Prodeje, nákupy a cesty se sem počítají samy. Letenky a ubytování patří do Nákupy → Cesty. Sem zapisujte jen ostatní: kurzy, reklamu, materiál a výplaty provizí.</p>
       <section class="card">
         <h2>Záznamy v období</h2>
-        ${list.length || nakupy.length ? `<div class="list">
+        ${list.length || nakupy.length || cesty.length ? `<div class="list">
           ${list.map(f => `<button class="row" data-edit="${f.id}">
             <div class="row-main"><div class="row-title">${f.typ === "vyplata" ? "Provize: " + esc(PEOPLE[f.komu] || "") : esc(f.kategorie || typLabel[f.typ])}</div>
             <div class="row-sub">${fmtDate(f.datum)} · ${typLabel[f.typ]}${f.poznamka ? " · " + esc(f.poznamka) : ""}</div></div>
             <div class="row-end num" style="color:${f.typ === "prijem" ? "var(--ok)" : "inherit"}"><strong>${f.typ === "prijem" ? "+" : "−"}${fmtKc(f.castka)}</strong></div>
           </button>`).join("")}
+          ${cesty.map(c => `<button class="row" data-cesta="${c.id}"><div class="row-main"><div class="row-title">Cesta: ${esc(c.nazev || "")}</div>
+            <div class="row-sub">${fmtDate(c.datum_od)} · ze sekce Nákupy → Cesty</div></div><div class="row-end num">−${fmtKc((c.naklady || []).reduce((a, x) => a + num(x.castka), 0))}</div></button>`).join("")}
           ${nakupy.map(n => `<div class="row"><div class="row-main"><div class="row-title">Nákup vlasů: ${esc(n.dodavatel || "")}</div>
             <div class="row-sub">${fmtDate(n.datum)} · ze sekce Nákupy</div></div><div class="row-end num">−${fmtKc(n.celkem)}</div></div>`).join("")}
         </div>` : `<p class="muted small">Žádné záznamy v období.</p>`}
@@ -968,6 +1163,7 @@
     bindChips("period", v => { state.period = v; render(); });
     $$("[data-new]").forEach(b => b.addEventListener("click", () => finForm(null, b.dataset.new)));
     $$("[data-edit]").forEach(b => b.addEventListener("click", () => finForm(state.db.finance.find(f => f.id === b.dataset.edit))));
+    $$("[data-cesta]").forEach(b => b.addEventListener("click", () => cestaForm(state.db.cesty.find(c => c.id === b.dataset.cesta))));
   }
 
   function finForm(existing, typ) {
@@ -979,9 +1175,11 @@
         <label class="field"><span>Datum</span><input type="date" name="datum" value="${esc(f.datum)}" required></label>
         <label class="field"><span>Částka Kč</span><input name="castka" inputmode="decimal" value="${esc(f.castka)}" required></label>
       </div>
-      <label class="field" data-kat><span>Kategorie</span><select name="kategorie"></select><span class="hint hidden" data-kat-hint>Jen nákup bez kusů do skladu. Když kusy zapisujete do skladu, použijte sekci Nákupy, jinak se náklad započítá dvakrát.</span></label>
+      <label class="field" data-kat><span>Kategorie</span><select name="kategorie"></select><span class="hint hidden" data-kat-hint>Jen vlasy, které nejdou do prodeje (cvičné culíky). Culíky na prodej patří do Nákupy, letenky a ubytování do Nákupy → Cesty.</span></label>
       <label class="field" data-komu><span>Komu</span><select name="komu">${Object.entries(PEOPLE).map(([k, v]) => `<option value="${k}" ${k === f.komu ? "selected" : ""}>${v} (k výplatě ${fmtKc(st.provize[k].celkem - st.provize[k].vyplaceno)})</option>`).join("")}</select></label>
       <label class="field"><span>Poznámka</span><input name="poznamka" value="${esc(f.poznamka)}"></label>
+      ${existing && f.typ === "vydaj" ? `<div class="note info">Je to letenka, ubytování nebo jiný náklad cesty za nákupem? Přesuňte ho do cesty, pak se započítá do ceny culíků.
+        <div style="margin-top:8px"><button type="button" class="btn small" data-presun>Přesunout do cesty</button></div></div>` : ""}
     </div>`;
     openSheet(existing ? "Záznam" : "Nový záznam", body, () => {
       const fd = new FormData($("#sheet-form"));
@@ -989,6 +1187,7 @@
       if (rec.castka <= 0) { toast("Zadejte částku.", true); return false; }
       return save([{ type: "upsert", col: "finance", rec }], "Uloženo");
     }, existing ? () => confirm("Smazat záznam?") && save([{ type: "delete", col: "finance", id: f.id }], "Smazáno") : null);
+    $("[data-presun]")?.addEventListener("click", () => { closeSheet(); presunDoCesty(f); });
     const root = $(".sheet");
     const upd = () => {
       const t = $("[name=typ]:checked", root).value;
@@ -1104,7 +1303,8 @@
       name = `silki-finance-${stamp}.csv`; type = "text/csv";
       content = csv([["Datum", "Typ", "Kategorie / komu", "Částka", "Poznámka"],
         ...db.finance.map(f => [f.datum, f.typ, f.typ === "vyplata" ? PEOPLE[f.komu] : f.kategorie, f.castka, f.poznamka]),
-        ...db.nakupy.map(n => [n.datum, "nákup vlasů", n.dodavatel, n.celkem, n.poznamka])].sort((a, b) => String(a[0]).localeCompare(String(b[0]))));
+        ...db.nakupy.map(n => [n.datum, "nákup vlasů", n.dodavatel, n.celkem, n.poznamka]),
+        ...db.cesty.flatMap(c => (c.naklady || []).map(x => [c.datum_od, "cesta", c.nazev + ": " + (DRUHY[x.druh] || x.druh), x.castka, x.poznamka]))].sort((a, b) => String(a[0]).localeCompare(String(b[0]))));
     } else {
       name = `silki-sklad-${stamp}.csv`; type = "text/csv";
       content = csv([["Číslo", "Odstín", "Délka", "Gramáž", "Kč/g", "Původní cena", "Nákupní cena", "Stav"],

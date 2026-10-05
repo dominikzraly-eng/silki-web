@@ -10,7 +10,7 @@
  */
 import crypto from "node:crypto";
 
-const COLLECTIONS = ["sklad", "prodeje", "nakupy", "zakaznici", "finance"];
+const COLLECTIONS = ["sklad", "prodeje", "nakupy", "cesty", "zakaznici", "finance"];
 const MAX_BODY = 512 * 1024;
 
 export const DEFAULT_SETTINGS = {
@@ -36,6 +36,13 @@ export const DEFAULT_SETTINGS = {
 function emptyDb() {
   const db = { v: 1, nastaveni: structuredClone(DEFAULT_SETTINGS), log: [] };
   for (const c of COLLECTIONS) db[c] = [];
+  return db;
+}
+
+// Starší data nemusí mít novější kolekce (např. cesty)
+function normalize(db) {
+  for (const c of COLLECTIONS) if (!Array.isArray(db[c])) db[c] = [];
+  if (!Array.isArray(db.log)) db.log = [];
   return db;
 }
 
@@ -121,7 +128,7 @@ export async function handle(req, { store, verifyUser }) {
 
   if (req.method === "GET" && route === "data") {
     const cur = await store.get("db");
-    const db = cur?.data || emptyDb();
+    const db = normalize(cur?.data || emptyDb());
     return json(200, { db, user: session.u });
   }
 
@@ -137,7 +144,7 @@ export async function handle(req, { store, verifyUser }) {
     for (let attempt = 0; attempt < 10; attempt++) {
       if (attempt) await new Promise(r => setTimeout(r, 20 + Math.random() * 80 * attempt));
       const cur = await store.get("db");
-      let db = cur?.data || emptyDb();
+      let db = normalize(cur?.data || emptyDb());
       try {
         db = applyOps(db, body.ops, session.u);
       } catch (e) {
