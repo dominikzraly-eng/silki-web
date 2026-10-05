@@ -1,0 +1,11 @@
+{
+  "name": "silki-web",
+  "private": true,
+  "description": "Statický web silkihair.cz. Závislost je jen pro serverovou funkci interního CRM.",
+  "scripts": {
+    "crm-dev": "node tools/crm-dev.mjs"
+  },
+  "dependencies": {
+    "@netlify/blobs": "^11.1.3"
+  }
+}

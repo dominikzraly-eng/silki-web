@@ -159,3 +159,31 @@ Klidně tedy web na Netlify + pošta přes Google Workspace současně.
 - **Fáze 2 administrace**: pokud budete chtít editovat i běžný text na stránkách
   (ne jen produkty a kontakty), řeší se to přestavbou webu na statický generátor
   (šablony) — větší úprava, klidně to připravím, až budete chtít.
+
+---
+
+## Interní CRM (`/admin/crm/`)
+
+Prodeje, sklad, nákupy, zákazníci a salony, finance a provize. Data **nejsou v GitHubu**
+(repo je veřejné), leží v Netlify Blobs a čte je jen serverová funkce
+`netlify/functions/crm/` po přihlášení.
+
+**Jednorázové nastavení v Netlify → Site configuration → Environment variables:**
+
+| Proměnná | Hodnota |
+|---|---|
+| `CRM_USERS` | `dominik:HESLO;tereza:HESLO;marketa:HESLO` (každé heslo aspoň 8 znaků) |
+| `CRM_SECRET` | dlouhý náhodný řetězec, aspoň 16 znaků |
+
+Pak **Deploys → Trigger deploy**. Změna hesla = upravit `CRM_USERS` a znovu nasadit.
+Změna `CRM_SECRET` odhlásí všechny.
+
+**Pravidla výpočtu** (měnit jdou v CRM → Nastavení):
+- provize prodejce z původní ceníkové ceny: 20 % koncová zákaznice, 10 % kadeřnice a salon
+- Dominik 5 % z každého culíku navíc
+- kadeřnice a salon: vyšší z partnerské slevy a slevy za množství (2+ ks 15 %, 5+ ks 20 %), strop 20 %
+- zbytek jde firmě, zisk = zbytek minus nákupní cena kusů
+
+**Zálohy:** server ukládá jednu zálohu denně, v Nastavení je export JSON a CSV.
+
+**Lokální test:** `node tools/crm-dev.mjs` → http://localhost:4630/admin/crm/ (data v `.crm-dev-data/`).
