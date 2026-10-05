@@ -63,3 +63,14 @@
     X-Robots-Tag = "noindex, nofollow"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Interní CRM: jen vlastní skripty a jen vlastní API. Když platí i pravidlo /admin/*,
+# prohlížeč uplatní obě politiky naráz, takže výsledek je vždy ta přísnější.
+[[headers]]
+  for = "/admin/crm/*"
+
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; base-uri 'none'; frame-ancestors 'none'; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; form-action 'none'"
+    X-Robots-Tag = "noindex, nofollow"
+    Referrer-Policy = "no-referrer"
+    Cache-Control = "no-store"
