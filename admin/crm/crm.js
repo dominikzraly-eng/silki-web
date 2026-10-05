@@ -14,7 +14,7 @@
   const PRODEJ_STAV = { rezervace: "Rezervace", zaplaceno: "Zaplaceno", storno: "Storno" };
   const PLATBY = { prevod: "Převod", hotove: "Hotově", karta: "Karta" };
   const ZAK_STAV = { lead: "Lead", aktivni: "Aktivní", neaktivni: "Neaktivní" };
-  const KAT_VYDAJ = ["Reklama", "Doprava a poštovné", "Materiál a pomůcky", "Kurzy", "Poplatky", "Ostatní"];
+  const KAT_VYDAJ = ["Nákup vlasů", "Reklama", "Doprava a poštovné", "Materiál a pomůcky", "Kurzy", "Poplatky", "Ostatní"];
   const KAT_PRIJEM = ["Kurzy", "Ostatní"];
 
   const $ = (sel, el = document) => el.querySelector(sel);
@@ -954,7 +954,7 @@
         <label class="field"><span>Datum</span><input type="date" name="datum" value="${esc(f.datum)}" required></label>
         <label class="field"><span>Částka Kč</span><input name="castka" inputmode="decimal" value="${esc(f.castka)}" required></label>
       </div>
-      <label class="field" data-kat><span>Kategorie</span><select name="kategorie"></select></label>
+      <label class="field" data-kat><span>Kategorie</span><select name="kategorie"></select><span class="hint hidden" data-kat-hint>Jen nákup bez kusů do skladu. Když kusy zapisujete do skladu, použijte sekci Nákupy, jinak se náklad započítá dvakrát.</span></label>
       <label class="field" data-komu><span>Komu</span><select name="komu">${Object.entries(PEOPLE).map(([k, v]) => `<option value="${k}" ${k === f.komu ? "selected" : ""}>${v} (k výplatě ${fmtKc(st.provize[k].celkem - st.provize[k].vyplaceno)})</option>`).join("")}</select></label>
       <label class="field"><span>Poznámka</span><input name="poznamka" value="${esc(f.poznamka)}"></label>
     </div>`;
@@ -973,6 +973,7 @@
       const cur = sel.value || f.kategorie;
       const kats = t === "prijem" ? KAT_PRIJEM : KAT_VYDAJ;
       sel.innerHTML = kats.map(k => `<option ${k === cur ? "selected" : ""}>${k}</option>`).join("");
+      $("[data-kat-hint]", root).classList.toggle("hidden", t !== "vydaj" || sel.value !== "Nákup vlasů");
       if (t === "vyplata" && !existing && !$("[name=castka]", root).value) {
         const k = $("[name=komu]", root).value;
         const dluh = st.provize[k].celkem - st.provize[k].vyplaceno;
