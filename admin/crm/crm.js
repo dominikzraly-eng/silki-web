@@ -736,7 +736,7 @@
         ${kpi("Letos nakoupeno", fmtKc(letos.reduce((a, n) => a + num(n.celkem), 0)), letos.length + " " + plural(letos.length, "nákup", "nákupy", "nákupů"))}
         ${kpi("Kusů letos", letos.reduce((a, n) => a + (n.polozky || []).length, 0) + " ks", "")}
       </div>
-      <p class="note info" style="margin-top:14px">Nákup zapíše kusy rovnou do skladu i s nákupní cenou. Doprava a clo se rozpočítají na kusy podle gramáže.</p>
+      <p class="note info" style="margin-top:14px">Nákup zapíše kusy rovnou do skladu i s nákupní cenou. Cesta (letenky, ubytování), doprava a clo se rozpočítají na kusy podle gramáže.</p>
       ${list.length ? `<div class="list boxed">${list.map(n => `
         <button class="row" data-edit="${n.id}">
           <div class="row-main"><div class="row-title">${esc(n.dodavatel || "Dodavatel neuveden")}</div>
@@ -755,7 +755,8 @@
         <label class="field"><span>Datum</span><input type="date" name="datum" value="${esc(n.datum)}" required></label>
         <label class="field"><span>Dodavatel</span><input name="dodavatel" value="${esc(n.dodavatel)}"></label>
       </div>
-      <label class="field"><span>Doprava, clo, poplatky Kč</span><input name="doprava" inputmode="decimal" value="${n.doprava || ""}" ${lock ? "disabled" : ""}></label>
+      <label class="field"><span>Cesta a doprava Kč</span><input name="doprava" inputmode="decimal" value="${n.doprava || ""}">
+        <span class="hint">Letenky, ubytování, cesta, poštovné, clo. Rozpočítá se do nákupní ceny kusů podle gramáže. Jde doplnit i později.</span></label>
       <div class="field"><span>Kusy</span>
         ${lock ? `<p class="small muted">Kusy jsou už ve skladu, upravují se tam.</p>` : ""}
         <div class="items" data-items></div>
@@ -768,7 +769,31 @@
       read();
       const fd = new FormData($("#sheet-form"));
       n.datum = fd.get("datum"); n.dodavatel = fd.get("dodavatel"); n.poznamka = fd.get("poznamka");
-      if (lock) return save([{ type: "upsert", col: "nakupy", rec: n }], "Nákup upraven");
+      if (lock) {
+        // Změna nákladů cesty se přepočítá do nákupní ceny kusů i do už uložených prodejů
+        const doprava = num(fd.get("doprava"));
+        const ops = [];
+        if (doprava !== num(n.doprava)) {
+          const totalG = n.polozky.reduce((a, k) => a + num(k.gramaz), 0) || 1;
+          const nove = {};
+          for (const k of n.polozky) {
+            if (!k.sklad_id) continue;
+            nove[k.sklad_id] = Math.round(num(k.cena) + doprava * num(k.gramaz) / totalG);
+            const kus = state.db.sklad.find(x => x.id === k.sklad_id);
+            if (kus) ops.push({ type: "upsert", col: "sklad", rec: { ...kus, nakup_cena: nove[k.sklad_id] } });
+          }
+          for (const p of state.db.prodeje) {
+            if (!(p.polozky || []).some(k => k.sklad_id in nove)) continue;
+            const polozky = p.polozky.map(k => k.sklad_id in nove ? { ...k, nakup_cena: nove[k.sklad_id] } : k);
+            const naklad = polozky.reduce((a, k) => a + num(k.nakup_cena), 0);
+            ops.push({ type: "upsert", col: "prodeje", rec: { ...p, polozky, split: { ...p.split, naklad, zisk: num(p.split?.firma) - naklad } } });
+          }
+          n.doprava = doprava;
+          n.celkem = Math.round(n.polozky.reduce((a, k) => a + num(k.cena), 0) + doprava);
+        }
+        ops.unshift({ type: "upsert", col: "nakupy", rec: n });
+        return save(ops, ops.length > 1 ? "Nákup upraven, ceny kusů přepočítány" : "Nákup upraven");
+      }
       n.polozky = n.polozky.filter(k => num(k.gramaz) > 0);
       if (!n.polozky.length) { toast("Zadejte aspoň jeden kus s gramáží.", true); return false; }
       n.doprava = num(fd.get("doprava"));
@@ -803,13 +828,13 @@
           n.polozky[i] = { odstin: $("[name=odstin]", row).value, delka: $("[name=delka]", row).value, gramaz: $("[name=gramaz]", row).value, cena: $("[name=cena]", row).value };
         });
       }
-      const doprava = lock ? num(n.doprava) : num($("[name=doprava]", root).value);
+      const doprava = num($("[name=doprava]", root).value);
       const zbozi = n.polozky.reduce((a, k) => a + num(k.cena), 0);
       const g = n.polozky.reduce((a, k) => a + num(k.gramaz), 0);
       const ceník = n.polozky.reduce((a, k) => a + num(k.gramaz) * cenaZaGram(k.odstin, k.delka), 0);
       $("[data-sum]", root).innerHTML = `
         <div><span>Zboží (${n.polozky.length} ks, ${g} g)</span><span class="num">${fmtKc(zbozi)}</span></div>
-        <div><span>Doprava a poplatky</span><span class="num">${fmtKc(doprava)}</span></div>
+        <div><span>Cesta a doprava</span><span class="num">${fmtKc(doprava)}</span></div>
         <div class="total"><span>Celkem</span><span class="num">${fmtKc(zbozi + doprava)}</span></div>
         <div><span>Hodnota v ceníku</span><span class="num">${fmtKc(ceník)}</span></div>`;
     }
