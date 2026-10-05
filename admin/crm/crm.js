@@ -36,6 +36,7 @@
     prehled: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
     prodeje: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg>',
     sklad: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg>',
+    zpravy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M8 10h8M8 14h5"/></svg>',
     zakaznici: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M17 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-4-6.3"/></svg>',
     nakupy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h2l2.4 12.2a2 2 0 0 0 2 1.8h8.2a2 2 0 0 0 2-1.6L21 8H6"/><circle cx="10" cy="21" r="1"/><circle cx="18" cy="21" r="1"/></svg>',
     finance: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg>',
@@ -74,7 +75,7 @@
   }
 
   function normDb(db) {
-    for (const c of ["sklad", "prodeje", "nakupy", "cesty", "zakaznici", "finance"]) if (!Array.isArray(db[c])) db[c] = [];
+    for (const c of ["sklad", "prodeje", "nakupy", "cesty", "zakaznici", "finance", "zpravy"]) if (!Array.isArray(db[c])) db[c] = [];
     return db;
   }
 
@@ -237,7 +238,8 @@
     ["prehled", "Přehled", ""],
     ["prodeje", "Prodeje", ""],
     ["sklad", "Sklad", ""],
-    ["zakaznici", "Zákazníci", ""],
+    ["zpravy", "Zprávy", ""],
+    ["zakaznici", "Zákazníci", "desk-only"],
     ["nakupy", "Nákupy", "desk-only"],
     ["finance", "Finance", "desk-only"],
     ["nastaveni", "Nastavení", "desk-only"],
@@ -275,13 +277,13 @@
 
   function render() {
     if (!state.db) return;
-    const moreViews = ["nakupy", "finance", "nastaveni", "vice"];
+    const moreViews = ["nakupy", "finance", "nastaveni", "vice", "zakaznici"];
     $$(".nav [data-view]").forEach(b => {
       const active = b.dataset.view === state.view || (b.dataset.view === "vice" && moreViews.includes(state.view) && window.innerWidth < 900);
       b.toggleAttribute("aria-current", false);
       if (active) b.setAttribute("aria-current", "page");
     });
-    const views = { prehled: viewPrehled, prodeje: viewProdeje, sklad: viewSklad, zakaznici: viewZakaznici, nakupy: viewNakupy, finance: viewFinance, nastaveni: viewNastaveni, vice: viewVice };
+    const views = { prehled: viewPrehled, prodeje: viewProdeje, sklad: viewSklad, zakaznici: viewZakaznici, zpravy: viewZpravy, nakupy: viewNakupy, finance: viewFinance, nastaveni: viewNastaveni, vice: viewVice };
     (views[state.view] || viewPrehled)();
   }
 
@@ -1294,11 +1296,62 @@
   // ================================================================
   // 12. Více (mobil) a Nastavení
   // ================================================================
+  const ZPRAVA_STAV = { nova: "Čeká na zapsání", zapsano: "Zapsáno", doplnit: "Potřeba doplnit" };
+  const kdo = u => u === "claude" ? "Claude" : PEOPLE[u] || u || "";
+
+  function viewZpravy() {
+    const list = [...state.db.zpravy].sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
+    const ceka = list.filter(z => z.stav === "nova").length;
+    const doplnit = list.filter(z => z.stav === "doplnit").length;
+    $("#view").innerHTML = `
+      <div class="view-head"><h1>Zprávy</h1></div>
+      <form class="card" id="zprava-form">
+        <label class="field"><span>Co se stalo</span>
+          <textarea name="text" rows="4" required placeholder="např. Terka včera prodala 2 culíky z várky od Turka kadeřnici Janě, 120 g a 95 g, platila převodem"></textarea>
+          <span class="hint">Pište volně jako do chatu: prodeje, platby, půjčky, provize, nákupy. Jméno a čas se uloží samy. Jednou týdně to Claude zapíše do CRM a ke zprávě připíše, co udělal.</span></label>
+        <button class="btn primary" type="submit" style="margin-top:10px">Odeslat</button>
+      </form>
+      ${ceka || doplnit ? `<p class="note info" style="margin-top:14px">${ceka ? `${ceka} ${plural(ceka, "zpráva čeká", "zprávy čekají", "zpráv čeká")} na zapsání.` : ""} ${doplnit ? `${doplnit} ${plural(doplnit, "zpráva potřebuje", "zprávy potřebují", "zpráv potřebuje")} doplnit.` : ""}</p>` : ""}
+      ${list.length ? `<div class="list boxed" style="margin-top:14px">${list.map(z => `
+        <div class="row" style="align-items:flex-start">
+          <div class="row-main">
+            <div class="row-sub">${esc(kdo(z.createdBy))} · ${z.createdAt ? new Date(z.createdAt).toLocaleString("cs-CZ", { day: "numeric", month: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" }) : ""}</div>
+            <div style="white-space:pre-wrap;margin-top:2px">${esc(z.text)}</div>
+            ${z.odpoved ? `<div class="small" style="margin-top:6px;padding:8px 10px;border-radius:8px;background:var(--cream-2);white-space:pre-wrap"><strong>Claude:</strong> ${esc(z.odpoved)}</div>` : ""}
+          </div>
+          <div class="row-end" style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+            <span class="badge ${z.stav === "zapsano" ? "ok" : z.stav === "doplnit" ? "warn" : ""}">${ZPRAVA_STAV[z.stav] || ""}</span>
+            ${z.stav !== "zapsano" && z.createdBy === state.user ? `<button class="link small" data-edit-zprava="${z.id}">Upravit</button>` : ""}
+          </div>
+        </div>`).join("")}</div>` : `<p class="empty">Zatím žádná zpráva.</p>`}`;
+    $("#zprava-form").addEventListener("submit", async e => {
+      e.preventDefault();
+      const text = new FormData(e.target).get("text").trim();
+      if (!text) return;
+      $("button[type=submit]", e.target).disabled = true;
+      await save([{ type: "upsert", col: "zpravy", rec: { id: uid(), text, stav: "nova", odpoved: "" } }], "Zpráva uložena");
+    });
+    $$("[data-edit-zprava]").forEach(b => b.addEventListener("click", () => zpravaForm(state.db.zpravy.find(z => z.id === b.dataset.editZprava))));
+  }
+
+  function zpravaForm(z) {
+    const body = `<div class="f">
+      ${z.odpoved ? `<p class="note info">${esc(z.odpoved)}</p>` : ""}
+      <label class="field"><span>Text zprávy</span><textarea name="text" rows="6">${esc(z.text)}</textarea>
+        <span class="hint">Po úpravě se zpráva znovu zařadí k zapsání.</span></label>
+    </div>`;
+    openSheet("Upravit zprávu", body, () => {
+      const text = new FormData($("#sheet-form")).get("text").trim();
+      if (!text) { toast("Zpráva je prázdná.", true); return false; }
+      return save([{ type: "upsert", col: "zpravy", rec: { ...z, text, stav: "nova" } }], "Zpráva upravena");
+    }, () => confirm("Smazat zprávu?") && save([{ type: "delete", col: "zpravy", id: z.id }], "Zpráva smazána"));
+  }
+
   function viewVice() {
     $("#view").innerHTML = `
       <div class="view-head"><h1>Více</h1></div>
       <div class="list boxed">
-        ${[["nakupy", "Nákupy", "Nákupy vlasů a jejich náklady"], ["finance", "Finance", "Příjmy, výdaje, výplaty provizí"], ["nastaveni", "Nastavení", "Provize, slevy, ceník, export"]].map(([k, t, s]) => `
+        ${[["zakaznici", "Zákazníci", "Kadeřnice, salony, zákaznice"], ["nakupy", "Nákupy", "Nákupy vlasů a jejich náklady"], ["finance", "Finance", "Příjmy, výdaje, výplaty provizí"], ["nastaveni", "Nastavení", "Provize, slevy, ceník, export"]].map(([k, t, s]) => `
           <button class="row" data-go="${k}"><span style="width:22px;color:var(--gold-deep)">${ICONS[k]}</span>
           <div class="row-main"><div class="row-title">${t}</div><div class="row-sub">${s}</div></div><span aria-hidden="true">›</span></button>`).join("")}
       </div>`;

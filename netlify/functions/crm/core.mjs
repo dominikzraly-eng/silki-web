@@ -10,7 +10,7 @@
  */
 import crypto from "node:crypto";
 
-const COLLECTIONS = ["sklad", "prodeje", "nakupy", "cesty", "zakaznici", "finance"];
+const COLLECTIONS = ["sklad", "prodeje", "nakupy", "cesty", "zakaznici", "finance", "zpravy"];
 const MAX_BODY = 512 * 1024;
 const AGENT_PREFIX = "sck_";
 const AGENT_USER = "claude";
