@@ -1,6 +1,8 @@
 // Lokální test CRM bez Netlify: statický web + /api/crm s daty v souboru .crm-dev-data/.
 // Spuštění: node tools/crm-dev.mjs  →  http://localhost:4630/admin/crm/
-// Testovací hesla jsou jen pro lokální běh (heslo1234 pro všechny tři).
+// Přihlášení se simuluje: v konzoli prohlížeče
+//   localStorage.setItem("decap-cms-user", JSON.stringify({ token: "dev-dominik" }))
+// (místo dominik jde tereza nebo marketa).
 import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
@@ -13,10 +15,7 @@ const dataDir = path.join(root, ".crm-dev-data");
 fs.mkdirSync(dataDir, { recursive: true });
 const PORT = Number(process.env.PORT || 4630);
 
-const env = {
-  CRM_USERS: process.env.CRM_USERS || "dominik:heslo1234;tereza:heslo1234;marketa:heslo1234",
-  CRM_SECRET: process.env.CRM_SECRET || "lokalni-tajny-klic-jen-pro-test"
-};
+const verifyUser = async token => (/^dev-(dominik|tereza|marketa)$/.exec(token) || [])[1] || null;
 
 const file = key => path.join(dataDir, key.replace(/[^a-z0-9-]/gi, "_") + ".json");
 const store = {
@@ -43,7 +42,7 @@ http.createServer(async (req, res) => {
     for await (const c of req) chunks.push(c);
     const body = chunks.length ? Buffer.concat(chunks) : undefined;
     const request = new Request(url, { method: req.method, headers: req.headers, body: req.method === "GET" ? undefined : body });
-    const r = await handle(request, { store, env, ip: req.socket.remoteAddress });
+    const r = await handle(request, { store, verifyUser });
     res.writeHead(r.status, Object.fromEntries(r.headers));
     res.end(await r.text());
     return;

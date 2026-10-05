@@ -62,20 +62,6 @@ h1, h2, h3 { font-weight: 600; line-height: 1.2; }
 .brand { font-family: var(--font-display); font-size: 30px; letter-spacing: .02em; }
 .brand small { font-family: var(--font); font-size: 13px; color: var(--ink-2); letter-spacing: 0; margin-left: 6px; }
 .login-card .brand { margin-bottom: 18px; }
-.who { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 6px 0 16px; }
-.who label {
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 12px 6px;
-  text-align: center;
-  cursor: pointer;
-  background: var(--cream);
-  font-weight: 500;
-}
-.who input { position: absolute; opacity: 0; pointer-events: none; }
-.who input:checked + span { color: var(--ivory); }
-.who label:has(input:checked) { background: var(--ink); border-color: var(--ink); color: var(--ivory); }
-.who label:has(input:focus-visible) { outline: 2px solid var(--gold-deep); outline-offset: 2px; }
 
 /* ---------- Rozvržení ---------- */
 .shell { min-height: 100vh; padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 16px); }

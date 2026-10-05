@@ -46,13 +46,18 @@
   // 2. Stav a komunikace se serverem
   // ================================================================
   const state = {
-    token: ls.get("crm_token"),
-    user: ls.get("crm_user"),
+    token: decapToken(),
+    user: null,
     db: null,
     view: ls.get("crm_view") || "prehled",
     period: "mesic",
     filters: { prodeje: "vse", sklad: "skladem", zakaznici: "vse", q: "" }
   };
+
+  // Přihlášení se přebírá z administrace (Decap CMS ho ukládá na stejné doméně).
+  function decapToken() {
+    try { return JSON.parse(localStorage.getItem("decap-cms-user") || "null")?.token || null; } catch { return null; }
+  }
 
   async function api(path, opts = {}) {
     const res = await fetch("/api/crm/" + path, {
@@ -62,7 +67,7 @@
     });
     let data = {};
     try { data = await res.json(); } catch { /* prázdná odpověď */ }
-    if (res.status === 401 && path !== "login") { logout(); throw new Error(data.error || "Přihlaste se znovu."); }
+    if (res.status === 401) { state.db = null; renderLogin(state.token ? "Přihlášení z administrace vypršelo nebo nemá přístup k webu." : ""); throw new Error(data.error || "Nejste přihlášeni."); }
     if (!res.ok) throw new Error(data.error || "Chyba serveru (" + res.status + ")");
     return data;
   }
@@ -91,18 +96,13 @@
       const r = await api("data");
       state.db = r.db;
       state.user = r.user;
+      const me = $(".me"); if (me) me.textContent = PEOPLE[r.user] || r.user;
       setSync("");
       render();
     } catch (e) {
       setSync("err");
-      if (state.token) toast(e.message, true);
+      if (state.db) toast(e.message, true);
     }
-  }
-
-  function logout() {
-    state.token = null; state.user = null; state.db = null;
-    ls.del("crm_token"); ls.del("crm_user");
-    renderLogin();
   }
 
   let toastTimer;
@@ -207,36 +207,19 @@
   // 4. Přihlášení
   // ================================================================
   function renderLogin(err) {
-    const last = ls.get("crm_last_user") || "";
     $("#app").innerHTML = `
       <main class="login">
-        <form class="login-card" id="login-form">
+        <div class="login-card">
           <div class="brand">Silki <small>interní CRM</small></div>
-          <fieldset>
-            <legend>Kdo jste</legend>
-            <div class="who">
-              ${Object.entries(PEOPLE).map(([k, v]) => `<label><input type="radio" name="user" value="${k}" ${k === last ? "checked" : ""} required><span>${v}</span></label>`).join("")}
-            </div>
-          </fieldset>
-          <label class="field"><span>Heslo</span><input type="password" name="password" autocomplete="current-password" required></label>
-          ${err ? `<p class="note" style="margin:12px 0 0">${esc(err)}</p>` : ""}
-          <button class="btn primary block" style="margin-top:16px" type="submit">Přihlásit</button>
-        </form>
+          <p style="margin-bottom:16px">CRM používá stejné přihlášení jako administrace webu. Přihlaste se tam přes GitHub a vraťte se sem tlačítkem CRM.</p>
+          ${err ? `<p class="note">${esc(err)}</p>` : ""}
+          <a class="btn primary block" href="/admin/" style="text-decoration:none">Přihlásit v administraci</a>
+          <button class="btn block" style="margin-top:8px" id="retry">Už jsem přihlášený, zkusit znovu</button>
+        </div>
       </main>`;
-    $("#login-form").addEventListener("submit", async e => {
-      e.preventDefault();
-      const fd = new FormData(e.target);
-      const btn = $("button[type=submit]", e.target);
-      btn.disabled = true;
-      try {
-        const r = await api("login", { method: "POST", body: { user: fd.get("user"), password: fd.get("password") } });
-        state.token = r.token; state.user = r.user;
-        ls.set("crm_token", r.token); ls.set("crm_user", r.user); ls.set("crm_last_user", r.user);
-        renderShell();
-        load();
-      } catch (ex) {
-        renderLogin(ex.message);
-      }
+    $("#retry").addEventListener("click", () => {
+      state.token = decapToken();
+      if (state.token) { renderShell(); load(); } else renderLogin("V tomto prohlížeči zatím nejste v administraci přihlášeni.");
     });
   }
 
@@ -261,15 +244,14 @@
           <div class="brand">Silki</div>
           <span class="sync busy" title="Stav ukládání"></span>
           <div class="spacer"></div>
-          <span class="me">${esc(PEOPLE[state.user] || "")}</span>
-          <button class="btn small" id="logout">Odhlásit</button>
+          <span class="me"></span>
+          <a class="btn small" href="/admin/" style="text-decoration:none">Administrace</a>
         </header>
         <nav class="nav" aria-label="Sekce">
           ${NAV.map(([k, label, cls]) => `<button data-view="${k}" class="${cls}">${ICONS[k]}<span>${label}</span></button>`).join("")}
         </nav>
         <main class="main" id="view"><p class="empty">Načítám…</p></main>
       </div>`;
-    $("#logout").addEventListener("click", logout);
     $(".nav").addEventListener("click", e => {
       const b = e.target.closest("[data-view]");
       if (b) go(b.dataset.view);
@@ -1159,7 +1141,7 @@
 
   // Po návratu do záložky načíst čerstvá data (ostatní mezitím mohli něco zapsat)
   document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible" && state.token && !$(".sheet")) load();
+    if (document.visibilityState === "visible" && state.db && !$(".sheet")) { state.token = decapToken() || state.token; load(); }
   });
 
   // ================================================================

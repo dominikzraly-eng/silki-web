@@ -168,15 +168,11 @@ Prodeje, sklad, nákupy, zákazníci a salony, finance a provize. Data **nejsou 
 (repo je veřejné), leží v Netlify Blobs a čte je jen serverová funkce
 `netlify/functions/crm/` po přihlášení.
 
-**Jednorázové nastavení v Netlify → Site configuration → Environment variables:**
-
-| Proměnná | Hodnota |
-|---|---|
-| `CRM_USERS` | `dominik:HESLO;tereza:HESLO;marketa:HESLO` (každé heslo aspoň 8 znaků) |
-| `CRM_SECRET` | dlouhý náhodný řetězec, aspoň 16 znaků |
-
-Pak **Deploys → Trigger deploy**. Změna hesla = upravit `CRM_USERS` a znovu nasadit.
-Změna `CRM_SECRET` odhlásí všechny.
+**Přihlášení:** žádné zvláštní. CRM převezme GitHub přihlášení z `/admin`.
+Přístup má každý, kdo smí zapisovat do repa `dominikzraly-eng/silki-web`
+(= může upravovat web). Nového člověka přidáte jako collaboratora na GitHubu.
+Jména pro provize se párují podle GitHub účtu v `netlify/functions/crm/crm.mjs`
+(`GITHUB_USERS`). Markéta zatím namapovaná není, protože nemá GitHub účet v repu.
 
 **Pravidla výpočtu** (měnit jdou v CRM → Nastavení):
 - provize prodejce z původní ceníkové ceny: 20 % koncová zákaznice, 10 % kadeřnice a salon
@@ -186,4 +182,4 @@ Změna `CRM_SECRET` odhlásí všechny.
 
 **Zálohy:** server ukládá jednu zálohu denně, v Nastavení je export JSON a CSV.
 
-**Lokální test:** `node tools/crm-dev.mjs` → http://localhost:4630/admin/crm/ (data v `.crm-dev-data/`).
+**Lokální test:** `node tools/crm-dev.mjs` → http://localhost:4630/admin/crm/ (data v `.crm-dev-data/`, přihlášení simuluje návod v hlavičce skriptu).

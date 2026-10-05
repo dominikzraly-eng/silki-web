@@ -1,10 +1,9 @@
 /*
  * Interní CRM Silki: API logika nezávislá na úložišti.
- * Netlify vstup je v crm.mjs (Netlify Blobs), lokální test v tools/crm-dev.mjs (soubor).
+ * Netlify vstup je v crm.mjs (Netlify Blobs + ověření přes GitHub), lokální test v tools/crm-dev.mjs.
  *
- * Proměnné prostředí (Netlify → Site configuration → Environment variables):
- *   CRM_USERS   dominik:heslo1;tereza:heslo2;marketa:heslo3
- *   CRM_SECRET  libovolný dlouhý náhodný řetězec (podepisuje přihlášení)
+ * Přihlášení se nezadává zvlášť: CRM převezme GitHub přihlášení z administrace (/admin).
+ * Kdo má do repozitáře webu právo zápisu (může upravovat web), má přístup i do CRM.
  *
  * Data leží v jednom JSON dokumentu "db". Zápis jde přes podmíněný zápis
  * (etag), takže dva lidé ukládající ve stejnou chvíli si nepřepíšou změny.
@@ -12,11 +11,7 @@
 import crypto from "node:crypto";
 
 const COLLECTIONS = ["sklad", "prodeje", "nakupy", "zakaznici", "finance"];
-const USERS = ["dominik", "tereza", "marketa"];
-const TOKEN_DAYS = 30;
 const MAX_BODY = 512 * 1024;
-const LOGIN_LIMIT = 8;            // pokusů
-const LOGIN_WINDOW = 15 * 60e3;   // za 15 minut
 
 export const DEFAULT_SETTINGS = {
   provize: { zakaznice: 20, kadernik: 10, dominik: 5 },
@@ -54,49 +49,6 @@ function json(status, data, extra = {}) {
       ...extra
     }
   });
-}
-
-function b64url(buf) {
-  return Buffer.from(buf).toString("base64url");
-}
-
-function safeEqual(a, b) {
-  const ha = crypto.createHash("sha256").update(String(a)).digest();
-  const hb = crypto.createHash("sha256").update(String(b)).digest();
-  return crypto.timingSafeEqual(ha, hb);
-}
-
-function parseUsers(env) {
-  const out = {};
-  for (const pair of String(env.CRM_USERS || "").split(";")) {
-    const i = pair.indexOf(":");
-    if (i < 1) continue;
-    const name = pair.slice(0, i).trim().toLowerCase();
-    const pw = pair.slice(i + 1).trim();
-    if (USERS.includes(name) && pw.length >= 8) out[name] = pw;
-  }
-  return out;
-}
-
-function sign(payload, secret) {
-  const body = b64url(JSON.stringify(payload));
-  const mac = b64url(crypto.createHmac("sha256", secret).update(body).digest());
-  return body + "." + mac;
-}
-
-function verify(token, secret) {
-  if (!token || typeof token !== "string") return null;
-  const [body, mac] = token.split(".");
-  if (!body || !mac) return null;
-  const expect = b64url(crypto.createHmac("sha256", secret).update(body).digest());
-  if (!safeEqual(mac, expect)) return null;
-  try {
-    const p = JSON.parse(Buffer.from(body, "base64url").toString());
-    if (!USERS.includes(p.u) || typeof p.exp !== "number" || p.exp < Date.now()) return null;
-    return p;
-  } catch {
-    return null;
-  }
 }
 
 // Ořízne řetězce a zahodí nečekané typy, ať do DB nejde nic divného.
@@ -155,40 +107,17 @@ function applyOps(db, ops, user) {
 }
 
 /*
- * store: { get(key) -> {data, etag} | null, set(key, data, etag?) -> boolean (false = konflikt) }
+ * store:      { get(key) -> {data, etag} | null, set(key, data, etag?) -> boolean (false = konflikt) }
+ * verifyUser: async (token) -> jméno uživatele | null
  */
-export async function handle(req, { store, env, ip }) {
+export async function handle(req, { store, verifyUser }) {
   const url = new URL(req.url);
   const route = url.pathname.replace(/^\/api\/crm\/?/, "");
-  const users = parseUsers(env);
-  const secret = env.CRM_SECRET || "";
 
-  if (!Object.keys(users).length || secret.length < 16) {
-    return json(503, { error: "CRM není nastavené: chybí CRM_USERS nebo CRM_SECRET (min. 16 znaků) v Netlify." });
-  }
-
-  if (req.method === "POST" && route === "login") {
-    const rlKey = "rl/" + crypto.createHash("sha256").update(ip || "?").digest("hex").slice(0, 24);
-    const rl = (await store.get(rlKey))?.data || { n: 0, t: Date.now() };
-    if (Date.now() - rl.t > LOGIN_WINDOW) { rl.n = 0; rl.t = Date.now(); }
-    if (rl.n >= LOGIN_LIMIT) return json(429, { error: "Příliš mnoho pokusů. Zkuste to za 15 minut." });
-
-    let body;
-    try { body = JSON.parse(await req.text()); } catch { body = {}; }
-    const name = String(body.user || "").toLowerCase();
-    const ok = users[name] && safeEqual(body.password || "", users[name]);
-    if (!ok) {
-      rl.n++;
-      await store.set(rlKey, rl);
-      return json(401, { error: "Špatné jméno nebo heslo." });
-    }
-    const token = sign({ u: name, exp: Date.now() + TOKEN_DAYS * 864e5 }, secret);
-    return json(200, { token, user: name });
-  }
-
-  const auth = req.headers.get("authorization") || "";
-  const session = verify(auth.replace(/^Bearer\s+/i, ""), secret);
-  if (!session) return json(401, { error: "Přihlášení vypršelo." });
+  const token = (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "").trim();
+  const user = token ? await verifyUser(token) : null;
+  if (!user) return json(401, { error: "Nejste přihlášeni v administraci." });
+  const session = { u: user };
 
   if (req.method === "GET" && route === "data") {
     const cur = await store.get("db");
