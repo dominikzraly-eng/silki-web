@@ -21,6 +21,7 @@
   const $$ = (sel, el = document) => Array.from(el.querySelectorAll(sel));
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const fmtKc = n => new Intl.NumberFormat("cs-CZ", { maximumFractionDigits: 0 }).format(Math.round(n || 0)) + " Kč";
+  const fmtKcG = n => new Intl.NumberFormat("cs-CZ", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n || 0) + " Kč/g";
   const fmtDate = d => d ? new Date(d + "T12:00:00").toLocaleDateString("cs-CZ", { day: "numeric", month: "numeric", year: "numeric" }) : "";
   const today = () => new Date().toISOString().slice(0, 10);
   const num = v => { const n = parseFloat(String(v ?? "").replace(",", ".").replace(/\s/g, "")); return Number.isFinite(n) ? n : 0; };
@@ -641,7 +642,7 @@
         ${kpi("Skladem", skladem.length + " ks", skladem.reduce((a, k) => a + num(k.gramaz), 0) + " g")}
         ${kpi("Hodnota v ceníku", fmtKc(skladem.reduce((a, k) => a + kusCena(k), 0)), "původní ceny")}
         ${kpi("Nákupní hodnota", fmtKc(skladem.reduce((a, k) => a + num(k.nakup_cena), 0)), "co jsme zaplatili")}
-        ${kpi("Rezervováno", state.db.sklad.filter(k => k.stav === "rezervovano").length + " ks", "čeká na zaplacení")}
+        ${kpi("Ve várkách", state.db.nakupy.filter(isVaha).reduce((a, n) => a + nakupG(n) - odebranoG(n), 0) + " g", "ještě nerozděleno na culíky")}
       </div>
       <div style="margin-top:14px">${chips("sf", { skladem: "Skladem", rezervovano: "Rezervováno", prodano: "Prodáno", vse: "Vše" }, f)}</div>
       <input class="search" type="search" placeholder="Hledat číslo, odstín, délku" value="${esc(state.filters.q)}" id="q">
@@ -665,14 +666,17 @@
     return "SK-" + String((nums.length ? Math.max(...nums) : 0) + 1).padStart(3, "0");
   }
 
-  function kusForm(existing) {
-    const k = existing ? { ...existing } : { id: uid(), cislo: nextCislo(), odstin: "tmave", delka: S().cenik[0]?.delka || "", gramaz: "", cena_g: cenaZaGram("tmave", S().cenik[0]?.delka), nakup_cena: "", stav: "skladem", poznamka: "" };
+  function kusForm(existing, varkaId) {
+    const k = existing ? { ...existing } : { id: uid(), cislo: nextCislo(), odstin: "tmave", delka: S().cenik[0]?.delka || "", gramaz: "", cena_g: cenaZaGram("tmave", S().cenik[0]?.delka), nakup_cena: "", stav: "skladem", poznamka: "", nakup_id: varkaId || "" };
+    const varky = state.db.nakupy.filter(isVaha).sort((a, b) => b.datum.localeCompare(a.datum));
+    const puvodniVarka = varky.find(n => n.id === k.nakup_id) ? k.nakup_id : "";
     const body = `<div class="f">
       <div class="f2">
         <label class="field"><span>Číslo kusu</span><input name="cislo" value="${esc(k.cislo)}" required></label>
         <label class="field"><span>Stav</span><select name="stav" ${k.prodej_id ? "disabled" : ""}>${opts(SKLAD_STAV, k.stav)}</select>
           ${k.prodej_id ? `<span class="hint">Řídí se prodejem</span>` : ""}</label>
       </div>
+      ${varky.length ? `<label class="field"><span>Z várky (nákup na váhu)</span><select name="varka"><option value="">Ne, kus zvlášť</option>${varky.map(n => `<option value="${n.id}" ${n.id === puvodniVarka ? "selected" : ""}>${esc(n.dodavatel || "Várka")} ${fmtDate(n.datum)} · zbývá ${nakupG(n) - odebranoG(n, k.id)} g</option>`).join("")}</select></label>` : ""}
       <div class="f2">
         <label class="field"><span>Odstín</span><select name="odstin">${opts(ODSTINY, k.odstin)}</select></label>
         <label class="field"><span>Délka cm</span><select name="delka">${S().cenik.map(r => `<option ${r.delka === k.delka ? "selected" : ""}>${esc(r.delka)}</option>`).join("")}</select></label>
@@ -681,25 +685,60 @@
         <label class="field"><span>Gramáž g</span><input name="gramaz" inputmode="decimal" value="${esc(k.gramaz)}" required></label>
         <label class="field"><span>Prodejní Kč/g</span><input name="cena_g" inputmode="decimal" value="${esc(k.cena_g)}"><span class="hint">Doplní se z ceníku</span></label>
       </div>
-      <label class="field"><span>Nákupní cena kusu Kč</span><input name="nakup_cena" inputmode="decimal" value="${esc(k.nakup_cena)}"><span class="hint">Celkem za kus, i s poměrem dopravy</span></label>
+      <label class="field"><span>Nákupní cena kusu Kč</span><input name="nakup_cena" inputmode="decimal" value="${esc(k.nakup_cena)}"><span class="hint" data-nakup-hint>Celkem za kus, i s poměrem dopravy</span></label>
       <div class="split" data-cena></div>
       <label class="field"><span>Poznámka</span><textarea name="poznamka">${esc(k.poznamka)}</textarea></label>
     </div>`;
-    openSheet(existing ? "Kus " + (k.cislo || "") : "Nový kus", body, () => {
+    const polozka = rec => ({ sklad_id: rec.id, cislo: rec.cislo, odstin: rec.odstin, delka: rec.delka, gramaz: rec.gramaz });
+    openSheet(existing ? "Kus " + (k.cislo || "") : "Nový kus", body, async () => {
       const fd = new FormData($("#sheet-form"));
+      const varka = varky.find(n => n.id === fd.get("varka"));
       const rec = { ...k, cislo: fd.get("cislo").trim(), odstin: fd.get("odstin"), delka: fd.get("delka"), gramaz: num(fd.get("gramaz")), cena_g: num(fd.get("cena_g")), nakup_cena: num(fd.get("nakup_cena")), poznamka: fd.get("poznamka") };
       if (!k.prodej_id) rec.stav = fd.get("stav");
       if (!rec.gramaz) { toast("Doplňte gramáž.", true); return false; }
       if (state.db.sklad.some(x => x.id !== rec.id && x.cislo && x.cislo === rec.cislo)) { toast("Číslo " + rec.cislo + " už ve skladu je.", true); return false; }
-      return save([{ type: "upsert", col: "sklad", rec }], "Kus uložen");
-    }, existing && !k.prodej_id ? () => confirm("Smazat kus " + k.cislo + "?") && save([{ type: "delete", col: "sklad", id: k.id }], "Kus smazán") : null);
+      const ops = [];
+      if (varka) {
+        const zbyva = nakupG(varka) - odebranoG(varka, rec.id);
+        if (rec.gramaz > zbyva) { toast(`Ve várce zbývá jen ${zbyva} g.`, true); return false; }
+        rec.nakup_id = varka.id;
+        rec.nakup_cena = Math.round(vahaCenaG(varka) * rec.gramaz);
+        const pol = (varka.polozky || []).filter(x => x.sklad_id !== rec.id);
+        ops.push({ type: "upsert", col: "nakupy", rec: { ...varka, polozky: [...pol, polozka(rec)] } });
+      } else if (puvodniVarka) {
+        rec.nakup_id = "";
+      }
+      // Kus přesunutý z jiné várky (nebo z várky ven) z ní odebrat
+      if (puvodniVarka && puvodniVarka !== varka?.id) {
+        const stara = varky.find(n => n.id === puvodniVarka);
+        ops.push({ type: "upsert", col: "nakupy", rec: { ...stara, polozky: (stara.polozky || []).filter(x => x.sklad_id !== rec.id) } });
+      }
+      ops.unshift({ type: "upsert", col: "sklad", rec });
+      if (!await save(ops, "Kus uložen")) return false;
+      return varka || puvodniVarka ? prepocitatNaklady() : true;
+    }, existing && !k.prodej_id ? async () => {
+      if (!confirm("Smazat kus " + k.cislo + "?")) return false;
+      const ops = [{ type: "delete", col: "sklad", id: k.id }];
+      const stara = varky.find(n => n.id === puvodniVarka);
+      if (stara) ops.push({ type: "upsert", col: "nakupy", rec: { ...stara, polozky: (stara.polozky || []).filter(x => x.sklad_id !== k.id) } });
+      return save(ops, "Kus smazán");
+    } : null);
     const root = $(".sheet");
     const upd = () => {
       const fd = new FormData($("#sheet-form"));
+      const varka = varky.find(n => n.id === fd.get("varka"));
+      const inp = $("[name=nakup_cena]", root);
+      inp.readOnly = !!varka;
+      if (varka) {
+        inp.value = Math.round(vahaCenaG(varka) * num(fd.get("gramaz"))) || "";
+        $("[data-nakup-hint]", root).textContent = `Spočítá se z várky: ${fmtKcG(vahaCenaG(varka))} včetně cesty a dopravy. Zbývá ${nakupG(varka) - odebranoG(varka, k.id)} g.`;
+      } else {
+        $("[data-nakup-hint]", root).textContent = "Celkem za kus, i s poměrem dopravy";
+      }
       const cena = Math.round(num(fd.get("gramaz")) * num(fd.get("cena_g")));
-      const nak = num(fd.get("nakup_cena"));
+      const nak = num(inp.value);
       $("[data-cena]", root).innerHTML = `<div class="total"><span>Původní cena</span><span class="num">${fmtKc(cena)}</span></div>
-        ${nak ? `<div><span>Marže před provizemi</span><span class="num">${fmtKc(cena - nak)}</span></div>` : ""}`;
+        ${nak ? `<div><span>Nákupní cena</span><span class="num">${fmtKc(nak)}</span></div><div><span>Marže před provizemi</span><span class="num">${fmtKc(cena - nak)}</span></div>` : ""}`;
     };
     root.addEventListener("change", e => {
       if (e.target.matches("[name=odstin], [name=delka]")) {
@@ -736,7 +775,17 @@
   // ================================================================
   const DRUHY = { letenky: "Letenky", ubytovani: "Ubytování", doprava: "Doprava na místě", jidlo: "Jídlo", ostatni: "Ostatní" };
   const cestaCelkem = c => (c.naklady || []).reduce((a, x) => a + num(x.castka), 0);
-  const nakupG = n => (n.polozky || []).reduce((a, k) => a + num(k.gramaz), 0);
+  const isVaha = n => n?.typ === "vaha";
+  // U nákupu na váhu se náklady dělí podle celé várky, ne jen podle už odebraných culíků
+  const nakupG = n => isVaha(n) ? num(n.vaha_g) : (n.polozky || []).reduce((a, k) => a + num(k.gramaz), 0);
+  const odebranoG = (n, krome) => (n.polozky || []).filter(k => k.sklad_id !== krome).reduce((a, k) => a + num(k.gramaz), 0);
+  function cestaPodil(n) {
+    const c = n.cesta_id && state.db.cesty.find(x => x.id === n.cesta_id);
+    if (!c) return 0;
+    const G = state.db.nakupy.filter(x => x.cesta_id === n.cesta_id).reduce((a, x) => a + nakupG(x), 0);
+    return G ? cestaCelkem(c) * nakupG(n) / G : 0;
+  }
+  const vahaCenaG = n => (num(n.cena_zbozi) + num(n.doprava) + cestaPodil(n)) / (num(n.vaha_g) || 1);
 
   // Nákupní cena kusu = cena kusu + jeho podíl na dopravě nákupu + podíl na nákladech cesty.
   // Podíly se dělí podle gramáže; u cesty přes všechny kusy ze všech jejích nákupů.
@@ -749,7 +798,8 @@
       const g = nakupG(n) || 1;
       for (const k of n.polozky || []) {
         if (!k.sklad_id) continue;
-        let cena = num(k.cena) + num(n.doprava) * num(k.gramaz) / g;
+        const zbozi = isVaha(n) ? num(n.cena_zbozi) * num(k.gramaz) / g : num(k.cena);
+        let cena = zbozi + num(n.doprava) * num(k.gramaz) / g;
         if (n.cesta_id && sumCesty[n.cesta_id] && gCesty[n.cesta_id]) cena += sumCesty[n.cesta_id] * num(k.gramaz) / gCesty[n.cesta_id];
         out[k.sklad_id] = Math.round(cena);
       }
@@ -804,7 +854,7 @@
         const c = state.db.cesty.find(x => x.id === n.cesta_id);
         return `<button class="row" data-edit="${n.id}">
           <div class="row-main"><div class="row-title">${esc(n.dodavatel || "Dodavatel neuveden")}</div>
-          <div class="row-sub">${fmtDate(n.datum)} · ${(n.polozky || []).length} ks · ${nakupG(n)} g${c ? " · " + esc(c.nazev) : ""}</div></div>
+          <div class="row-sub">${fmtDate(n.datum)} · ${isVaha(n) ? `na váhu ${nakupG(n)} g, zbývá ${nakupG(n) - odebranoG(n)} g` : `${(n.polozky || []).length} ks · ${nakupG(n)} g`}${c ? " · " + esc(c.nazev) : ""}</div></div>
           <div class="row-end num"><strong>${fmtKc(n.celkem)}</strong></div>
         </button>`;
       }).join("")}</div>` : `<p class="empty">Zatím žádný nákup.</p>`}`;
@@ -829,18 +879,27 @@
     .map(c => `<option value="${c.id}" ${c.id === cur ? "selected" : ""}>${esc(c.nazev || "Cesta")} (${fmtDate(c.datum_od)})</option>`).join("");
 
   function nakupForm(existing) {
-    const n = existing ? structuredClone(existing) : { id: uid(), datum: today(), dodavatel: "", doprava: 0, cesta_id: "", polozky: [{ odstin: "tmave", delka: S().cenik[0]?.delka || "", gramaz: "", cena: "" }], poznamka: "" };
+    const n = existing ? structuredClone(existing) : { id: uid(), typ: "vaha", datum: today(), dodavatel: "", doprava: 0, cesta_id: "", vaha_g: "", cena_zbozi: "", polozky: [], poznamka: "" };
     const lock = !!existing;
+    const vahaKusy = isVaha(n) ? (n.polozky || []) : [];
     const body = `<div class="f">
       <div class="f2">
         <label class="field"><span>Datum</span><input type="date" name="datum" value="${esc(n.datum)}" required></label>
         <label class="field"><span>Dodavatel</span><input name="dodavatel" value="${esc(n.dodavatel)}"></label>
       </div>
+      <fieldset ${lock ? "disabled" : ""}><legend>Jak jste nakoupili</legend><div class="seg">${segs("typ", { vaha: "Na váhu (várka)", kusy: "Po kusech" }, isVaha(n) ? "vaha" : "kusy")}</div></fieldset>
+      <div class="f2" data-vaha>
+        <label class="field"><span>Celková gramáž g</span><input name="vaha_g" inputmode="decimal" value="${esc(n.vaha_g)}"></label>
+        <label class="field"><span>Cena za vlasy Kč</span><input name="cena_zbozi" inputmode="decimal" value="${esc(n.cena_zbozi)}"><span class="hint">Celkem v Kč, i s poplatky dodavateli</span></label>
+      </div>
       <label class="field"><span>Cesta</span><select name="cesta_id">${cestaOptions(n.cesta_id)}</select>
         <span class="hint">Letenky a ubytování z cesty se rozdělí mezi všechny její nákupy. Novou cestu založíte v Nákupy → Cesty.</span></label>
       <label class="field"><span>Doprava a clo k tomuto nákupu Kč</span><input name="doprava" inputmode="decimal" value="${n.doprava || ""}">
         <span class="hint">Poštovné, clo, poplatky jen za tenhle nákup. Rozpočítá se do ceny kusů podle gramáže.</span></label>
-      <div class="field"><span>Kusy</span>
+      ${lock && isVaha(n) ? `<div class="field"><span>Culíky z várky (${vahaKusy.length})</span>
+        ${vahaKusy.length ? `<div class="list boxed">${vahaKusy.map(k => `<div class="row"><span class="swatch sw-${esc(k.odstin)}"></span><div class="row-main"><div class="row-title">${esc(k.cislo)} · ${ODSTINY[k.odstin] || ""} ${esc(k.delka)} cm</div></div><div class="row-end num">${num(k.gramaz)} g</div></div>`).join("")}</div>` : `<p class="small muted">Zatím žádný culík.</p>`}
+        <button type="button" class="btn small" data-kus-z-varky style="justify-self:start;margin-top:6px">+ Culík z této várky</button></div>` : ""}
+      <div class="field" data-kusy><span>Kusy</span>
         ${lock ? `<p class="small muted">Kusy jsou už ve skladu, upravují se tam.</p>` : ""}
         <div class="items" data-items></div>
         ${lock ? "" : `<button type="button" class="btn small" data-add style="justify-self:start;margin-top:4px">+ Další kus</button>`}
@@ -853,8 +912,14 @@
       const fd = new FormData($("#sheet-form"));
       n.datum = fd.get("datum"); n.dodavatel = fd.get("dodavatel"); n.poznamka = fd.get("poznamka");
       n.cesta_id = fd.get("cesta_id"); n.doprava = num(fd.get("doprava"));
+      if (!lock) n.typ = fd.get("typ");
       const ops = [];
-      if (!lock) {
+      if (isVaha(n)) {
+        n.vaha_g = num(fd.get("vaha_g")); n.cena_zbozi = num(fd.get("cena_zbozi"));
+        if (!n.vaha_g || !n.cena_zbozi) { toast("Doplňte gramáž a cenu várky.", true); return false; }
+        if (n.vaha_g < odebranoG(n)) { toast(`Z várky už je odebráno ${odebranoG(n)} g.`, true); return false; }
+        n.polozky = n.polozky || [];
+      } else if (!lock) {
         n.polozky = n.polozky.filter(k => num(k.gramaz) > 0);
         if (!n.polozky.length) { toast("Zadejte aspoň jeden kus s gramáží.", true); return false; }
         let cisloBase = parseInt(nextCislo().replace(/\D/g, ""), 10);
@@ -865,9 +930,9 @@
           return { ...k, cislo, sklad_id: skladId };
         });
       }
-      n.celkem = Math.round(n.polozky.reduce((a, k) => a + num(k.cena), 0) + n.doprava);
+      n.celkem = Math.round((isVaha(n) ? n.cena_zbozi : n.polozky.reduce((a, k) => a + num(k.cena), 0)) + n.doprava);
       ops.unshift({ type: "upsert", col: "nakupy", rec: n });
-      if (!await save(ops, lock ? "Nákup upraven" : `Nákup uložen, ${n.polozky.length} ks ve skladu`)) return false;
+      if (!await save(ops, lock ? "Nákup upraven" : isVaha(n) ? "Várka uložena" : `Nákup uložen, ${n.polozky.length} ks ve skladu`)) return false;
       return prepocitatNaklady();
     }, existing ? async () => {
       if (!confirm("Smazat záznam o nákupu? Kusy ve skladu zůstanou.")) return false;
@@ -891,10 +956,13 @@
           n.polozky[i] = { odstin: $("[name=odstin]", row).value, delka: $("[name=delka]", row).value, gramaz: $("[name=gramaz]", row).value, cena: $("[name=cena]", row).value };
         });
       }
+      const vaha = lock ? isVaha(n) : $("[name=typ]:checked", root).value === "vaha";
+      $("[data-vaha]", root).classList.toggle("hidden", !vaha);
+      $("[data-kusy]", root).classList.toggle("hidden", vaha);
       const doprava = num($("[name=doprava]", root).value);
-      const zbozi = n.polozky.reduce((a, k) => a + num(k.cena), 0);
-      const g = n.polozky.reduce((a, k) => a + num(k.gramaz), 0);
-      const cenik = n.polozky.reduce((a, k) => a + num(k.gramaz) * cenaZaGram(k.odstin, k.delka), 0);
+      const zbozi = vaha ? num($("[name=cena_zbozi]", root).value) : n.polozky.reduce((a, k) => a + num(k.cena), 0);
+      const g = vaha ? num($("[name=vaha_g]", root).value) : n.polozky.reduce((a, k) => a + num(k.gramaz), 0);
+      const cenik = vaha ? 0 : n.polozky.reduce((a, k) => a + num(k.gramaz) * cenaZaGram(k.odstin, k.delka), 0);
       // Podíl cesty: gramáž tohoto nákupu proti ostatním nákupům téže cesty
       const cId = $("[name=cesta_id]", root).value;
       const c = state.db.cesty.find(x => x.id === cId);
@@ -904,20 +972,26 @@
         podil = g ? cestaCelkem(c) * g / (g + gOstatni) : 0;
       }
       $("[data-sum]", root).innerHTML = `
-        <div><span>Zboží (${n.polozky.length} ks, ${g} g)</span><span class="num">${fmtKc(zbozi)}</span></div>
+        <div><span>${vaha ? `Vlasy (${g} g)` : `Zboží (${n.polozky.length} ks, ${g} g)`}</span><span class="num">${fmtKc(zbozi)}</span></div>
         <div><span>Doprava a clo</span><span class="num">${fmtKc(doprava)}</span></div>
         <div class="total"><span>Zaplaceno za nákup</span><span class="num">${fmtKc(zbozi + doprava)}</span></div>
         ${c ? `<div><span>Podíl na cestě ${esc(c.nazev)}</span><span class="num">${fmtKc(podil)}</span></div>
-        <div class="firm"><span>Skutečná cena kusů</span><span class="num">${fmtKc(zbozi + doprava + podil)}</span></div>` : ""}
-        <div><span>Hodnota v ceníku</span><span class="num">${fmtKc(cenik)}</span></div>`;
+        <div class="firm"><span>Skutečná cena${vaha ? " várky" : " kusů"}</span><span class="num">${fmtKc(zbozi + doprava + podil)}</span></div>` : ""}
+        ${vaha ? `<div class="firm"><span>Nákupní cena za gram</span><span class="num">${g ? fmtKcG((zbozi + doprava + podil) / g) : ""}</span></div>
+          ${lock ? `<div><span>Zbývá ve várce</span><span class="num">${g - odebranoG(n)} g</span></div>` : ""}`
+        : `<div><span>Hodnota v ceníku</span><span class="num">${fmtKc(cenik)}</span></div>`}`;
     }
     root.addEventListener("click", e => {
+      if (e.target.closest("[data-kus-z-varky]")) { closeSheet(); kusForm(null, n.id); return; }
       if (e.target.closest("[data-add]")) { read(); const last = n.polozky[n.polozky.length - 1] || {}; n.polozky.push({ odstin: last.odstin || "tmave", delka: last.delka || S().cenik[0]?.delka, gramaz: "", cena: "" }); draw(); read(); }
       const rm = e.target.closest("[data-rm]");
       if (rm) { read(); n.polozky.splice(+rm.dataset.rm, 1); draw(); read(); }
     });
     root.addEventListener("input", read);
-    root.addEventListener("change", read);
+    root.addEventListener("change", e => {
+      if (e.target.name === "typ" && e.target.value === "kusy" && !n.polozky.length) { n.polozky.push({ odstin: "tmave", delka: S().cenik[0]?.delka || "", gramaz: "", cena: "" }); draw(); }
+      read();
+    });
     draw();
     read();
   }
@@ -990,7 +1064,7 @@
         ${poDruhu.map(([v, sum]) => `<div><span>${v}</span><span class="num">${fmtKc(sum)}</span></div>`).join("")}
         <div class="total"><span>Cesta celkem</span><span class="num">${fmtKc(total)}</span></div>
         <div><span>${vybrane.length ? `Rozdělí se na ${vybrane.length} ${plural(vybrane.length, "nákup", "nákupy", "nákupů")} (${g} g)` : "Bez nákupu se do ceny kusů zatím nepočítá"}</span>
-        <span class="num">${g ? fmtKc(total / g) + "/g" : ""}</span></div>`;
+        <span class="num">${g ? fmtKcG(total / g) : ""}</span></div>`;
     }
     root.addEventListener("click", e => {
       if (e.target.closest("[data-add-nakl]")) { read(); c.naklady.push({ druh: "ubytovani", castka: "", poznamka: "" }); draw(); read(); }
