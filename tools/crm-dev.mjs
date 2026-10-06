@@ -51,7 +51,7 @@ http.createServer(async (req, res) => {
     const request = new Request(url, { method: req.method, headers: req.headers, body: req.method === "GET" ? undefined : body });
     const r = await handle(request, { store, verifyUser, ip: req.socket.remoteAddress });
     res.writeHead(r.status, Object.fromEntries(r.headers));
-    res.end(await r.text());
+    res.end(Buffer.from(await r.arrayBuffer()));
     return;
   }
   let p = path.join(root, decodeURIComponent(url.pathname));

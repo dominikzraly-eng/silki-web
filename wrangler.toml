@@ -1,0 +1,21 @@
+# Cloudflare Worker pro silkihair.cz (web + administrace + CRM).
+# Sestavení: node tools/build-site.mjs   Nasazení: npx wrangler deploy
+name = "silki-web"
+main = "worker/index.mjs"
+compatibility_date = "2026-10-01"
+compatibility_flags = ["nodejs_compat"]
+
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+# Adresy .html zůstávají beze změny (jako dřív na Netlify), složky a hezké adresy řeší worker
+html_handling = "none"
+not_found_handling = "none"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "silki-crm"
+database_id = "5613e0aa-26ec-40f5-b661-ff5960f92182"
+
+[observability]
+enabled = true

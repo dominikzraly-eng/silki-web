@@ -180,9 +180,9 @@
         firstInvalid.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center" });
         return;
       }
-      // Odesila se tremi cestami zaroven: Web3Forms doruci poptavku rovnou na
-      // e-mail, Netlify Forms ji ulozi do dashboardu jako archiv a interni CRM
-      // ji zaradi do Poptavek z webu. Staci, kdyz projde jedna z nich.
+      // Odesila se dvema cestami zaroven: Web3Forms doruci poptavku rovnou na
+      // e-mail a interni CRM ji zaradi do Poptavek z webu (zaroven archiv).
+      // Staci, kdyz projde jedna z nich.
       var submitBtn = form.querySelector('[type="submit"]');
       var labelCs = submitBtn ? submitBtn.getAttribute("data-loading-cs") : null;
       var labelEn = submitBtn ? submitBtn.getAttribute("data-loading-en") : null;
@@ -199,20 +199,7 @@
 
       var formName = form.getAttribute("name") || "silki-form";
 
-      /* 1) Netlify Forms - archiv v dashboardu */
-      var body = new URLSearchParams();
-      fd.forEach(function (v, k) { body.append(k, v); });
-      if (!body.has("form-name")) body.append("form-name", formName);
-      var toNetlify = fetch("/", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: body.toString()
-      }).then(function (r) {
-        if (!r.ok) throw new Error("Netlify HTTP " + r.status);
-        return "netlify";
-      });
-
-      /* 2) Web3Forms - doruceni na e-mail, s citelnymi ceskymi popisky poli */
+      /* 1) Web3Forms - doruceni na e-mail, s citelnymi ceskymi popisky poli */
       var payload = {
         access_key: WEB3FORMS_KEY,
         subject: String(fd.get("subject") || "") || FORM_SUBJECTS[formName] || "Zpráva z webu silkihair.cz",
@@ -234,7 +221,7 @@
         return "mail";
       });
 
-      /* 3) Interní CRM - poptávka se objeví v evidenci (Poptávky z webu) */
+      /* 2) Interní CRM - poptávka se objeví v evidenci (Poptávky z webu) */
       var crmPole = {};
       fd.forEach(function (v, k) { if (k !== "form-name") crmPole[k] = String(v || ""); });
       var toCrm = fetch("/api/crm/lead", {
@@ -248,12 +235,11 @@
 
       Promise.all([
         toMail.catch(function (e) { return e; }),
-        toNetlify.catch(function (e) { return e; }),
         toCrm.catch(function (e) { return e; })
       ]).then(function (res) {
         resetBtn();
         var en = root.getAttribute("lang") === "en";
-        if (res.indexOf("mail") === -1 && res.indexOf("netlify") === -1 && res.indexOf("crm") === -1) {
+        if (res.indexOf("mail") === -1 && res.indexOf("crm") === -1) {
           showToast(en ? "Sending failed — please reach us on WhatsApp." : "Odeslání se nezdařilo — napište nám prosím na WhatsApp.");
           showDirectContact(form);
           return;

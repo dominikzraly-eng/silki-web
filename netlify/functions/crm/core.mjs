@@ -18,7 +18,7 @@ const LEAD_FIELDS = ["name", "salon", "phone", "email", "shade", "length", "cour
 const LEAD_LIMIT = 5;            // poptávek z jedné IP
 const LEAD_WINDOW = 60 * 60e3;   // za hodinu
 const MAX_BODY = 512 * 1024;
-const MAX_FOTO = 4 * 1024 * 1024;
+const MAX_FOTO = 1900 * 1024;   // D1 má limit řádku 2 MB; telefon fotku zmenší na ~300 kB
 const AGENT_PREFIX = "sck_";
 const AGENT_USER = "claude";
 
@@ -161,7 +161,7 @@ async function lead(req, url, store, ip) {
     const cur = await store.get("db");
     const db = normalize(cur?.data || emptyDb());
     db.poptavky.push(rec);
-    db.poptavky = db.poptavky.slice(-2000);
+    db.poptavky = db.poptavky.slice(-500);
     db.log.unshift({ t: now, u: "web", co: "nová poptávka z webu" });
     db.log = db.log.slice(0, 300);
     if (await store.set("db", db, cur?.etag ?? null)) return json(200, { ok: true });
@@ -211,9 +211,11 @@ export async function handle(req, { store, verifyUser, ip }) {
 
   if (req.method === "POST" && route === "foto") {
     const buf = Buffer.from(await req.arrayBuffer());
-    if (buf.length < 100 || buf.length > MAX_FOTO) return json(413, { error: "Fotka musí mít do 4 MB." });
+    if (buf.length < 100 || buf.length > MAX_FOTO) return json(413, { error: "Fotka musí mít do 1,9 MB." });
     if (buf[0] !== 0xff || buf[1] !== 0xd8 || buf[2] !== 0xff) return json(415, { error: "Fotka musí být JPEG." });
-    const id = crypto.randomUUID();
+    // Při přenosu dat (migrace) smí Claude zachovat původní id fotky
+    const chtene = url.searchParams.get("id");
+    const id = user === AGENT_USER && chtene && /^[A-Za-z0-9-]{1,64}$/.test(chtene) ? chtene : crypto.randomUUID();
     await store.setBinary("foto/" + id, buf);
     return json(200, { id });
   }
