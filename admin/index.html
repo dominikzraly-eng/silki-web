@@ -8,9 +8,34 @@
 </head>
 <body>
   <!-- Decap CMS (git-based admin) — every change here is saved as a commit
-       to the GitHub repo, which triggers a new Netlify deploy automatically. -->
+       to the GitHub repo, which triggers a new deploy automatically. -->
   <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-  <!-- Odkaz do interního CRM (prodeje, sklad, finance). Data CRM nejsou v GitHubu. -->
-  <a href="/admin/crm/" style="position:fixed;right:16px;bottom:16px;z-index:9999;background:#241D18;color:#FDFBF8;padding:10px 16px;border-radius:10px;font:600 14px system-ui,sans-serif;text-decoration:none;box-shadow:0 4px 14px rgba(0,0,0,.2)">CRM</a>
+  <!-- Odkaz do interního CRM jako poslední položka levého panelu (Decap panel překresluje, proto MutationObserver) -->
+  <script>
+    (function () {
+      var ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>';
+      function pridej() {
+        var list = document.querySelector('ul[class*="SidebarNavList"]');
+        if (!list || document.getElementById("silki-crm-link")) return;
+        var vzor = list.querySelector("a:not(.sidebar-active)") || list.querySelector("a");
+        if (!vzor) return;
+        var a = vzor.cloneNode(true);
+        a.id = "silki-crm-link";
+        a.href = "/admin/crm/";
+        a.removeAttribute("aria-current");
+        a.classList.remove("sidebar-active");
+        a.setAttribute("data-testid", "crm");
+        var ikona = a.querySelector("span");
+        a.textContent = "";
+        if (ikona) { ikona.innerHTML = ICON; a.appendChild(ikona); }
+        a.appendChild(document.createTextNode("CRM"));
+        var li = document.createElement("li");
+        li.style.cssText = "margin-top:12px;padding-top:12px;border-top:1px solid rgba(0,0,0,.08)";
+        li.appendChild(a);
+        list.appendChild(li);
+      }
+      new MutationObserver(pridej).observe(document.body, { childList: true, subtree: true });
+    })();
+  </script>
 </body>
 </html>
