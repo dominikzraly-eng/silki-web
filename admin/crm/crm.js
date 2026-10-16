@@ -97,7 +97,10 @@
   }
   async function nahrajFoto(file) {
     let blob;
-    try { blob = await zmensitFoto(file); } catch { throw new Error("Tenhle soubor neumím otevřít jako fotku."); }
+    try {
+      blob = await zmensitFoto(file, file.type === "image/png" ? 2600 : 1600);
+      if (blob.size > 1800 * 1024) blob = await zmensitFoto(file);
+    } catch { throw new Error("Tenhle soubor neumím otevřít jako fotku."); }
     const res = await fetch("/api/crm/foto", { method: "POST", headers: { Authorization: "Bearer " + state.token, "Content-Type": "image/jpeg" }, body: blob });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || "Fotku se nepodařilo nahrát.");
@@ -1430,10 +1433,10 @@
       <form class="card" id="zprava-form">
         <label class="field"><span>Co se stalo</span>
           <textarea name="text" rows="4" placeholder="např. Terka včera prodala 2 culíky z várky od Turka kadeřnici Janě, 120 g a 95 g, platila převodem"></textarea>
-          <span class="hint">Pište volně jako do chatu: prodeje, platby, půjčky, provize, nákupy. Jméno a čas se uloží samy. Jednou týdně to Claude zapíše do CRM a ke zprávě připíše, co udělal.</span></label>
+          <span class="hint">Pište volně jako do chatu: prodeje, platby, půjčky, provize, nákupy. Jméno a čas se uloží samy. Jednou týdně to Claude zapíše do CRM a ke zprávě připíše, co udělal. Screenshot jde vložit rovnou do textu.</span></label>
         <div class="zfoto" data-zfoto-list></div>
         <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
-          <label class="btn">Přidat fotku<input type="file" accept="image/*" multiple hidden data-zfoto></label>
+          <label class="btn">Fotka nebo screenshot<input type="file" accept="image/*" multiple hidden data-zfoto></label>
           <button class="btn primary" type="submit" style="flex:1">Odeslat</button>
         </div>
       </form>
@@ -1464,14 +1467,35 @@
       box.innerHTML = zFotky.map(id => thumb(id)).join("");
       nactiFotky(box);
     };
-    $("[data-zfoto]").addEventListener("change", async e => {
+    let nahrava = 0;
+    const pridejZFotky = async files => {
       const btn = $("#zprava-form button[type=submit]");
+      nahrava++;
       btn.disabled = true;
-      for (const f of e.target.files) {
+      for (const f of files) {
         try { zFotky.push(await nahrajFoto(f)); kresliZFotky(); } catch (ex) { toast(ex.message, true); }
       }
+      if (!--nahrava) btn.disabled = false;
+    };
+    const obrazky = dt => [...(dt?.files || [])].filter(f => f.type.startsWith("image/"));
+    $("[data-zfoto]").addEventListener("change", e => {
+      const files = [...e.target.files];
       e.target.value = "";
-      btn.disabled = false;
+      pridejZFotky(files);
+    });
+    const zForm = $("#zprava-form");
+    zForm.addEventListener("paste", e => {
+      const files = obrazky(e.clipboardData);
+      if (!files.length || e.clipboardData.types.includes("text/plain")) return;
+      e.preventDefault();
+      pridejZFotky(files);
+    });
+    zForm.addEventListener("dragover", e => { if (e.dataTransfer.types.includes("Files")) e.preventDefault(); });
+    zForm.addEventListener("drop", e => {
+      const files = obrazky(e.dataTransfer);
+      if (!files.length) return;
+      e.preventDefault();
+      pridejZFotky(files);
     });
     $$("[data-edit-zprava]").forEach(b => b.addEventListener("click", () => zpravaForm(state.db.zpravy.find(z => z.id === b.dataset.editZprava))));
   }
