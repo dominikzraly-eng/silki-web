@@ -472,7 +472,7 @@
     return `<button class="row" data-edit-sale="${p.id}">
       <div class="row-main"><div class="row-title">${esc(p.zakaznik_jmeno || "Bez jména")}</div>
       <div class="row-sub">${fmtDate(p.datum)} · ${ks} ks · ${esc(SELLERS[p.prodejce] || "")}</div></div>
-      <div class="row-end"><div class="num"><strong>${fmtKc(p.split?.celkem)}</strong></div><span class="badge ${st}">${PRODEJ_STAV[p.stav]}</span></div>
+      <div class="row-end"><div class="num"><strong>${fmtKc(p.split?.firma)}</strong></div><div class="row-sub num">prodáno za ${fmtKc(p.split?.celkem)}</div><span class="badge ${st}">${PRODEJ_STAV[p.stav]}</span></div>
     </button>`;
   }
 
@@ -1338,7 +1338,7 @@
     // Všechny pohyby peněz v jednom seznamu od nejnovějšího, druh ukazuje barevný štítek.
     const pohyby = [
       ...state.db.prodeje.filter(p => p.stav === "zaplaceno" && inRange(p.datum, range)).map(p => ({
-        druh: "prodej", datum: p.datum, poradi: p.createdAt, attr: `data-edit-sale="${p.id}"`, plus: true, castka: p.split?.celkem,
+        druh: "prodej", datum: p.datum, poradi: p.createdAt, attr: `data-edit-sale="${p.id}"`, plus: true, castka: p.split?.firma, pod: "prodáno za " + fmtKc(p.split?.celkem),
         title: esc(p.zakaznik_jmeno || "Bez jména"), sub: `${(p.polozky || []).length} ks · ${esc(SELLERS[p.prodejce] || "")}`
       })),
       ...state.db.finance.filter(f => inRange(f.datum, range)).map(f => ({
@@ -1358,7 +1358,7 @@
     const pohybRow = r => { const el = r.attr ? "button" : "div"; return `<${el} class="row" ${r.attr || ""}>
             <span class="tag tag-${r.druh}">${tag[r.druh]}</span>
             <div class="row-main"><div class="row-title">${r.title}</div><div class="row-sub">${fmtDate(r.datum)}${r.sub ? " · " + r.sub : ""}</div></div>
-            <div class="row-end num"${r.plus ? ' style="color:var(--ok)"' : ""}><strong>${r.plus ? "+" : "−"}${fmtKc(r.castka)}</strong></div>
+            <div class="row-end num"><strong${r.plus ? ' style="color:var(--ok)"' : ""}>${r.plus ? "+" : "−"}${fmtKc(r.castka)}</strong>${r.pod ? `<div class="row-sub">${r.pod}</div>` : ""}</div>
           </${el}>`; };
     $("#view").innerHTML = `
       <div class="view-head"><h1>Finance</h1><button class="btn" data-new="zaloha">Záloha</button><button class="btn" data-new="vyplata">Vyplatit provizi</button><button class="btn primary" data-new="vydaj">+ Záznam</button></div>
