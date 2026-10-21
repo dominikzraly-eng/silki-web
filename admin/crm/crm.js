@@ -230,7 +230,7 @@
     const kusy = sum(vObdobi, p => (p.polozky || []).length);
 
     const provize = {};
-    for (const k of Object.keys(PEOPLE)) provize[k] = { obdobi: 0, celkem: 0, vyplaceno: 0 };
+    for (const k of Object.keys(PEOPLE)) provize[k] = { obdobi: 0, celkem: 0, vyplaceno: 0, zaloha: 0 };
     for (const p of placene) {
       const s = p.split || {};
       const add = (who, amt) => {
@@ -241,8 +241,14 @@
       add(p.prodejce, s.prodejce);
       add("dominik", s.dominik);
     }
-    for (const f of db.finance.filter(f => f.typ === "vyplata" || f.typ === "zaloha")) {
-      if (provize[f.komu]) provize[f.komu].vyplaceno += num(f.castka);
+    // Záloha je dluh vůči firmě, z provizí se sama nestrhává. Splátka se strhne z provize ručně
+    // (sníží k výplatě i dluh), peníze se přitom nehýbou.
+    for (const f of db.finance) {
+      const p = provize[f.komu];
+      if (!p) continue;
+      if (f.typ === "vyplata" || f.typ === "splatka") p.vyplaceno += num(f.castka);
+      if (f.typ === "zaloha") p.zaloha += num(f.castka);
+      if (f.typ === "splatka") p.zaloha -= num(f.castka);
     }
 
     // Peníze firmy od začátku: co přišlo minus co odešlo (nákupy, výdaje, vyplacené provize).
@@ -391,12 +397,12 @@
             <thead><tr><th>Kdo</th><th class="r">V období</th><th class="r">Vyplaceno</th><th class="r">K výplatě</th></tr></thead>
             <tbody>${Object.entries(PEOPLE).map(([k, v]) => {
               const p = st.provize[k];
-              const dluh = p.celkem - p.vyplaceno;
-              return `<tr><td>${v}</td><td class="r num">${fmtKc(p.obdobi)}</td><td class="r num muted">${fmtKc(p.vyplaceno)}</td><td class="r num"><strong>${fmtKc(Math.max(0, dluh))}</strong>${dluh < 0 ? `<div class="small" style="color:var(--warn)">záloha ${fmtKc(-dluh)}</div>` : ""}</td></tr>`;
+              const zbyva = p.celkem - p.vyplaceno;
+              return `<tr><td>${v}</td><td class="r num">${fmtKc(p.obdobi)}</td><td class="r num muted">${fmtKc(p.vyplaceno)}</td><td class="r num"><strong>${fmtKc(Math.max(0, zbyva))}</strong>${zbyva < 0 ? `<div class="small" style="color:var(--bad)">přeplaceno ${fmtKc(-zbyva)}</div>` : ""}${p.zaloha > 0 ? `<div class="small" style="color:var(--warn)">záloha ${fmtKc(p.zaloha)}</div>` : ""}</td></tr>`;
             }).join("")}</tbody>
           </table>
-          ${Object.entries(PEOPLE).filter(([k]) => st.provize[k].celkem - st.provize[k].vyplaceno < 0).map(([k, v]) => `<p class="note" style="margin:10px 0 0">${v} má zálohu ${fmtKc(st.provize[k].vyplaceno - st.provize[k].celkem)}, strhne se z dalších provizí.</p>`).join("")}
-          <p class="small muted" style="margin-top:10px">K výplatě se počítá od začátku. Výplatu nebo zálohu zapíšete ve Financích.</p>
+          ${Object.entries(PEOPLE).filter(([k]) => st.provize[k].zaloha > 0).map(([k, v]) => `<p class="note" style="margin:10px 0 0">${v} dluží firmě zálohu ${fmtKc(st.provize[k].zaloha)}. Sama se nestrhává, splátku z provize zapíšete ručně. <button class="link" data-splatka="${k}">Zapsat splátku</button></p>`).join("")}
+          <p class="small muted" style="margin-top:10px">K výplatě se počítá od začátku. Výplatu, zálohu nebo splátku zálohy zapíšete ve Financích.</p>
         </section>
         <section class="card">
           <h2>Firma v období</h2>
@@ -433,6 +439,7 @@
 
     bindChips("period", v => { state.period = v; render(); });
     bindCommon();
+    $$("[data-splatka]").forEach(b => b.addEventListener("click", () => finForm(null, "splatka", b.dataset.splatka)));
   }
 
   const kpi = (label, value, sub) => `<div class="kpi"><div class="label">${label}</div><div class="value">${value}</div><div class="sub">${sub}</div></div>`;
@@ -1331,34 +1338,37 @@
   // ================================================================
   // 11. Finance
   // ================================================================
+  const OSOBNI = ["vyplata", "zaloha", "splatka"];
+
   function viewFinance() {
     const range = periodRange(state.period);
     const st = stats(range);
-    const typLabel = { prijem: "Příjem", vydaj: "Výdaj", vyplata: "Výplata provize", zaloha: "Záloha na provize" };
+    const typLabel = { prijem: "Příjem", vydaj: "Výdaj", vyplata: "Výplata provize", zaloha: "Záloha na provize", splatka: "Splátka zálohy" };
     // Všechny pohyby peněz v jednom seznamu od nejnovějšího, druh ukazuje barevný štítek.
     const pohyby = [
       ...state.db.prodeje.filter(p => p.stav === "zaplaceno" && inRange(p.datum, range)).map(p => ({
-        druh: "prodej", datum: p.datum, poradi: p.createdAt, attr: `data-edit-sale="${p.id}"`, plus: true, castka: p.split?.firma, pod: "prodáno za " + fmtKc(p.split?.celkem),
+        druh: "prodej", datum: p.datum, poradi: p.createdAt, attr: `data-edit-sale="${p.id}"`, znak: "+", castka: p.split?.firma, pod: "prodáno za " + fmtKc(p.split?.celkem),
         title: esc(p.zakaznik_jmeno || "Bez jména"), sub: `${(p.polozky || []).length} ks · ${esc(SELLERS[p.prodejce] || "")}`
       })),
       ...state.db.finance.filter(f => inRange(f.datum, range)).map(f => ({
-        druh: f.typ, datum: f.datum, poradi: f.createdAt, attr: `data-edit="${f.id}"`, plus: f.typ === "prijem", castka: f.castka,
-        title: ["vyplata", "zaloha"].includes(f.typ) ? esc(PEOPLE[f.komu] || "") : esc(f.kategorie || typLabel[f.typ]), sub: esc(f.poznamka || "")
+        druh: f.typ, datum: f.datum, poradi: f.createdAt, attr: `data-edit="${f.id}"`, znak: f.typ === "prijem" ? "+" : f.typ === "splatka" ? "" : "−", castka: f.castka,
+        title: OSOBNI.includes(f.typ) ? esc(PEOPLE[f.komu] || "") : esc(f.kategorie || typLabel[f.typ]),
+        sub: [f.typ === "splatka" ? "strženo z provize" : "", esc(f.poznamka || "")].filter(Boolean).join(" · ")
       })),
       ...state.db.cesty.filter(c => inRange(c.datum_od || "", range)).map(c => ({
-        druh: "cesta", datum: c.datum_od, poradi: c.createdAt, attr: `data-cesta="${c.id}"`, castka: (c.naklady || []).reduce((a, x) => a + num(x.castka), 0),
+        druh: "cesta", datum: c.datum_od, poradi: c.createdAt, attr: `data-cesta="${c.id}"`, znak: "−", castka: (c.naklady || []).reduce((a, x) => a + num(x.castka), 0),
         title: esc(c.nazev || ""), sub: "ze sekce Nákupy → Cesty"
       })),
       ...state.db.nakupy.filter(n => inRange(n.datum, range)).map(n => ({
-        druh: "nakup", datum: n.datum, poradi: n.createdAt, castka: n.celkem,
+        druh: "nakup", datum: n.datum, poradi: n.createdAt, znak: "−", castka: n.celkem,
         title: n.dodavatel ? "Vlasy: " + esc(n.dodavatel) : "Vlasy", sub: "ze sekce Nákupy"
       }))
     ].sort((a, b) => (b.datum + (b.poradi || "")).localeCompare(a.datum + (a.poradi || "")));
-    const tag = { prodej: "Prodej", prijem: "Příjem", vydaj: "Výdaj", vyplata: "Provize", zaloha: "Záloha", cesta: "Cesta", nakup: "Nákup" };
+    const tag = { prodej: "Prodej", prijem: "Příjem", vydaj: "Výdaj", vyplata: "Provize", zaloha: "Záloha", splatka: "Splátka", cesta: "Cesta", nakup: "Nákup" };
     const pohybRow = r => { const el = r.attr ? "button" : "div"; return `<${el} class="row" ${r.attr || ""}>
             <span class="tag tag-${r.druh}">${tag[r.druh]}</span>
             <div class="row-main"><div class="row-title">${r.title}</div><div class="row-sub">${fmtDate(r.datum)}${r.sub ? " · " + r.sub : ""}</div></div>
-            <div class="row-end num"><strong${r.plus ? ' style="color:var(--ok)"' : ""}>${r.plus ? "+" : "−"}${fmtKc(r.castka)}</strong>${r.pod ? `<div class="row-sub">${r.pod}</div>` : ""}</div>
+            <div class="row-end num"><strong${r.znak === "+" ? ' style="color:var(--ok)"' : ""}>${r.znak}${fmtKc(r.castka)}</strong>${r.pod ? `<div class="row-sub">${r.pod}</div>` : ""}</div>
           </${el}>`; };
     $("#view").innerHTML = `
       <div class="view-head"><h1>Finance</h1><button class="btn" data-new="zaloha">Záloha</button><button class="btn" data-new="vyplata">Vyplatit provizi</button><button class="btn primary" data-new="vydaj">+ Záznam</button></div>
@@ -1381,35 +1391,43 @@
     $$("[data-cesta]").forEach(b => b.addEventListener("click", () => cestaForm(state.db.cesty.find(c => c.id === b.dataset.cesta))));
   }
 
-  function finForm(existing, typ) {
+  function finForm(existing, typ, komu) {
     const st = stats(periodRange("vse"));
-    const f = existing ? { ...existing } : { id: uid(), datum: today(), typ: typ || "vydaj", kategorie: "", castka: "", komu: "marketa", poznamka: "" };
+    const f = existing ? { ...existing } : { id: uid(), datum: today(), typ: typ || "vydaj", kategorie: "", castka: "", komu: komu || "marketa", poznamka: "" };
     const body = `<div class="f">
-      <fieldset><legend>Typ</legend><div class="seg">${segs("typ", { vydaj: "Výdaj", prijem: "Příjem", vyplata: "Výplata", zaloha: "Záloha" }, f.typ)}</div></fieldset>
+      <fieldset><legend>Typ</legend><div class="seg">${segs("typ", { vydaj: "Výdaj", prijem: "Příjem", vyplata: "Výplata", zaloha: "Záloha", splatka: "Splátka" }, f.typ)}</div></fieldset>
       <div class="f2">
         <label class="field"><span>Datum</span><input type="date" name="datum" value="${esc(f.datum)}" required></label>
         <label class="field"><span>Částka Kč</span><input name="castka" inputmode="decimal" value="${esc(f.castka)}" required></label>
       </div>
       <label class="field" data-kat><span>Kategorie</span><select name="kategorie"></select><span class="hint hidden" data-kat-hint>Jen vlasy, které nejdou do prodeje (cvičné culíky). Culíky na prodej patří do Nákupy, letenky a ubytování do Nákupy → Cesty.</span></label>
-      <label class="field" data-komu><span>Komu</span><select name="komu">${Object.entries(PEOPLE).map(([k, v]) => `<option value="${k}" ${k === f.komu ? "selected" : ""}>${v} (k výplatě ${fmtKc(st.provize[k].celkem - st.provize[k].vyplaceno)})</option>`).join("")}</select></label>
-      <p class="note info hidden" data-zaloha-hint>Záloha se strhne z budoucích provizí. Dokud je provizí méně, ukazuje Přehled zbývající zálohu.</p>
+      <label class="field" data-komu><span>Komu</span><select name="komu">${Object.entries(PEOPLE).map(([k, v]) => `<option value="${k}" ${k === f.komu ? "selected" : ""}>${v} (k výplatě ${fmtKc(st.provize[k].celkem - st.provize[k].vyplaceno)}${st.provize[k].zaloha > 0 ? ", záloha " + fmtKc(st.provize[k].zaloha) : ""})</option>`).join("")}</select></label>
+      <p class="note info hidden" data-zaloha-hint>Záloha je dluh vůči firmě. Z provizí se sama nestrhává, splácí se ručně přes Splátku.</p>
+      <p class="note info hidden" data-splatka-hint>Splátka se strhne z provize: o tuto částku se sníží k výplatě i záloha. Peníze se nehýbou.</p>
       <label class="field"><span>Poznámka</span><input name="poznamka" value="${esc(f.poznamka)}"></label>
       ${existing && f.typ === "vydaj" ? `<div class="note info">Je to letenka, ubytování nebo jiný náklad cesty za nákupem? Přesuňte ho do cesty, pak se započítá do ceny culíků.
         <div style="margin-top:8px"><button type="button" class="btn small" data-presun>Přesunout do cesty</button></div></div>` : ""}
     </div>`;
     openSheet(existing ? "Záznam" : "Nový záznam", body, () => {
       const fd = new FormData($("#sheet-form"));
-      const rec = { ...f, typ: fd.get("typ"), datum: fd.get("datum"), castka: num(fd.get("castka")), kategorie: ["vyplata", "zaloha"].includes(fd.get("typ")) ? "" : fd.get("kategorie"), komu: ["vyplata", "zaloha"].includes(fd.get("typ")) ? fd.get("komu") : "", poznamka: fd.get("poznamka") };
+      const rec = { ...f, typ: fd.get("typ"), datum: fd.get("datum"), castka: num(fd.get("castka")), kategorie: OSOBNI.includes(fd.get("typ")) ? "" : fd.get("kategorie"), komu: OSOBNI.includes(fd.get("typ")) ? fd.get("komu") : "", poznamka: fd.get("poznamka") };
       if (rec.castka <= 0) { toast("Zadejte částku.", true); return false; }
+      if (rec.typ === "splatka") {
+        const p = st.provize[rec.komu];
+        const puvodni = existing?.typ === "splatka" && existing.komu === rec.komu ? num(existing.castka) : 0;
+        if (rec.castka > p.zaloha + puvodni) { toast(`${PEOPLE[rec.komu]} má zálohu jen ${fmtKc(p.zaloha + puvodni)}.`, true); return false; }
+        if (rec.castka > p.celkem - p.vyplaceno + puvodni) { toast(`${PEOPLE[rec.komu]} má k výplatě jen ${fmtKc(Math.max(0, p.celkem - p.vyplaceno + puvodni))}, splátka se strhává z provize.`, true); return false; }
+      }
       return save([{ type: "upsert", col: "finance", rec }], "Uloženo");
     }, existing ? () => confirm("Smazat záznam?") && save([{ type: "delete", col: "finance", id: f.id }], "Smazáno") : null);
     $("[data-presun]")?.addEventListener("click", () => { closeSheet(); presunDoCesty(f); });
     const root = $(".sheet");
     const upd = () => {
       const t = $("[name=typ]:checked", root).value;
-      $("[data-kat]", root).classList.toggle("hidden", t === "vyplata" || t === "zaloha");
-      $("[data-komu]", root).classList.toggle("hidden", t !== "vyplata" && t !== "zaloha");
+      $("[data-kat]", root).classList.toggle("hidden", OSOBNI.includes(t));
+      $("[data-komu]", root).classList.toggle("hidden", !OSOBNI.includes(t));
       $("[data-zaloha-hint]", root).classList.toggle("hidden", t !== "zaloha");
+      $("[data-splatka-hint]", root).classList.toggle("hidden", t !== "splatka");
       const sel = $("[name=kategorie]", root);
       const cur = sel.value || f.kategorie;
       const kats = t === "prijem" ? KAT_PRIJEM : KAT_VYDAJ;
@@ -1719,7 +1737,7 @@
     } else if (kind === "finance") {
       name = `silki-finance-${stamp}.csv`; type = "text/csv";
       content = csv([["Datum", "Typ", "Kategorie / komu", "Částka", "Poznámka"],
-        ...db.finance.map(f => [f.datum, f.typ, ["vyplata", "zaloha"].includes(f.typ) ? PEOPLE[f.komu] : f.kategorie, f.castka, f.poznamka]),
+        ...db.finance.map(f => [f.datum, f.typ, OSOBNI.includes(f.typ) ? PEOPLE[f.komu] : f.kategorie, f.castka, f.poznamka]),
         ...db.nakupy.map(n => [n.datum, "nákup vlasů", n.dodavatel, n.celkem, n.poznamka]),
         ...db.cesty.flatMap(c => (c.naklady || []).map(x => [c.datum_od, "cesta", c.nazev + ": " + (DRUHY[x.druh] || x.druh), x.castka, x.poznamka]))].sort((a, b) => String(a[0]).localeCompare(String(b[0]))));
     } else {
