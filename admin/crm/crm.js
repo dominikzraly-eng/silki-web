@@ -1334,10 +1334,32 @@
   function viewFinance() {
     const range = periodRange(state.period);
     const st = stats(range);
-    const list = state.db.finance.filter(f => inRange(f.datum, range)).sort((a, b) => b.datum.localeCompare(a.datum));
-    const nakupy = state.db.nakupy.filter(n => inRange(n.datum, range));
-    const cesty = state.db.cesty.filter(c => inRange(c.datum_od || "", range));
     const typLabel = { prijem: "Příjem", vydaj: "Výdaj", vyplata: "Výplata provize", zaloha: "Záloha na provize" };
+    // Všechny pohyby peněz v jednom seznamu od nejnovějšího, druh ukazuje barevný štítek.
+    const pohyby = [
+      ...state.db.prodeje.filter(p => p.stav === "zaplaceno" && inRange(p.datum, range)).map(p => ({
+        druh: "prodej", datum: p.datum, poradi: p.createdAt, attr: `data-edit-sale="${p.id}"`, plus: true, castka: p.split?.celkem,
+        title: esc(p.zakaznik_jmeno || "Bez jména"), sub: `${(p.polozky || []).length} ks · ${esc(SELLERS[p.prodejce] || "")}`
+      })),
+      ...state.db.finance.filter(f => inRange(f.datum, range)).map(f => ({
+        druh: f.typ, datum: f.datum, poradi: f.createdAt, attr: `data-edit="${f.id}"`, plus: f.typ === "prijem", castka: f.castka,
+        title: ["vyplata", "zaloha"].includes(f.typ) ? esc(PEOPLE[f.komu] || "") : esc(f.kategorie || typLabel[f.typ]), sub: esc(f.poznamka || "")
+      })),
+      ...state.db.cesty.filter(c => inRange(c.datum_od || "", range)).map(c => ({
+        druh: "cesta", datum: c.datum_od, poradi: c.createdAt, attr: `data-cesta="${c.id}"`, castka: (c.naklady || []).reduce((a, x) => a + num(x.castka), 0),
+        title: esc(c.nazev || ""), sub: "ze sekce Nákupy → Cesty"
+      })),
+      ...state.db.nakupy.filter(n => inRange(n.datum, range)).map(n => ({
+        druh: "nakup", datum: n.datum, poradi: n.createdAt, castka: n.celkem,
+        title: n.dodavatel ? "Vlasy: " + esc(n.dodavatel) : "Vlasy", sub: "ze sekce Nákupy"
+      }))
+    ].sort((a, b) => (b.datum + (b.poradi || "")).localeCompare(a.datum + (a.poradi || "")));
+    const tag = { prodej: "Prodej", prijem: "Příjem", vydaj: "Výdaj", vyplata: "Provize", zaloha: "Záloha", cesta: "Cesta", nakup: "Nákup" };
+    const pohybRow = r => { const el = r.attr ? "button" : "div"; return `<${el} class="row" ${r.attr || ""}>
+            <span class="tag tag-${r.druh}">${tag[r.druh]}</span>
+            <div class="row-main"><div class="row-title">${r.title}</div><div class="row-sub">${fmtDate(r.datum)}${r.sub ? " · " + r.sub : ""}</div></div>
+            <div class="row-end num"${r.plus ? ' style="color:var(--ok)"' : ""}><strong>${r.plus ? "+" : "−"}${fmtKc(r.castka)}</strong></div>
+          </${el}>`; };
     $("#view").innerHTML = `
       <div class="view-head"><h1>Finance</h1><button class="btn" data-new="zaloha">Záloha</button><button class="btn" data-new="vyplata">Vyplatit provizi</button><button class="btn primary" data-new="vydaj">+ Záznam</button></div>
       ${chips("period", { mesic: "Tento měsíc", minuly: "Minulý měsíc", rok: "Letos", vse: "Od začátku" }, state.period)}
@@ -1350,19 +1372,10 @@
       <p class="note info" style="margin-top:14px">Prodeje, nákupy a cesty se sem počítají samy. Letenky a ubytování patří do Nákupy → Cesty. Sem zapisujte jen ostatní: kurzy, reklamu, materiál a výplaty provizí.</p>
       <section class="card">
         <h2>Záznamy v období</h2>
-        ${list.length || nakupy.length || cesty.length ? `<div class="list">
-          ${list.map(f => `<button class="row" data-edit="${f.id}">
-            <div class="row-main"><div class="row-title">${f.typ === "vyplata" ? "Provize: " + esc(PEOPLE[f.komu] || "") : f.typ === "zaloha" ? "Záloha: " + esc(PEOPLE[f.komu] || "") : esc(f.kategorie || typLabel[f.typ])}</div>
-            <div class="row-sub">${fmtDate(f.datum)} · ${typLabel[f.typ]}${f.poznamka ? " · " + esc(f.poznamka) : ""}</div></div>
-            <div class="row-end num" style="color:${f.typ === "prijem" ? "var(--ok)" : "inherit"}"><strong>${f.typ === "prijem" ? "+" : "−"}${fmtKc(f.castka)}</strong></div>
-          </button>`).join("")}
-          ${cesty.map(c => `<button class="row" data-cesta="${c.id}"><div class="row-main"><div class="row-title">Cesta: ${esc(c.nazev || "")}</div>
-            <div class="row-sub">${fmtDate(c.datum_od)} · ze sekce Nákupy → Cesty</div></div><div class="row-end num">−${fmtKc((c.naklady || []).reduce((a, x) => a + num(x.castka), 0))}</div></button>`).join("")}
-          ${nakupy.map(n => `<div class="row"><div class="row-main"><div class="row-title">Nákup vlasů: ${esc(n.dodavatel || "")}</div>
-            <div class="row-sub">${fmtDate(n.datum)} · ze sekce Nákupy</div></div><div class="row-end num">−${fmtKc(n.celkem)}</div></div>`).join("")}
-        </div>` : `<p class="muted small">Žádné záznamy v období.</p>`}
+        ${pohyby.length ? `<div class="list">${pohyby.map(pohybRow).join("")}</div>` : `<p class="muted small">Žádné záznamy v období.</p>`}
       </section>`;
     bindChips("period", v => { state.period = v; render(); });
+    bindCommon();
     $$("[data-new]").forEach(b => b.addEventListener("click", () => finForm(null, b.dataset.new)));
     $$("[data-edit]").forEach(b => b.addEventListener("click", () => finForm(state.db.finance.find(f => f.id === b.dataset.edit))));
     $$("[data-cesta]").forEach(b => b.addEventListener("click", () => cestaForm(state.db.cesty.find(c => c.id === b.dataset.cesta))));
