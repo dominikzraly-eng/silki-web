@@ -62,6 +62,16 @@ collections:
           - { label: "Lokalita — krátká (patička)", name: "lokalita_kratka", widget: "string" }
           - { label: "Lokalita — delší (stránka Kontakt)", name: "lokalita_dlouha", widget: "string" }
 
+  - name: "kurz"
+    label: "Kurz — termín"
+    description: "Datum nadcházejícího kurzu. Promítne se na stránku Kurzy (karta termínu, WhatsApp zpráva, formulář)."
+    files:
+      - file: "data/kurz.json"
+        label: "Termín kurzu"
+        name: "kurz"
+        fields:
+          - { label: "Datum kurzu", name: "datum", widget: "datetime", format: "YYYY-MM-DD", date_format: "D. M. YYYY", time_format: false, picker_utc: true }
+
   - name: "fotky"
     label: "Fotky na webu"
     description: "Jedna konkrétní fotka na jednom konkrétním místě webu. Nahrajte novou a nahradí tu starou přesně tam, kde je popsáno."

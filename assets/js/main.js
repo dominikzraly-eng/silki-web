@@ -327,6 +327,44 @@
       .catch(function () { /* keep static fallback text already in the HTML */ });
   })();
 
+  /* ---------- 9b2. Course date (data/kurz.json) ----------
+     The admin edits one date; the course card, WhatsApp message, form option,
+     page title, meta description and JSON-LD follow it. The HTML keeps the
+     same date as the no-JS fallback. */
+  (function () {
+    var els = document.querySelectorAll("[data-kurz]");
+    if (!els.length) return;
+    fetch("data/kurz.json")
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (kurz) {
+        var m = kurz && /^(\d{4})-(\d{2})-(\d{2})/.exec(kurz.datum || "");
+        if (!m) return;
+        var iso = m[1] + "-" + m[2] + "-" + m[3];
+        var den = +m[3] + ". " + +m[2] + ".";
+        var full = den + " " + m[1];
+        var nbsp = function (s) { return s.replace(/ /g, " "); };
+        var oldDate = /\d{1,2}\. ?\d{1,2}\.( ?\d{4})?/;
+        els.forEach(function (el) {
+          var kind = el.getAttribute("data-kurz");
+          if (kind === "den") el.textContent = nbsp(den);
+          else if (kind === "rok") el.textContent = m[1];
+          else if (kind === "volba") el.textContent = "Kurz prodlužování vlasů — " + nbsp(full) + ", Praha";
+          else if (kind === "wa") {
+            var href = el.getAttribute("href").split("?")[0];
+            el.setAttribute("href", href + "?text=" + encodeURIComponent("Dobrý den, mám zájem o kurz prodlužování vlasů " + full + "."));
+          }
+        });
+        document.title = document.title.replace(oldDate, den);
+        var desc = document.querySelector('meta[name="description"]');
+        if (desc) desc.setAttribute("content", desc.getAttribute("content").replace(oldDate, full));
+        document.querySelectorAll('script[type="application/ld+json"]').forEach(function (s) {
+          if (s.textContent.indexOf("CourseInstance") === -1) return;
+          s.textContent = s.textContent.replace(/("(?:start|end)Date":\s*")[^"]*/g, "$1" + iso);
+        });
+      })
+      .catch(function () { /* keep static fallback date already in the HTML */ });
+  })();
+
   /* ---------- 9c. Named page images (data/images.json) ----------
      Each <img data-img-key="slot_name"> gets its src/alt from one shared
      file, so swapping a photo in the admin updates it without touching
