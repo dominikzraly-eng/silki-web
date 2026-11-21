@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hair prices per gram: dark, medium, blonde | Silki</title>
+  <meta name="description" content="Prices for real European hair: price per gram by length and shade. Total price = weight × price per gram. Plus prices for keratin method work.">
+  <link rel="canonical" href="https://silkihair.cz/en/cenik.html">
+  <link rel="alternate" hreflang="cs" href="https://silkihair.cz/cenik.html">
+  <link rel="alternate" hreflang="de" href="https://silkihair.cz/de/cenik.html">
+  <link rel="alternate" hreflang="en" href="https://silkihair.cz/en/cenik.html">
+  <link rel="alternate" hreflang="x-default" href="https://silkihair.cz/cenik.html">
+  <link rel="icon" href="../favicon.ico" sizes="any">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="icon" type="image/png" sizes="48x48" href="../favicon-48x48.png">
+  <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <link rel="manifest" href="../site.webmanifest">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Silki">
+  <meta property="og:locale" content="en_GB">
+  <meta property="og:title" content="Hair prices per gram: dark, medium, blonde | Silki">
+  <meta property="og:description" content="Prices for real European hair: price per gram by length and shade. Total price = weight × price per gram. Plus prices for keratin method work.">
+  <meta property="og:url" content="https://silkihair.cz/en/cenik.html">
+  <meta property="og:image" content="https://silkihair.cz/assets/img/uploads/whatsapp-image-2026-06-07-at-22.58.55.jpeg">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="../assets/css/styles.css">
+  <style>
+    .unit { font-size: .72rem; font-weight: 500; color: var(--ink-2); letter-spacing: .04em; }
+
+    /* ---- Work: keratin method (compact band above the hair prices) ---- */
+    .prace-wrap { max-width: 940px; margin-inline: auto; }
+    .prace-band {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      background: var(--ivory);
+      border: 1px solid var(--line-2); border-radius: var(--radius-lg);
+      overflow: hidden; box-shadow: var(--shadow-sm);
+    }
+    .prace-item {
+      background: linear-gradient(165deg, var(--ivory) 0%, var(--cream) 100%);
+      padding: var(--sp-6) var(--sp-4);
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      text-align: center; position: relative;
+    }
+    .prace-item + .prace-item { border-left: 1px solid var(--line-2); }
+    .prace-item .pk-name { font-size: .74rem; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-2); font-weight: 600; }
+    .prace-item .pk-price { font-family: var(--font-mono); font-size: 2rem; line-height: 1; color: var(--ink); font-variant-numeric: tabular-nums; }
+    .prace-item .pk-price .pk-c { font-size: 1.05rem; color: var(--ink-2); margin-left: 4px; }
+    .prace-item .pk-price em { display: block; font-style: normal; font-size: .66rem; letter-spacing: .05em; color: var(--gold-deep); margin-top: 8px; }
+    @media (max-width: 620px) {
+      .prace-band { grid-template-columns: 1fr; }
+      .prace-item + .prace-item { border-left: none; border-top: 1px solid var(--line-2); }
+    }
+
+    /* ---- Hair: price per gram ---- */
+    .cenik-hair { position: relative; overflow: hidden; }
+    .cenik-hair .hero-orn.one { top: 60px; right: -60px; }
+    .cenik-hair .hero-orn.two { bottom: 40px; left: -100px; }
+
+    .tier-grid { display: grid; grid-template-columns: 1fr; gap: var(--sp-5); align-items: start; max-width: 560px; margin-inline: auto; }
+    @media (max-width: 860px) { .tier-grid { grid-template-columns: 1fr; } }
+
+    .tier-card { background: var(--ivory); border: 1px solid var(--line-2); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); }
+    .tier-card.premium { box-shadow: 0 18px 44px rgba(176,141,87,.16); border-color: rgba(176,141,87,.34); }
+    .tier-head { padding: var(--sp-6) var(--sp-6) var(--sp-5); position: relative; }
+    .tier-card.premium .tier-head { background: linear-gradient(135deg, rgba(176,141,87,.20), rgba(236,219,208,.34)); }
+    .tier-card.standard .tier-head { background: linear-gradient(135deg, var(--cream-2), var(--cream)); }
+    .tier-head h3 { font-size: 1.5rem; margin: 0; }
+    .tier-sub { font-size: .82rem; line-height: 1.5; color: var(--ink-2); margin-top: var(--sp-3); max-width: 34ch; }
+    .tier-badge { position: absolute; top: var(--sp-5); right: var(--sp-5); font-size: .62rem; text-transform: uppercase; letter-spacing: .09em; font-weight: 700; padding: 5px 11px; border-radius: var(--radius-pill); }
+    .tier-card.premium .tier-badge { background: var(--gold-deep); color: var(--ivory); }
+    .tier-card.standard .tier-badge { background: var(--cream-2); color: var(--gold-deep); border: 1px solid var(--line-2); }
+
+    .tt { width: 100%; border-collapse: collapse; font-family: var(--font-mono); }
+    .tt th, .tt td { padding: 8px 14px; text-align: right; font-size: .84rem; font-variant-numeric: tabular-nums; border-bottom: 1px solid var(--line-2); }
+    .tt thead th { font-family: var(--font-body); font-size: .64rem; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-2); font-weight: 600; }
+    .tt th:first-child, .tt td:first-child { text-align: left; font-weight: 600; color: var(--ink); }
+    .tt tbody tr:last-child td { border-bottom: none; }
+    .tt tbody tr { transition: background var(--dur-1) var(--ease-out); }
+    .tt tbody tr:hover { background: var(--cream); }
+    .tt .u { font-size: .58rem; color: var(--ink-2); letter-spacing: .03em; }
+    @media (max-width: 420px) { .tt th, .tt td { padding: 8px 9px; font-size: .8rem; } }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="container nav-inner">
+      <a href="index.html" class="brand" aria-label="Silki, home">Silki<span class="dot">.</span></a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="sortiment.html">Shop</a>
+        <a href="kurzy.html">Courses</a>
+        <a href="pro-kadernice.html">For salons</a>
+        <a href="cenik.html" aria-current="page">Prices</a>
+        <a href="o-nas.html">About us</a>
+        <a href="kontakt.html">Contact</a>
+      </nav>
+      <div class="nav-actions">
+        <nav class="lang-switch" aria-label="Language"><a href="../cenik.html" lang="cs" hreflang="cs">CZ</a><a href="../de/cenik.html" lang="de" hreflang="de">DE</a><a href="cenik.html" lang="en" aria-current="true">EN</a></nav>
+        <a href="kontakt.html#poptavka" class="btn btn-primary nav-cta">Enquire</a>
+        <button class="burger" aria-label="Menu" aria-expanded="false" aria-controls="drawer"><span></span></button>
+      </div>
+    </div>
+  </header>
+
+  <div class="drawer" id="drawer">
+    <div class="drawer-scrim"></div>
+    <aside class="drawer-panel" aria-label="Mobile navigation">
+      <a href="sortiment.html" class="drawer-link">Shop</a>
+      <a href="kurzy.html" class="drawer-link">Courses</a>
+      <a href="pro-kadernice.html" class="drawer-link">For salons</a>
+      <a href="cenik.html" class="drawer-link" aria-current="page">Prices</a>
+      <a href="o-nas.html" class="drawer-link">About us</a>
+      <a href="pece.html" class="drawer-link">Care &amp; choosing</a>
+      <a href="blond.html" class="drawer-link">Blonde</a>
+      <a href="reference.html" class="drawer-link">Reviews</a>
+      <a href="kontakt.html" class="drawer-link">Contact</a>
+      <div class="drawer-foot">
+        <a href="kontakt.html#poptavka" class="btn btn-primary btn-block" data-close-menu>No-obligation enquiry</a>
+        <p class="meta">WhatsApp <span data-site="telefon_zobrazit">+420&nbsp;608&nbsp;784&nbsp;440</span> · <span data-site="instagram_handle">@silki_hair_cz</span></p>
+      </div>
+      <nav class="lang-switch drawer-lang" aria-label="Language"><a href="../cenik.html" lang="cs" hreflang="cs">CZ</a><a href="../de/cenik.html" lang="de" hreflang="de">DE</a><a href="cenik.html" lang="en" aria-current="true">EN</a></nav>
+    </aside>
+  </div>
+
+  <main id="main">
+    <section class="page-hero">
+      <div class="container narrow">
+        <span class="eyebrow center reveal in">Prices</span>
+        <h1 class="reveal in" data-delay="1" style="margin-top:var(--sp-4)">Prices per gram</h1>
+        <p class="reveal in" data-delay="2">All prices are in Czech crowns (CZK).</p>
+        <p class="reveal in" data-delay="2">Hair is always priced <strong>per gram</strong> by length and shade, plus the cost of the work depending on the method. To work out the final price of a piece, use <span class="serif-accent">weight&nbsp;×&nbsp;price per gram</span>.</p>
+      </div>
+    </section>
+
+    <!-- ===== WORK: KERATIN METHOD (compact band above the hair prices) ===== -->
+    <section class="section" style="padding-top:var(--sp-5);padding-bottom:var(--sp-6)">
+      <div class="container">
+        <div class="section-head center reveal in" style="margin-bottom:var(--sp-6)">
+          <h2>Keratin method extensions</h2>
+          <p>The cost of the work depends on the technique. We always confirm the final amount based on the number of strands and the scope of the work.</p>
+        </div>
+        <div class="prace-wrap reveal in">
+          <div class="prace-band">
+            <div class="prace-item"><span class="pk-name">Application</span><span class="pk-price">28<span class="pk-c">CZK</span><em>per strand</em></span></div>
+            <div class="prace-item"><span class="pk-name">Refit</span><span class="pk-price">38<span class="pk-c">CZK</span><em>per strand</em></span></div>
+            <div class="prace-item"><span class="pk-name">Re-bonding</span><span class="pk-price">10<span class="pk-c">CZK</span><em>per strand</em></span></div>
+          </div>
+          <p class="form-note" style="text-align:center;margin-top:var(--sp-4)">Prices for the work are a guide. We'll give you an exact quote at a consultation.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== HAIR: PRICE PER GRAM ===== -->
+    <section class="section cenik-hair bg-cream2" style="padding-top:var(--sp-8)">
+      <div class="container">
+        <div class="section-head center reveal in" style="margin-bottom:var(--sp-7)">
+          <h2>Price per gram</h2>
+          <p>Virgin European hair. Dark and medium shades are chemical-free, and we lighten blonde gently. Prices are per gram by length and shade. The final price of a piece is <span class="serif-accent">weight&nbsp;×&nbsp;price per gram</span>.</p>
+        </div>
+
+        <div class="tier-grid reveal in">
+          <!-- PREMIUM -->
+          <article class="tier-card premium">
+            <div class="tier-head">
+              <h3>European virgin hair</h3>
+              <p class="tier-sub">Hand-picked piece by piece.</p>
+            </div>
+            <table class="tt">
+              <caption class="sr-only">European virgin hair prices: CZK per gram by length and shade</caption>
+              <thead><tr><th>Length <span class="u">cm</span></th><th>Dark <span class="u">CZK/g</span></th><th>Medium <span class="u">CZK/g</span></th><th>Blonde <span class="u">CZK/g</span></th></tr></thead>
+              <tbody>
+                <tr><td>30–35</td><td>58</td><td>65</td><td>69</td></tr>
+                <tr><td>35–40</td><td>76</td><td>87</td><td>90</td></tr>
+                <tr><td>41–45</td><td>106</td><td>113</td><td>126</td></tr>
+                <tr><td>46–50</td><td>116</td><td>136</td><td>140</td></tr>
+                <tr><td>51–55</td><td>135</td><td>159</td><td>163</td></tr>
+                <tr><td>56–60</td><td>140</td><td>166</td><td>172</td></tr>
+                <tr><td>61–65</td><td>147</td><td>172</td><td>176</td></tr>
+                <tr><td>66–70</td><td>156</td><td>182</td><td>186</td></tr>
+                <tr><td>71–75</td><td>161</td><td>185</td><td>188</td></tr>
+                <tr><td>76–80</td><td>164</td><td>190</td><td>194</td></tr>
+                <tr><td>81–85</td><td>166</td><td>199</td><td>205</td></tr>
+                <tr><td>85–90</td><td>177</td><td>207</td><td>213</td></tr>
+              </tbody>
+            </table>
+          </article>
+        </div>
+
+        <p class="form-note" style="text-align:center;max-width:62ch;margin:var(--sp-7) auto 0">
+          All prices are per gram in CZK. Virgin hair, hand-picked piece by piece. You'll find the weight and price of each piece in the <a href="sortiment.html" class="link-arrow" style="display:inline-flex">shop</a>.
+        </p>
+
+        <div style="text-align:center;margin-top:var(--sp-7);display:flex;gap:var(--sp-4);justify-content:center;flex-wrap:wrap">
+          <a href="sortiment.html" class="btn btn-primary">Browse the shop</a>
+          <a href="kontakt.html#poptavka" class="btn btn-gold">No-obligation enquiry</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <a href="index.html" class="brand">Silki<span class="dot">.</span></a>
+          <p class="f-about">Virgin European hair, hand-picked piece by piece. Dark and medium shades are chemical-free, and we lighten blonde gently.</p>
+          <div class="socials">
+            <a href="https://instagram.com/silki_hair_cz" aria-label="Instagram" target="_blank" rel="noopener" data-site-href="instagram_link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
+            <a href="https://wa.me/420608784440" aria-label="WhatsApp" target="_blank" rel="noopener" data-site-href="wa_link"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 00-8.6 15l-1.3 4.8 4.9-1.3A10 10 0 1012 2zm0 2a8 8 0 11-4.2 14.8l-.3-.2-2.9.8.8-2.8-.2-.3A8 8 0 0112 4zm-2.7 4c-.2 0-.5.1-.7.4-.3.3-.9.9-.9 2.1s.9 2.4 1 2.6c.2.2 1.8 2.9 4.5 3.9 2.2.9 2.7.7 3.2.7.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2l-.6-.3c-.3-.2-1.5-.8-1.7-.9-.3-.1-.4-.1-.6.1l-.8 1c-.2.2-.3.2-.5.1-.7-.3-1.4-.6-2.2-1.5-.6-.7-1-1.5-1.2-1.7-.1-.3 0-.4.1-.5l.4-.5c.1-.2.2-.3.2-.5v-.4c0-.2-.6-1.5-.8-2-.2-.4-.4-.4-.6-.4z"/></svg></a>
+          </div>
+        </div>
+        <div><h4>What we offer</h4><ul class="f-links"><li><a href="sortiment.html">Shop</a></li><li><a href="cenik.html">Prices</a></li><li><a href="kurzy.html">Courses</a></li><li><a href="pro-kadernice.html">For salons</a></li></ul></div>
+        <div><h4>Information</h4><ul class="f-links"><li><a href="o-nas.html">About us</a></li><li><a href="pece.html">Care &amp; choosing</a></li><li><a href="blond.html">Blonde</a></li><li><a href="reference.html">Reviews</a></li><li><a href="kontakt.html#faq">FAQ</a></li></ul></div>
+        <div><h4>Contact</h4><div class="f-contact"><span data-site="lokalita_kratka">Prague · Czech Republic and EU</span><a href="https://wa.me/420608784440" target="_blank" rel="noopener" data-site-href="wa_link">WhatsApp <span data-site="telefon_zobrazit">+420&nbsp;608&nbsp;784&nbsp;440</span></a><a href="mailto:tereza.celedova@gmail.com" data-site-href="mailto_link"><span data-site="email">tereza.celedova@gmail.com</span></a><a href="https://instagram.com/silki_hair_cz" target="_blank" rel="noopener">@silki_hair_cz</a></div></div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span data-year>2026</span> Silki · IČO (company ID)&nbsp;09787160</span>
+        <span><a href="obchodni-podminky.html">Terms and conditions</a> · <a href="ochrana-osobnich-udaju.html">Privacy policy</a></span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,10 +1,14 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+/* Písma hostovaná u nás (Cormorant Garamond, Hanken Grotesk; SIL Open Font License). Jen latinka a latinka rozšířená (čeština, němčina). */
+@font-face { font-family: 'Cormorant Garamond'; font-style: italic; font-weight: 500 600; font-display: swap; src: url('../fonts/cormorant-garamond-italic-latin-ext.woff2') format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'Cormorant Garamond'; font-style: italic; font-weight: 500 600; font-display: swap; src: url('../fonts/cormorant-garamond-italic-latin.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Cormorant Garamond'; font-style: normal; font-weight: 500 700; font-display: swap; src: url('../fonts/cormorant-garamond-normal-latin-ext.woff2') format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'Cormorant Garamond'; font-style: normal; font-weight: 500 700; font-display: swap; src: url('../fonts/cormorant-garamond-normal-latin.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Hanken Grotesk'; font-style: normal; font-weight: 400 700; font-display: swap; src: url('../fonts/hanken-grotesk-normal-latin-ext.woff2') format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'Hanken Grotesk'; font-style: normal; font-weight: 400 700; font-display: swap; src: url('../fonts/hanken-grotesk-normal-latin.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 
 /* =================================================================
-   SILKI — Evropské vlasy prémiové kvality
-   Design system · "Atelier of the gram"
-   Type: Cormorant Garamond (display) · Inter (body) · IBM Plex Mono (data)
-   Signature: everything measured is set in mono — cm, grams, Kč/g, refs
+   Silki: evropské vlasy na prodlužování
+   Písma: Cormorant Garamond (nadpisy), Hanken Grotesk (text a čísla, tabulková číslice)
    ================================================================= */
 
 /* ---------- Design tokens ---------- */
@@ -17,7 +21,7 @@
   --ink:        #241D18;   /* primary text — high contrast on cream */
   --ink-2:      #574A40;   /* secondary text — meets AA on cream */
   --gold:       #B08D57;   /* decorative accent / borders / fills */
-  --gold-deep:  #8A6A3B;   /* gold for text (AA on cream) */
+  --gold-deep:  #7A5C30;   /* zlatá pro text, AA i na cream-2 */
   --line:       rgba(36, 29, 24, 0.12);
   --line-2:     rgba(36, 29, 24, 0.07);
   --shadow-sm:  0 1px 2px rgba(36,29,24,.06), 0 2px 6px rgba(36,29,24,.05);
@@ -26,8 +30,8 @@
 
   /* Type */
   --font-display: "Cormorant Garamond", Georgia, "Times New Roman", serif;
-  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-mono: "IBM Plex Mono", "SFMono-Regular", ui-monospace, "Cascadia Mono", Menlo, monospace;
+  --font-body: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-body);
 
   /* Spacing scale (4 / 8 pt rhythm) */
   --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
@@ -87,26 +91,12 @@ p { color: var(--ink-2); }
 strong { color: var(--ink); font-weight: 600; }
 
 .eyebrow {
-  font-family: var(--font-mono);
-  font-size: .72rem;
-  font-weight: 500;
-  letter-spacing: .2em;
+  font-family: var(--font-body);
+  font-size: .82rem;
+  font-weight: 600;
+  letter-spacing: .06em;
   text-transform: uppercase;
   color: var(--gold-deep);
-  display: inline-flex;
-  align-items: center;
-  gap: var(--sp-3);
-}
-.eyebrow::before {
-  content: "";
-  width: 32px; height: 1px;
-  background: var(--gold);
-  display: inline-block;
-}
-.eyebrow.center::after {
-  content: "";
-  width: 32px; height: 1px;
-  background: var(--gold);
   display: inline-block;
 }
 .lead { font-size: clamp(1.05rem, 1.6vw, 1.22rem); color: var(--ink-2); max-width: 60ch; }
@@ -127,14 +117,13 @@ strong { color: var(--ink); font-weight: 600; }
 .bg-ink h1, .bg-ink h2, .bg-ink h3 { color: var(--ivory); }
 .bg-ink p { color: rgba(253,251,248,.74); }
 .bg-ink .eyebrow { color: #D8B884; }
-.bg-ink .eyebrow::before, .bg-ink .eyebrow.center::after { background: #C7A06A; }
 
 /* ---------- Buttons ---------- */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-2);
   min-height: 52px;
   padding: 0 var(--sp-6);
-  border-radius: var(--radius-pill);
+  border-radius: 10px;
   font-size: .96rem; font-weight: 600; letter-spacing: .01em;
   transition: transform var(--dur-1) var(--ease-out),
               box-shadow var(--dur-1) var(--ease-out),
@@ -266,9 +255,6 @@ body.menu-open .drawer-panel { transform: translateX(0); }
 .hero-media .badge .stars svg { width: 16px; height: 16px; }
 .hero-media .badge .b-text strong { display: block; font-size: .95rem; }
 .hero-media .badge .b-text span { font-size: .8rem; color: var(--ink-2); }
-.hero-orn { position: absolute; z-index: -1; border-radius: 50%; filter: blur(2px); opacity: .5; }
-.hero-orn.one { width: 280px; height: 280px; right: -80px; top: 40px; background: radial-gradient(circle, rgba(176,141,87,.25), transparent 70%); }
-.hero-orn.two { width: 340px; height: 340px; left: -120px; bottom: -60px; background: radial-gradient(circle, rgba(236,219,208,.6), transparent 70%); }
 
 /* ---------- Marquee / logos ---------- */
 .trust { border-block: 1px solid var(--line-2); }
@@ -416,7 +402,7 @@ body.menu-open .drawer-panel { transform: translateX(0); }
 }
 .field textarea { min-height: 130px; resize: vertical; line-height: 1.6; }
 .field input::placeholder, .field textarea::placeholder { color: #9A8B7E; }
-.field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--gold); background: var(--ivory); box-shadow: 0 0 0 4px rgba(176,141,87,.16); }
+.field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--gold-deep); background: var(--ivory); box-shadow: 0 0 0 3px rgba(122,92,48,.28); }
 .field.invalid input, .field.invalid select, .field.invalid textarea { border-color: #B4452F; }
 .field .err { font-size: .82rem; color: #B4452F; display: none; }
 .field.invalid .err { display: block; }
@@ -450,9 +436,6 @@ body.menu-open .drawer-panel { transform: translateX(0); }
 .cta-band .container { position: relative; z-index: 1; text-align: center; }
 .cta-band h2 { max-width: 18ch; margin-inline: auto; }
 .cta-band .actions { margin-top: var(--sp-6); display: flex; gap: var(--sp-4); justify-content: center; flex-wrap: wrap; }
-.cta-orn { position: absolute; border-radius: 50%; background: radial-gradient(circle, rgba(176,141,87,.18), transparent 70%); }
-.cta-orn.a { width: 360px; height: 360px; top: -120px; left: -80px; }
-.cta-orn.b { width: 420px; height: 420px; bottom: -160px; right: -100px; }
 
 /* ---------- Page hero (interior) ---------- */
 .page-hero { padding-top: 136px; padding-bottom: var(--sp-8); text-align: center; }
@@ -644,45 +627,34 @@ html[lang="en"] [data-lang-en] { display: revert; }
 /* ---------- Mono utility ---------- */
 .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 
-/* ---------- Signature: weigh-by-gram hero ---------- */
-.weigh {
-  position: relative;
-  background: var(--ivory);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  padding: clamp(22px, 3vw, 34px);
-  box-shadow: var(--shadow-lg);
-}
-.weigh::before {
-  content: "Nº 001 / specimen";
-  position: absolute; top: 16px; right: 20px;
-  font-family: var(--font-mono); font-size: .64rem; letter-spacing: .14em;
-  text-transform: uppercase; color: var(--ink-2); opacity: .55;
-}
-.weigh .wlabel { font-family: var(--font-mono); font-size: .68rem; letter-spacing: .2em; text-transform: uppercase; color: var(--gold-deep); }
-.weigh .wprice { font-family: var(--font-mono); font-size: clamp(2.4rem, 5.5vw, 3.4rem); font-weight: 500; color: var(--ink); font-variant-numeric: tabular-nums; line-height: 1; margin-top: 8px; }
-.weigh .wformula { font-family: var(--font-mono); font-size: .82rem; color: var(--ink-2); margin-top: 10px; }
-.weigh .wformula b { color: var(--ink); font-weight: 600; }
-.weigh .shades { display: flex; gap: 8px; margin: 22px 0 6px; }
-.weigh .shades button {
-  flex: 1; min-height: 44px; border: 1px solid var(--line); border-radius: 12px;
-  font-family: var(--font-mono); font-size: .76rem; letter-spacing: .03em; color: var(--ink-2);
-  background: var(--cream); cursor: pointer;
-  transition: background var(--dur-1) var(--ease-out), color var(--dur-1) var(--ease-out), border-color var(--dur-1) var(--ease-out);
-}
-.weigh .shades button:hover { border-color: var(--ink); color: var(--ink); }
-.weigh .shades button[aria-pressed="true"] { background: var(--ink); color: var(--ivory); border-color: var(--ink); }
-.weigh .ctrl { margin-top: 18px; }
-.weigh .crow { display: flex; justify-content: space-between; align-items: baseline; font-family: var(--font-mono); font-size: .78rem; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2); margin-bottom: 8px; }
-.weigh .crow b { color: var(--ink); font-weight: 600; font-size: .92rem; text-transform: none; letter-spacing: 0; }
-.weigh input[type="range"] { width: 100%; height: 28px; margin: 0; cursor: ew-resize; accent-color: var(--gold-deep); background: transparent; }
-.weigh .wnote { display: flex; align-items: center; gap: 8px; margin-top: 20px; padding-top: 16px; border-top: 1px dashed var(--line); font-family: var(--font-mono); font-size: .68rem; letter-spacing: .03em; color: var(--ink-2); }
-.weigh .wnote svg { width: 15px; height: 15px; color: var(--gold-deep); flex: none; }
-
-/* Hero ruler accent (cm ticks) — purely decorative */
+/* Pravítko vedle hera (dekorace) */
 .hero { position: relative; }
 .ruler { position: absolute; top: 0; bottom: 0; left: 0; width: 22px; display: flex; flex-direction: column; justify-content: space-between; padding: 140px 0 40px; pointer-events: none; opacity: .5; }
 .ruler i { display: block; height: 1px; background: var(--line); }
 .ruler i:nth-child(odd) { width: 14px; }
 .ruler i:nth-child(even) { width: 8px; }
 @media (max-width: 1024px) { .ruler { display: none; } }
+
+/* ---------- Přeskočit na obsah ---------- */
+.skip-link { position: absolute; left: 12px; top: -60px; z-index: 1000; background: var(--ink); color: var(--ivory); padding: 10px 16px; border-radius: 8px; font-weight: 600; }
+.skip-link:focus { top: 12px; }
+
+/* ---------- Přepínač jazyka ---------- */
+.lang-switch { display: inline-flex; align-items: center; gap: 2px; font-size: .8rem; font-weight: 600; letter-spacing: .04em; }
+.lang-switch a { padding: 8px 7px; min-height: 36px; display: inline-flex; align-items: center; color: var(--ink-2); border-radius: 6px; }
+.lang-switch a:hover { color: var(--ink); }
+.lang-switch a[aria-current="true"] { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
+.nav-actions .lang-switch { margin-right: var(--sp-2); }
+.drawer-lang { margin-top: var(--sp-5); font-size: 1rem; gap: var(--sp-2); }
+.drawer-lang a { min-height: 44px; padding: 8px 12px; border: 1px solid var(--line); }
+@media (max-width: 760px) { .nav-actions .lang-switch { margin-right: 0; font-size: .76rem; } .nav-actions .lang-switch a { padding: 8px 5px; min-height: 44px; } }
+
+/* ---------- Poznámka pod recenzemi ---------- */
+.review-note { font-size: .84rem; color: var(--ink-2); margin-top: var(--sp-5); max-width: 70ch; }
+.section-head.center + * .review-note, .review-note.center { margin-inline: auto; text-align: center; }
+
+[hidden] { display: none !important; }
+
+/* Dlouhá německá slova v nadpisech */
+h1, h2, h3 { overflow-wrap: break-word; }
+:lang(de) h1, :lang(de) h2, :lang(de) h3 { hyphens: auto; -webkit-hyphens: auto; }

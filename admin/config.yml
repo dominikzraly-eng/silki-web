@@ -58,13 +58,12 @@ collections:
           - { label: "E-mail", name: "email", widget: "string" }
           - { label: "Instagram — zobrazovaný handle", name: "instagram_handle", widget: "string" }
           - { label: "Instagram — odkaz", name: "instagram_url", widget: "string" }
-          - { label: "Facebook — odkaz", name: "facebook_url", widget: "string", required: false }
           - { label: "Lokalita — krátká (patička)", name: "lokalita_kratka", widget: "string" }
           - { label: "Lokalita — delší (stránka Kontakt)", name: "lokalita_dlouha", widget: "string" }
 
   - name: "kurz"
     label: "Kurz — termín"
-    description: "Datum nadcházejícího kurzu. Promítne se na stránku Kurzy (karta termínu, WhatsApp zpráva, formulář)."
+    description: "Datum nadcházejícího kurzu. Promítne se na stránku Kurzy ve všech jazycích (karta termínu, WhatsApp zpráva, formulář). Když datum proběhne, web sám ukáže Další termín brzy."
     files:
       - file: "data/kurz.json"
         label: "Termín kurzu"

@@ -1,15 +1,219 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://silkihair.cz/</loc><priority>1.0</priority></url>
-  <url><loc>https://silkihair.cz/sortiment.html</loc><priority>0.9</priority></url>
-  <url><loc>https://silkihair.cz/pro-kadernice.html</loc><priority>0.9</priority></url>
-  <url><loc>https://silkihair.cz/kurzy.html</loc><priority>0.8</priority></url>
-  <url><loc>https://silkihair.cz/cenik.html</loc><priority>0.8</priority></url>
-  <url><loc>https://silkihair.cz/pece.html</loc><priority>0.7</priority></url>
-  <url><loc>https://silkihair.cz/blond.html</loc><priority>0.7</priority></url>
-  <url><loc>https://silkihair.cz/reference.html</loc><priority>0.6</priority></url>
-  <url><loc>https://silkihair.cz/o-nas.html</loc><priority>0.6</priority></url>
-  <url><loc>https://silkihair.cz/kontakt.html</loc><priority>0.8</priority></url>
-  <url><loc>https://silkihair.cz/obchodni-podminky.html</loc><priority>0.3</priority></url>
-  <url><loc>https://silkihair.cz/ochrana-osobnich-udaju.html</loc><priority>0.3</priority></url>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url><loc>https://silkihair.cz/</loc><lastmod>2026-11-21</lastmod><priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://silkihair.cz/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://silkihair.cz/de/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://silkihair.cz/en/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://silkihair.cz/"/>
+  </url>
+  <url><loc>https://silkihair.cz/de/</loc><lastmod>2026-11-21</lastmod><priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://silkihair.cz/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://silkihair.cz/de/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://silkihair.cz/en/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://silkihair.cz/"/>
+  </url>
+  <url><loc>https://silkihair.cz/en/</loc><lastmod>2026-11-21</lastmod><priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://silkihair.cz/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://silkihair.cz/de/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://silkihair.cz/en/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://silkihair.cz/"/>
+  </url>
+  <url><loc>https://silkihair.cz/sortiment.html</loc><lastmod>2026-11-21</lastmod><priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://silkihair.cz/sortiment.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://silkihair.cz/de/sortiment.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://silkihair.cz/en/sortiment.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://silkihair.cz/sortiment.html"/>
+  </url>
+  <url><loc>https://silkihair.cz/de/sortiment.html</loc><lastmod>2026-11-21</lastmod><priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://silkihair.cz/sortiment.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://silkihair.cz/de/sortiment.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://silkihair.cz/en/sortiment.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://silkihair.cz/sortiment.html"/>
+  </url>
+  <url><loc>https://silkihair.cz/en/sortiment.html</loc><lastmod>2026-11-21</lastmod><priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://silkihair.cz/sortiment.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://silkihair.cz/de/sortiment.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://silkihair.cz/en/sortiment.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://silkihair.cz/sortiment.html"/>
+  </url>
+  <url><loc>https://silkihair.cz/pro-kadernice.html</loc><lastmod>2026-11-21</lastmod><priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://silkihair.cz/pro-kadernice.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://silkihair.cz/de/pro-kadernice.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://silkihair.cz/en/pro-kadernice.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://silkihair.cz/pro-kadernice.html"/>
+  </url>
+  <url><loc>https://silkihair.cz/de/pro-kadernice.html</loc><lastmod>2026-11-21</lastmod><priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://silkihair.cz/pro-kadernice.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://silkihair.cz/de/pro-kadernice.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://silkihair.cz/en/pro-kadernice.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://silkihair.cz/pro-kadernice.html"/>
+  </url>
+  <url><loc>https://silkihair.cz/en/pro-kadernice.html</loc><lastmod>2026-11-21</lastmod><priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://silkihair.cz/pro-kadernice.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://silkihair.cz/de/pro-kadernice.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://silkihair.cz/en/pro-kadernice.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://silkihair.cz/pro-kadernice.html"/>
+  </url>
+  <url><loc>https://silkihair.cz/kurzy.html</loc><lastmod>2026-11-21</lastmod><priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://silkihair.cz/kurzy.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://silkihair.cz/de/kurzy.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://silkihair.cz/en/kurzy.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://silkihair.cz/kurzy.html"/>
+  </url>
+  <url><loc>https://silkihair.cz/de/kurzy.html</loc><lastmod>2026-11-21</lastmod><priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://silkihair.cz/kurzy.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://silkihair.cz/de/kurzy.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://silkihair.cz/en/kurzy.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://silkihair.cz/kurzy.html"/>
+  </url>
+  <url><loc>https://silkihair.cz/en/kurzy.html</loc><lastmod>2026-11-21</lastmod><priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://silkihair.cz/kurzy.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://silkihair.cz/de/kurzy.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://silkihair.cz/en/kurzy.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://silkihair.cz/kurzy.html"/>
+  </url>
+  <url><loc>https://silkihair.cz/cenik.html</loc><lastmod>2026-11-21</lastmod><priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://silkihair.cz/cenik.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://silkihair.cz/de/cenik.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://silkihair.cz/en/cenik.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://silkihair.cz/cenik.html"/>
+  </url>
+  <url><loc>https://silkihair.cz/de/cenik.html</loc><lastmod>2026-11-21</lastmod><priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://silkihair.cz/cenik.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://silkihair.cz/de/cenik.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://silkihair.cz/en/cenik.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://silkihair.cz/cenik.html"/>
+  </url>
+  <url><loc>https://silkihair.cz/en/cenik.html</loc><lastmod>2026-11-21</lastmod><priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://silkihair.cz/cenik.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://silkihair.cz/de/cenik.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://silkihair.cz/en/cenik.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://silkihair.cz/cenik.html"/>
+  </url>
+  <url><loc>https://silkihair.cz/pece.html</loc><lastmod>2026-11-21</lastmod><priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://silkihair.cz/pece.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://silkihair.cz/de/pece.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://silkihair.cz/en/pece.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://silkihair.cz/pece.html"/>
+  </url>
+  <url><loc>https://silkihair.cz/de/pece.html</loc><lastmod>2026-11-21</lastmod><priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://silkihair.cz/pece.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://silkihair.cz/de/pece.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://silkihair.cz/en/pece.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://silkihair.cz/pece.html"/>
+  </url>
+  <url><loc>https://silkihair.cz/en/pece.html</loc><lastmod>2026-11-21</lastmod><priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://silkihair.cz/pece.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://silkihair.cz/de/pece.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://silkihair.cz/en/pece.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://silkihair.cz/pece.html"/>
+  </url>
+  <url><loc>https://silkihair.cz/blond.html</loc><lastmod>2026-11-21</lastmod><priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://silkihair.cz/blond.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://silkihair.cz/de/blond.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://silkihair.cz/en/blond.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://silkihair.cz/blond.html"/>
+  </url>
+  <url><loc>https://silkihair.cz/de/blond.html</loc><lastmod>2026-11-21</lastmod><priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://silkihair.cz/blond.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://silkihair.cz/de/blond.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://silkihair.cz/en/blond.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://silkihair.cz/blond.html"/>
+  </url>
+  <url><loc>https://silkihair.cz/en/blond.html</loc><lastmod>2026-11-21</lastmod><priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://silkihair.cz/blond.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://silkihair.cz/de/blond.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://silkihair.cz/en/blond.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://silkihair.cz/blond.html"/>
+  </url>
+  <url><loc>https://silkihair.cz/reference.html</loc><lastmod>2026-11-21</lastmod><priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://silkihair.cz/reference.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://silkihair.cz/de/reference.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://silkihair.cz/en/reference.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://silkihair.cz/reference.html"/>
+  </url>
+  <url><loc>https://silkihair.cz/de/reference.html</loc><lastmod>2026-11-21</lastmod><priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://silkihair.cz/reference.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://silkihair.cz/de/reference.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://silkihair.cz/en/reference.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://silkihair.cz/reference.html"/>
+  </url>
+  <url><loc>https://silkihair.cz/en/reference.html</loc><lastmod>2026-11-21</lastmod><priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://silkihair.cz/reference.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://silkihair.cz/de/reference.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://silkihair.cz/en/reference.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://silkihair.cz/reference.html"/>
+  </url>
+  <url><loc>https://silkihair.cz/o-nas.html</loc><lastmod>2026-11-21</lastmod><priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://silkihair.cz/o-nas.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://silkihair.cz/de/o-nas.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://silkihair.cz/en/o-nas.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://silkihair.cz/o-nas.html"/>
+  </url>
+  <url><loc>https://silkihair.cz/de/o-nas.html</loc><lastmod>2026-11-21</lastmod><priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://silkihair.cz/o-nas.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://silkihair.cz/de/o-nas.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://silkihair.cz/en/o-nas.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://silkihair.cz/o-nas.html"/>
+  </url>
+  <url><loc>https://silkihair.cz/en/o-nas.html</loc><lastmod>2026-11-21</lastmod><priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://silkihair.cz/o-nas.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://silkihair.cz/de/o-nas.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://silkihair.cz/en/o-nas.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://silkihair.cz/o-nas.html"/>
+  </url>
+  <url><loc>https://silkihair.cz/kontakt.html</loc><lastmod>2026-11-21</lastmod><priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://silkihair.cz/kontakt.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://silkihair.cz/de/kontakt.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://silkihair.cz/en/kontakt.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://silkihair.cz/kontakt.html"/>
+  </url>
+  <url><loc>https://silkihair.cz/de/kontakt.html</loc><lastmod>2026-11-21</lastmod><priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://silkihair.cz/kontakt.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://silkihair.cz/de/kontakt.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://silkihair.cz/en/kontakt.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://silkihair.cz/kontakt.html"/>
+  </url>
+  <url><loc>https://silkihair.cz/en/kontakt.html</loc><lastmod>2026-11-21</lastmod><priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://silkihair.cz/kontakt.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://silkihair.cz/de/kontakt.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://silkihair.cz/en/kontakt.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://silkihair.cz/kontakt.html"/>
+  </url>
+  <url><loc>https://silkihair.cz/obchodni-podminky.html</loc><lastmod>2026-11-21</lastmod><priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://silkihair.cz/obchodni-podminky.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://silkihair.cz/de/obchodni-podminky.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://silkihair.cz/en/obchodni-podminky.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://silkihair.cz/obchodni-podminky.html"/>
+  </url>
+  <url><loc>https://silkihair.cz/de/obchodni-podminky.html</loc><lastmod>2026-11-21</lastmod><priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://silkihair.cz/obchodni-podminky.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://silkihair.cz/de/obchodni-podminky.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://silkihair.cz/en/obchodni-podminky.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://silkihair.cz/obchodni-podminky.html"/>
+  </url>
+  <url><loc>https://silkihair.cz/en/obchodni-podminky.html</loc><lastmod>2026-11-21</lastmod><priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://silkihair.cz/obchodni-podminky.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://silkihair.cz/de/obchodni-podminky.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://silkihair.cz/en/obchodni-podminky.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://silkihair.cz/obchodni-podminky.html"/>
+  </url>
+  <url><loc>https://silkihair.cz/ochrana-osobnich-udaju.html</loc><lastmod>2026-11-21</lastmod><priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://silkihair.cz/ochrana-osobnich-udaju.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://silkihair.cz/de/ochrana-osobnich-udaju.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://silkihair.cz/en/ochrana-osobnich-udaju.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://silkihair.cz/ochrana-osobnich-udaju.html"/>
+  </url>
+  <url><loc>https://silkihair.cz/de/ochrana-osobnich-udaju.html</loc><lastmod>2026-11-21</lastmod><priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://silkihair.cz/ochrana-osobnich-udaju.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://silkihair.cz/de/ochrana-osobnich-udaju.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://silkihair.cz/en/ochrana-osobnich-udaju.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://silkihair.cz/ochrana-osobnich-udaju.html"/>
+  </url>
+  <url><loc>https://silkihair.cz/en/ochrana-osobnich-udaju.html</loc><lastmod>2026-11-21</lastmod><priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://silkihair.cz/ochrana-osobnich-udaju.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://silkihair.cz/de/ochrana-osobnich-udaju.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://silkihair.cz/en/ochrana-osobnich-udaju.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://silkihair.cz/ochrana-osobnich-udaju.html"/>
+  </url>
 </urlset>

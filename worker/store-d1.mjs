@@ -31,6 +31,10 @@ export function d1Store(db) {
       const r = await db.prepare("UPDATE kv SET value = ?, version = version + 1 WHERE key = ? AND version = ?").bind(value, key, etag).run();
       return r.meta.changes === 1;
     },
+    // Smaže klíče s daným prefixem, které jsou abecedně menší než hranice (staré zálohy, staré limity)
+    async prune(prefix, before) {
+      await db.prepare("DELETE FROM kv WHERE key >= ? AND key < ? AND substr(key, 1, ?) = ?").bind(prefix, before, prefix.length, prefix).run();
+    },
     async getBinary(key) {
       const r = await db.prepare("SELECT data FROM files WHERE key = ?").bind(key).first();
       if (!r) return null;

@@ -14,9 +14,11 @@ const COLLECTIONS = ["sklad", "prodeje", "nakupy", "cesty", "zakaznici", "financ
 
 // Veřejný vstup z formulářů na webu: jen tyto formuláře a pole, nic jiného se přes něj zapsat nedá.
 const LEAD_FORMS = ["poptavka", "registrace-kadernice", "poptavka-kurz"];
-const LEAD_FIELDS = ["name", "salon", "phone", "email", "shade", "length", "course", "experience", "city", "ico", "interest", "message", "subject"];
+const LEAD_FIELDS = ["name", "salon", "phone", "email", "shade", "length", "course", "experience", "city", "ico", "interest", "message", "subject", "jazyk"];
 const LEAD_LIMIT = 5;            // poptávek z jedné IP
 const LEAD_WINDOW = 60 * 60e3;   // za hodinu
+const LEAD_KEEP = 365 * 864e5;   // nezávazné poptávky nejdéle 12 měsíců od poslední změny
+const BACKUP_KEEP = 30 * 864e5;  // denní zálohy 30 dní
 const MAX_BODY = 512 * 1024;
 const MAX_FOTO = 1900 * 1024;   // D1 má limit řádku 2 MB; telefon fotku zmenší na ~300 kB
 const AGENT_PREFIX = "sck_";
@@ -129,11 +131,19 @@ function applyOps(db, ops, user) {
   return db;
 }
 
+// Poptávky bez změny déle než LEAD_KEEP se mažou (slib v Zásadách ochrany osobních údajů)
+function staraPryc(list) {
+  const hranice = Date.now() - LEAD_KEEP;
+  return list.filter(p => Date.parse(p.updatedAt || p.createdAt || 0) >= hranice);
+}
+
 async function lead(req, url, store, ip) {
   if (req.method !== "POST") return json(405, { error: "Jen POST." });
   // Jen z vlastního webu (prohlížeč posílá Origin; jiný web sem formulář neodešle)
   const origin = req.headers.get("origin");
-  if (origin && new URL(origin).host !== url.host) return json(403, { error: "Nepovolený původ." });
+  let originHost = "";
+  try { originHost = origin ? new URL(origin).host : ""; } catch { originHost = ""; }
+  if (originHost !== url.host) return json(403, { error: "Nepovolený původ." });
   const text = await req.text();
   if (text.length > 20000) return json(413, { error: "Moc dlouhé." });
   let body;
@@ -147,12 +157,14 @@ async function lead(req, url, store, ip) {
   }
   if (!pole.name && !pole.phone && !pole.email) return json(400, { error: "Chybí kontakt." });
 
-  const rlKey = "rl-lead/" + crypto.createHash("sha256").update(ip || "?").digest("hex").slice(0, 24);
-  const rl = (await store.get(rlKey))?.data || { n: 0, t: Date.now() };
-  if (Date.now() - rl.t > LEAD_WINDOW) { rl.n = 0; rl.t = Date.now(); }
+  // Limit po hodinových oknech; okno je v klíči, takže staré klíče jde mazat podle prefixu
+  const okno = "rl-lead/" + String(Math.floor(Date.now() / LEAD_WINDOW)).padStart(8, "0");
+  const rlKey = okno + "/" + crypto.createHash("sha256").update(ip || "?").digest("hex").slice(0, 24);
+  const rl = (await store.get(rlKey))?.data || { n: 0 };
   if (rl.n >= LEAD_LIMIT) return json(429, { error: "Příliš mnoho poptávek, zkuste to později." });
   rl.n++;
   await store.set(rlKey, rl);
+  if (store.prune) await store.prune("rl-lead/", okno);
 
   const now = new Date().toISOString();
   const rec = { id: crypto.randomUUID(), form: body.form, pole, stav: "nova", vyrizuje: "", poznamka: "", zakaznik_id: "", createdAt: now, createdBy: "web", updatedAt: now, updatedBy: "web" };
@@ -160,6 +172,7 @@ async function lead(req, url, store, ip) {
     if (attempt) await new Promise(r => setTimeout(r, 20 + Math.random() * 80 * attempt));
     const cur = await store.get("db");
     const db = normalize(cur?.data || emptyDb());
+    db.poptavky = staraPryc(db.poptavky);
     db.poptavky.push(rec);
     db.poptavky = db.poptavky.slice(-500);
     db.log.unshift({ t: now, u: "web", co: "nová poptávka z webu" });
@@ -249,6 +262,7 @@ export async function handle(req, { store, verifyUser, ip }) {
       let db = normalize(cur?.data || emptyDb());
       try {
         db = applyOps(db, body.ops, session.u);
+        db.poptavky = staraPryc(db.poptavky || []);
       } catch (e) {
         return json(400, { error: e.message });
       }
@@ -256,6 +270,7 @@ export async function handle(req, { store, verifyUser, ip }) {
       if (saved) {
         // Denní záloha: jeden snímek na den, přepisuje se během dne.
         await store.set("backup/" + new Date().toISOString().slice(0, 10), db);
+        if (store.prune) await store.prune("backup/", "backup/" + new Date(Date.now() - BACKUP_KEEP).toISOString().slice(0, 10));
         return json(200, { db });
       }
     }

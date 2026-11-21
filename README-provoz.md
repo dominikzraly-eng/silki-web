@@ -1,4 +1,16 @@
-# Silki — spuštění do provozu (GitHub + Netlify + administrace)
+# Silki: provoz webu
+
+> **Aktuální stav (21. 11. 2026):** web běží na Cloudflare Workeru (`wrangler.toml`, `worker/`), nasazuje se sám po každém commitu do `main` (Workers Builds). Návod níže o Netlify je historický. Přihlášení do administrace řeší `worker/auth.mjs` (GitHub OAuth, oprávnění `public_repo`).
+
+## Jazyky (cs, de, en)
+
+- Česky je kořen webu, německy `/de/`, anglicky `/en/`. Každá stránka má ve všech jazycích stejný název souboru.
+- Texty stránek v DE a EN se mění v kódu (`de/*.html`, `en/*.html`), ne v administraci. Při změně české stránky je potřeba upravit i obě překladové.
+- Data z administrace (culíky, ceny, fotky, termín kurzu, kontakty) se propíšou do všech jazyků samy. Odstíny se překládají v `assets/js/main.js` (sekce 1, `TEXTS`).
+- Poptávky z DE a EN stránek mají v předmětu e-mailu `[DE]` nebo `[EN]` a v CRM pole jazyk.
+- Termín kurzu: když datum v administraci proběhne, web sám ukáže „Další termín brzy“.
+
+## Původní návod (Netlify, historie)
 
 Tenhle dokument je checklist na spuštění webu naostro s administrací, kterou
 budete moci upravovat sami. Kroky dělejte v pořadí — na sebe navazují.

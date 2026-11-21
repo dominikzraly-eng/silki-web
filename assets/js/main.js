@@ -1,47 +1,84 @@
 /* =================================================================
-   LUMIÈRE — interaction layer
-   Progressive enhancement: site works with JS off (Czech default).
+   Silki: interakce webu
+   Web funguje i bez JS. Jazyk stránky určuje <html lang> (cs, de, en),
+   české stránky leží v kořeni, německé v /de/, anglické v /en/.
    ================================================================= */
 (function () {
   "use strict";
   var root = document.documentElement;
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  /* ---------- 1. Language (CZ / EN) ---------- */
-  var LANG_KEY = "lumiere-lang";
-  function setLang(lang) {
-    if (lang !== "cs" && lang !== "en") lang = "cs";
-    root.setAttribute("lang", lang);
-    try { localStorage.setItem(LANG_KEY, lang); } catch (e) {}
-    // Toggle buttons state
-    document.querySelectorAll("[data-set-lang]").forEach(function (btn) {
-      btn.setAttribute("aria-pressed", String(btn.getAttribute("data-set-lang") === lang));
-    });
-    // Localised <title>
-    var body = document.body;
-    var t = body.getAttribute("data-title-" + lang);
-    if (t) document.title = t;
-    // Localised meta description
-    var md = document.querySelector('meta[name="description"]');
-    var d = body.getAttribute("data-desc-" + lang);
-    if (md && d) md.setAttribute("content", d);
-    // Localised placeholders
-    document.querySelectorAll("[data-ph-" + lang + "]").forEach(function (el) {
-      el.setAttribute("placeholder", el.getAttribute("data-ph-" + lang));
-    });
-    // Localised aria-labels
-    document.querySelectorAll("[data-aria-" + lang + "]").forEach(function (el) {
-      el.setAttribute("aria-label", el.getAttribute("data-aria-" + lang));
+  /* ---------- 1. Jazyk a texty generované skriptem ---------- */
+  var LANG = (root.getAttribute("lang") || "cs").slice(0, 2);
+  if (LANG !== "de" && LANG !== "en") LANG = "cs";
+  var TEXTS = {
+    cs: {
+      sold: "Prodáno", inStock: "Skladem", shade: "Odstín", length: "Délka", weight: "Gramáž",
+      perGram: "Cena / gram", total: "Celková cena", detail: "Detail", catalog: "Sortiment",
+      pieces: function (n) { return n === 1 ? "kus" : (n >= 2 && n <= 4 ? "kusy" : "kusů"); },
+      copied: "Odkaz zkopírován", hairAlt: "Vlasy",
+      sendFail: "Odeslání se nezdařilo. Napište nám prosím na WhatsApp.",
+      sent: "Odesláno. Brzy se vám ozveme.",
+      fallbackLead: "<strong>Odeslání se nezdařilo.</strong> Napište nám prosím přímo, ozveme se obratem.",
+      galleryFail: "Galerii se nepodařilo načíst.",
+      catalogFail: "Sortiment se nepodařilo načíst. Zkuste stránku obnovit.",
+      pieceMsg: function (k) { return "Mám zájem o konkrétní kus: " + k + ". Prosím o více informací a dostupnost."; },
+      courseOption: function (d) { return "Kurz prodlužování vlasů, " + d + ", Praha"; },
+      courseWa: function (d) { return "Dobrý den, mám zájem o kurz prodlužování vlasů " + d + "."; },
+      shades: { "Tmavé": "Tmavé", "Střední": "Střední", "Blond": "Blond" },
+      productAlt: function (s, l) { return s + " culík panenských vlasů " + l + " cm"; },
+      ldName: function (s, l, c) { return s + " vlasy " + l + " cm, " + c; },
+      ldDesc: function (s, l, g) { return "Pravé evropské vlasy na prodlužování. Odstín " + s.toLowerCase() + ", délka " + l + " cm, gramáž " + g + " g."; },
+      numLocale: "cs-CZ", currency: function (s) { return s + " Kč"; }, rateUnit: " Kč", rateUnitG: " Kč/g"
+    },
+    de: {
+      sold: "Verkauft", inStock: "Vorrätig", shade: "Farbton", length: "Länge", weight: "Gewicht",
+      perGram: "Preis / Gramm", total: "Gesamtpreis", detail: "Details", catalog: "Sortiment",
+      pieces: function (n) { return n === 1 ? "Stück" : "Stück"; },
+      copied: "Link kopiert", hairAlt: "Haare",
+      sendFail: "Senden fehlgeschlagen. Bitte schreiben Sie uns auf WhatsApp.",
+      sent: "Gesendet. Wir melden uns in Kürze.",
+      fallbackLead: "<strong>Senden fehlgeschlagen.</strong> Bitte schreiben Sie uns direkt, wir antworten umgehend.",
+      galleryFail: "Die Galerie konnte nicht geladen werden.",
+      catalogFail: "Das Sortiment konnte nicht geladen werden. Bitte laden Sie die Seite neu.",
+      pieceMsg: function (k) { return "Ich interessiere mich für das Stück " + k + ". Bitte um weitere Informationen und Verfügbarkeit."; },
+      courseOption: function (d) { return "Kurs Haarverlängerung, " + d + ", Prag"; },
+      courseWa: function (d) { return "Guten Tag, ich interessiere mich für den Kurs Haarverlängerung am " + d + "."; },
+      shades: { "Tmavé": "Dunkel", "Střední": "Mittel", "Blond": "Blond" },
+      productAlt: function (s, l) { return "Zopf aus Virgin-Echthaar, " + s.toLowerCase() + ", " + l + " cm"; },
+      ldName: function (s, l, c) { return "Echthaar " + s.toLowerCase() + " " + l + " cm, " + c; },
+      ldDesc: function (s, l, g) { return "Europäisches Echthaar für Haarverlängerungen. Farbton " + s.toLowerCase() + ", Länge " + l + " cm, Gewicht " + g + " g."; },
+      numLocale: "de-DE", currency: function (s) { return s + " CZK"; }, rateUnit: " CZK", rateUnitG: " CZK/g"
+    },
+    en: {
+      sold: "Sold", inStock: "In stock", shade: "Shade", length: "Length", weight: "Weight",
+      perGram: "Price / gram", total: "Total price", detail: "Details", catalog: "Shop",
+      pieces: function (n) { return n === 1 ? "piece" : "pieces"; },
+      copied: "Link copied", hairAlt: "Hair",
+      sendFail: "Sending failed. Please message us on WhatsApp.",
+      sent: "Sent. We will be in touch soon.",
+      fallbackLead: "<strong>Sending failed.</strong> Please contact us directly, we reply quickly.",
+      galleryFail: "The gallery could not be loaded.",
+      catalogFail: "The catalogue could not be loaded. Please refresh the page.",
+      pieceMsg: function (k) { return "I am interested in piece " + k + ". Please send me more details and availability."; },
+      courseOption: function (d) { return "Hair extension course, " + d + ", Prague"; },
+      courseWa: function (d) { return "Hello, I am interested in the hair extension course on " + d + "."; },
+      shades: { "Tmavé": "Dark", "Střední": "Medium", "Blond": "Blonde" },
+      productAlt: function (s, l) { return s + " virgin hair ponytail, " + l + " cm"; },
+      ldName: function (s, l, c) { return s + " hair " + l + " cm, " + c; },
+      ldDesc: function (s, l, g) { return "European human hair for extensions. Shade " + s.toLowerCase() + ", length " + l + " cm, weight " + g + " g."; },
+      numLocale: "en-GB", currency: function (s) { return "CZK " + s; }, rateUnit: " CZK", rateUnitG: " CZK/g"
+    }
+  };
+  var T = TEXTS[LANG];
+  function shadeName(s) { return T.shades[s] || s || ""; }
+  // Data i fotky leží v kořeni webu, i když stránka běží v /de/ nebo /en/
+  function abs(u) { u = String(u || ""); return /^(https?:|\/|data:|blob:)/.test(u) ? u : "/" + u; }
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
     });
   }
-  var stored = "cs";
-  try { stored = localStorage.getItem(LANG_KEY) || "cs"; } catch (e) {}
-  setLang(stored);
-  document.addEventListener("click", function (e) {
-    var btn = e.target.closest("[data-set-lang]");
-    if (!btn) return;
-    setLang(btn.getAttribute("data-set-lang"));
-  });
 
   /* ---------- 2. Header shrink on scroll ---------- */
   var header = document.querySelector(".site-header");
@@ -59,11 +96,24 @@
   function openMenu() {
     document.body.classList.add("menu-open");
     if (burger) burger.setAttribute("aria-expanded", "true");
+    var first = drawer && drawer.querySelector(".drawer-panel a, .drawer-panel button");
+    if (first) setTimeout(function () { first.focus(); }, 50);
   }
   function closeMenu() {
+    var wasOpen = document.body.classList.contains("menu-open");
     document.body.classList.remove("menu-open");
     if (burger) burger.setAttribute("aria-expanded", "false");
+    if (wasOpen && burger && drawer && drawer.contains(document.activeElement)) burger.focus();
   }
+  // Tab v otevřeném menu zůstává v panelu
+  if (drawer) drawer.addEventListener("keydown", function (e) {
+    if (e.key !== "Tab" || !document.body.classList.contains("menu-open")) return;
+    var items = drawer.querySelectorAll(".drawer-panel a, .drawer-panel button");
+    if (!items.length) return;
+    var first = items[0], last = items[items.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
   if (burger) burger.addEventListener("click", function () {
     document.body.classList.contains("menu-open") ? closeMenu() : openMenu();
   });
@@ -142,15 +192,17 @@
   /* Verejny klic Web3Forms - urceny primo do klientskeho kodu (viz web3forms.com/docs). */
   var WEB3FORMS_KEY = "51ca21f5-d179-431f-a358-128b091d3054";
   var FORM_SUBJECTS = {
-    "poptavka": "Nová poptávka z webu — silkihair.cz",
-    "poptavka-kurz": "Přihláška na kurz — silkihair.cz",
-    "registrace-kadernice": "Registrace kadeřnice — silkihair.cz"
+    "poptavka": "Nová poptávka z webu silkihair.cz",
+    "poptavka-kurz": "Přihláška na kurz z webu silkihair.cz",
+    "registrace-kadernice": "Registrace kadeřnice z webu silkihair.cz"
   };
+  // E-maily čte tým česky; u německé a anglické poptávky je jazyk v předmětu
+  var LANG_TAG = LANG === "cs" ? "" : "[" + LANG.toUpperCase() + "] ";
   /* Aby e-mail nechodil s anglickymi nazvy poli. */
   var FIELD_LABELS = {
     name: "Jméno", salon: "Salon", phone: "Telefon", email: "E-mail",
     shade: "Odstín", length: "Délka", course: "Kurz", experience: "Zkušenosti",
-    city: "Město", ico: "IČO", interest: "Zájem", message: "Zpráva"
+    city: "Město", ico: "IČO", interest: "Zájem", message: "Zpráva", jazyk: "Jazyk webu"
   };
   var form = document.querySelector("form[data-booking]");
   if (form) {
@@ -184,12 +236,11 @@
       // e-mail a interni CRM ji zaradi do Poptavek z webu (zaroven archiv).
       // Staci, kdyz projde jedna z nich.
       var submitBtn = form.querySelector('[type="submit"]');
-      var labelCs = submitBtn ? submitBtn.getAttribute("data-loading-cs") : null;
-      var labelEn = submitBtn ? submitBtn.getAttribute("data-loading-en") : null;
+      var loadingLabel = submitBtn ? (submitBtn.getAttribute("data-loading") || submitBtn.getAttribute("data-loading-cs")) : null;
       if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.dataset.orig = submitBtn.innerHTML;
-        submitBtn.textContent = (root.getAttribute("lang") === "en" ? labelEn : labelCs) || "…";
+        submitBtn.textContent = loadingLabel || "…";
       }
       function resetBtn() { if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = submitBtn.dataset.orig; } }
 
@@ -202,9 +253,10 @@
       /* 1) Web3Forms - doruceni na e-mail, s citelnymi ceskymi popisky poli */
       var payload = {
         access_key: WEB3FORMS_KEY,
-        subject: String(fd.get("subject") || "") || FORM_SUBJECTS[formName] || "Zpráva z webu silkihair.cz",
+        subject: LANG_TAG + (String(fd.get("subject") || "") || FORM_SUBJECTS[formName] || "Zpráva z webu silkihair.cz"),
         from_name: "silkihair.cz"
       };
+      if (LANG !== "cs") fd.set("jazyk", LANG.toUpperCase());
       var replyTo = String(fd.get("email") || "").trim();
       if (replyTo) payload.replyto = replyTo;
       fd.forEach(function (v, k) {
@@ -238,9 +290,8 @@
         toCrm.catch(function (e) { return e; })
       ]).then(function (res) {
         resetBtn();
-        var en = root.getAttribute("lang") === "en";
         if (res.indexOf("mail") === -1 && res.indexOf("crm") === -1) {
-          showToast(en ? "Sending failed — please reach us on WhatsApp." : "Odeslání se nezdařilo — napište nám prosím na WhatsApp.");
+          showToast(T.sendFail);
           showDirectContact(form);
           return;
         }
@@ -251,7 +302,7 @@
           success.setAttribute("tabindex", "-1");
           success.focus();
         }
-        showToast(en ? "Request sent — we’ll be in touch soon." : "Odesláno — brzy se vám ozveme.");
+        showToast(T.sent);
       });
     });
   }
@@ -267,10 +318,10 @@
       "border:1px solid rgba(176,141,87,.45);background:rgba(176,141,87,.10)";
     var tel = (document.querySelector('[data-site="telefon_zobrazit"]') || {}).textContent || "";
     wrap.innerHTML =
-      '<p style="font-size:.95rem"><strong>Odeslání se nezdařilo.</strong> Napište nám prosím přímo — ozveme se obratem.</p>' +
+      '<p style="font-size:.95rem">' + T.fallbackLead + '</p>' +
       '<div style="display:flex;flex-wrap:wrap;gap:var(--sp-3);margin-top:var(--sp-4)">' +
         '<a class="btn btn-gold" target="_blank" rel="noopener" href="https://wa.me/420608784440">WhatsApp' +
-        (tel ? " " + tel : "") + '</a>' +
+        (tel ? " " + esc(tel) : "") + '</a>' +
         '<a class="btn btn-outline" href="mailto:tereza.celedova@gmail.com">tereza.celedova@gmail.com</a>' +
       '</div>';
     var btn = form.querySelector('[type="submit"]');
@@ -281,7 +332,7 @@
 
   /* ---------- 9. Price formatting (Kč) ---------- */
   function fmtCZK(n) {
-    return new Intl.NumberFormat("cs-CZ").format(Math.round(n)) + " Kč";
+    return T.currency(new Intl.NumberFormat(T.numLocale).format(Math.round(n)));
   }
   // Compute total = grams × rate for every element carrying both (static usages)
   function computeTotals(scope) {
@@ -305,18 +356,19 @@
     var textEls = document.querySelectorAll("[data-site]");
     var hrefEls = document.querySelectorAll("[data-site-href]");
     if (!textEls.length && !hrefEls.length) return;
-    fetch("data/site.json")
+    fetch("/data/site.json")
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (site) {
         if (!site) return;
         var hrefFor = {
           wa_link: "https://wa.me/" + site.telefon_whatsapp,
           mailto_link: "mailto:" + site.email,
-          instagram_link: site.instagram_url,
-          facebook_link: site.facebook_url
+          instagram_link: site.instagram_url
         };
         textEls.forEach(function (el) {
           var key = el.getAttribute("data-site");
+          // Lokalita je v datech česky, na DE/EN stránkách zůstává přeložený text z HTML
+          if (LANG !== "cs" && /^lokalita/.test(key)) return;
           if (site[key] != null) el.textContent = site[key];
         });
         hrefEls.forEach(function (el) {
@@ -327,42 +379,39 @@
       .catch(function () { /* keep static fallback text already in the HTML */ });
   })();
 
-  /* ---------- 9b2. Course date (data/kurz.json) ----------
-     The admin edits one date; the course card, WhatsApp message, form option,
-     page title, meta description and JSON-LD follow it. The HTML keeps the
-     same date as the no-JS fallback. */
+  /* ---------- 9b2. Termín kurzu (data/kurz.json) ----------
+     V adminu se mění jedno datum. Když je dnes nebo v budoucnu, ukáže se karta
+     s termínem ([data-kurz-stav="termin"]) a datum se doplní do karty, zprávy
+     pro WhatsApp a volby ve formuláři. Jinak zůstane blok „Další termín brzy“
+     ([data-kurz-stav="brzy"]), který je v HTML výchozí. */
   (function () {
     var els = document.querySelectorAll("[data-kurz]");
-    if (!els.length) return;
-    fetch("data/kurz.json")
+    var stavy = document.querySelectorAll("[data-kurz-stav]");
+    if (!els.length && !stavy.length) return;
+    fetch("/data/kurz.json")
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (kurz) {
         var m = kurz && /^(\d{4})-(\d{2})-(\d{2})/.exec(kurz.datum || "");
         if (!m) return;
-        var iso = m[1] + "-" + m[2] + "-" + m[3];
-        var den = +m[3] + ". " + +m[2] + ".";
+        var dnes = new Date(); dnes.setHours(0, 0, 0, 0);
+        if (new Date(+m[1], +m[2] - 1, +m[3]) < dnes) return;
+        var MESICE_EN = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        var den = LANG === "en" ? (+m[3] + " " + MESICE_EN[+m[2] - 1]) : (+m[3] + ". " + +m[2] + ".");
         var full = den + " " + m[1];
-        var nbsp = function (s) { return s.replace(/ /g, " "); };
-        var oldDate = /\d{1,2}\. ?\d{1,2}\.( ?\d{4})?/;
+        var nbsp = function (s) { return s.replace(/ /g, "\u00a0"); };
+        stavy.forEach(function (el) { el.hidden = el.getAttribute("data-kurz-stav") !== "termin"; });
         els.forEach(function (el) {
           var kind = el.getAttribute("data-kurz");
           if (kind === "den") el.textContent = nbsp(den);
           else if (kind === "rok") el.textContent = m[1];
-          else if (kind === "volba") el.textContent = "Kurz prodlužování vlasů — " + nbsp(full) + ", Praha";
+          else if (kind === "volba") el.textContent = T.courseOption(nbsp(full));
           else if (kind === "wa") {
             var href = el.getAttribute("href").split("?")[0];
-            el.setAttribute("href", href + "?text=" + encodeURIComponent("Dobrý den, mám zájem o kurz prodlužování vlasů " + full + "."));
+            el.setAttribute("href", href + "?text=" + encodeURIComponent(T.courseWa(full)));
           }
         });
-        document.title = document.title.replace(oldDate, den);
-        var desc = document.querySelector('meta[name="description"]');
-        if (desc) desc.setAttribute("content", desc.getAttribute("content").replace(oldDate, full));
-        document.querySelectorAll('script[type="application/ld+json"]').forEach(function (s) {
-          if (s.textContent.indexOf("CourseInstance") === -1) return;
-          s.textContent = s.textContent.replace(/("(?:start|end)Date":\s*")[^"]*/g, "$1" + iso);
-        });
       })
-      .catch(function () { /* keep static fallback date already in the HTML */ });
+      .catch(function () { /* zůstane výchozí stav z HTML */ });
   })();
 
   /* ---------- 9c. Named page images (data/images.json) ----------
@@ -372,15 +421,15 @@
   (function () {
     var imgEls = document.querySelectorAll("[data-img-key]");
     if (!imgEls.length) return;
-    fetch("data/images.json")
+    fetch("/data/images.json")
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (images) {
         if (!images) return;
         imgEls.forEach(function (el) {
           var entry = images[el.getAttribute("data-img-key")];
           if (!entry) return;
-          el.src = entry.src;
-          if (entry.alt) el.alt = entry.alt;
+          el.src = abs(entry.src);
+          if (entry.alt && LANG === "cs") el.alt = entry.alt;
         });
       })
       .catch(function () { /* keep static fallback image already in the HTML */ });
@@ -393,12 +442,13 @@
   (function () {
     var galleryEl = document.querySelector("[data-gallery]");
     if (!galleryEl) return;
-    fetch("data/galerie.json")
+    fetch("/data/galerie.json")
       .then(function (r) { return r.json(); })
       .then(function (data) {
         var polozky = (data && data.polozky) || [];
         galleryEl.innerHTML = polozky.map(function (p) {
-          return '<figure class="shot reveal"><img src="' + p.src + '" alt="' + (p.alt || "") + '" loading="lazy"></figure>';
+          var alt = LANG === "cs" ? (p.alt || "") : (LANG === "de" ? "Haarverlängerung mit Silki Echthaar" : "Hair extensions with Silki human hair");
+          return '<figure class="shot reveal"><img src="' + esc(abs(p.src)) + '" alt="' + esc(alt) + '" loading="lazy"></figure>';
         }).join("");
         if (!reduceMotion && "IntersectionObserver" in window) {
           var io3 = new IntersectionObserver(function (entries) {
@@ -410,7 +460,7 @@
         }
       })
       .catch(function () {
-        galleryEl.innerHTML = '<p class="form-note">Galerii se nepodařilo načíst.</p>';
+        galleryEl.innerHTML = '<p class="form-note">' + T.galleryFail + '</p>';
       });
   })();
 
@@ -421,7 +471,7 @@
   var catalogEl = document.querySelector("[data-catalog]");
   var featuredEl = document.querySelector("[data-featured]");
   if (catalogEl || featuredEl) {
-    fetch("data/products.json")
+    fetch("/data/products.json")
       .then(function (r) { return r.json(); })
       .then(function (data) {
         var produkty = (data && data.produkty) || [];
@@ -429,7 +479,7 @@
         if (featuredEl) renderFeatured(featuredEl, produkty);
       })
       .catch(function () {
-        if (catalogEl) catalogEl.innerHTML = '<p class="form-note">Sortiment se nepodařilo načíst. Zkuste stránku obnovit.</p>';
+        if (catalogEl) catalogEl.innerHTML = '<p class="form-note">' + T.catalogFail + '</p>';
       });
   }
 
@@ -438,15 +488,20 @@
   }
   var ARROW = "M5 12h14M13 6l6 6-6 6";
 
+  function productAlt(p) {
+    return LANG === "cs" && p.foto_alt ? p.foto_alt : T.productAlt(shadeName(p.odstin), p.delka_label);
+  }
+
   function renderCatalog(container, produkty) {
     container.innerHTML = produkty.map(function (p) {
       var sold = p.stav === "sold";
+      var shade = shadeName(p.odstin);
       return (
-        '<button type="button" class="product' + (sold ? " sold" : "") + '" data-status="' + p.stav + '" data-num="' + p.cislo + '" data-shade="' + p.odstin + '" data-shade-label="' + p.odstin + '" data-length="' + p.delka_cm + '" data-length-label="' + p.delka_label + '" data-grams="' + p.gramaz + '" data-rate="' + p.cena_g + '" data-img="' + p.foto + '">' +
-          '<div class="media"><img src="' + p.foto + '" width="600" height="750" alt="' + p.foto_alt + '" loading="lazy"><span class="num">' + p.cislo + '</span><span class="status ' + (sold ? "out" : "in") + '">' + (sold ? "Prodáno" : "Skladem") + '</span></div>' +
-          '<div class="body"><h3>' + p.odstin + ' · ' + p.delka_label + ' cm</h3>' +
-            '<div class="specs"><div class="row"><span>Odstín</span><span>' + p.odstin + '</span></div><div class="row"><span>Délka</span><span>' + p.delka_label + ' cm</span></div><div class="row"><span>Gramáž</span><span>' + p.gramaz + ' g</span></div><div class="row"><span>Cena / gram</span><span>' + p.cena_g + ' Kč</span></div></div>' +
-            '<div class="price"><div><div class="rate">Celková cena</div><div class="total" data-total>—</div></div><span class="view-hint">Detail ' + svgIcon(ARROW) + '</span></div>' +
+        '<button type="button" class="product' + (sold ? " sold" : "") + '" data-status="' + esc(p.stav) + '" data-num="' + esc(p.cislo) + '" data-shade="' + esc(p.odstin) + '" data-shade-label="' + esc(shade) + '" data-length="' + esc(p.delka_cm) + '" data-length-label="' + esc(p.delka_label) + '" data-grams="' + esc(p.gramaz) + '" data-rate="' + esc(p.cena_g) + '" data-img="' + esc(abs(p.foto)) + '">' +
+          '<div class="media"><img src="' + esc(abs(p.foto)) + '" width="600" height="750" alt="' + esc(productAlt(p)) + '" loading="lazy"><span class="num">' + esc(p.cislo) + '</span><span class="status ' + (sold ? "out" : "in") + '">' + (sold ? T.sold : T.inStock) + '</span></div>' +
+          '<div class="body"><h3>' + esc(shade) + ' · ' + esc(p.delka_label) + ' cm</h3>' +
+            '<div class="specs"><div class="row"><span>' + T.shade + '</span><span>' + esc(shade) + '</span></div><div class="row"><span>' + T.length + '</span><span>' + esc(p.delka_label) + ' cm</span></div><div class="row"><span>' + T.weight + '</span><span>' + esc(p.gramaz) + ' g</span></div><div class="row"><span>' + T.perGram + '</span><span>' + esc(p.cena_g) + T.rateUnit + '</span></div></div>' +
+            '<div class="price"><div><div class="rate">' + T.total + '</div><div class="total" data-total></div></div><span class="view-hint">' + T.detail + ' ' + svgIcon(ARROW) + '</span></div>' +
           '</div>' +
         '</button>'
       );
@@ -466,21 +521,22 @@
       "@context": "https://schema.org",
       "@type": "ItemList",
       "itemListElement": inStock.map(function (p, i) {
-        var img = /^https?:/.test(p.foto) ? p.foto : origin + "/" + p.foto;
+        var img = /^https?:/.test(p.foto) ? p.foto : origin + abs(p.foto);
+        var shade = shadeName(p.odstin);
         return {
           "@type": "ListItem",
           "position": i + 1,
           "item": {
             "@type": "Product",
-            "name": p.odstin + " vlasy " + p.delka_label + " cm — " + p.cislo,
+            "name": T.ldName(shade, p.delka_label, p.cislo),
             "image": img,
-            "description": "Pravé evropské vlasy na prodlužování. Odstín " + p.odstin.toLowerCase() + ", délka " + p.delka_label + " cm, gramáž " + p.gramaz + " g.",
+            "description": T.ldDesc(shade, p.delka_label, p.gramaz),
             "offers": {
               "@type": "Offer",
               "priceCurrency": "CZK",
               "price": String(p.gramaz * p.cena_g),
               "availability": "https://schema.org/InStock",
-              "url": origin + "/sortiment.html"
+              "url": origin + (LANG === "cs" ? "" : "/" + LANG) + "/sortiment.html"
             }
           }
         };
@@ -495,12 +551,13 @@
   function renderFeatured(container, produkty) {
     var picks = produkty.filter(function (p) { return p.vyber_domu && p.stav === "in"; }).slice(0, 3);
     container.innerHTML = picks.map(function (p, i) {
+      var shade = shadeName(p.odstin);
       return (
-        '<a href="sortiment.html" class="product reveal" data-delay="' + i + '" data-grams="' + p.gramaz + '" data-rate="' + p.cena_g + '">' +
-          '<div class="media"><img src="' + p.foto + '" width="600" height="750" alt="' + p.foto_alt + '" loading="lazy"><span class="num">' + p.cislo + '</span><span class="status in">Skladem</span></div>' +
-          '<div class="body"><h3>' + p.odstin + ' · ' + p.delka_label + ' cm</h3>' +
-            '<div class="specs"><div class="row"><span>Gramáž</span><span>' + p.gramaz + ' g</span></div><div class="row"><span>Cena / gram</span><span>' + p.cena_g + ' Kč</span></div></div>' +
-            '<div class="price"><div><div class="rate">Celková cena</div><div class="total" data-total>—</div></div><span class="view-hint">Sortiment ' + svgIcon(ARROW) + '</span></div>' +
+        '<a href="sortiment.html" class="product reveal" data-delay="' + i + '" data-grams="' + esc(p.gramaz) + '" data-rate="' + esc(p.cena_g) + '">' +
+          '<div class="media"><img src="' + esc(abs(p.foto)) + '" width="600" height="750" alt="' + esc(productAlt(p)) + '" loading="lazy"><span class="num">' + esc(p.cislo) + '</span><span class="status in">' + T.inStock + '</span></div>' +
+          '<div class="body"><h3>' + esc(shade) + ' · ' + esc(p.delka_label) + ' cm</h3>' +
+            '<div class="specs"><div class="row"><span>' + T.weight + '</span><span>' + esc(p.gramaz) + ' g</span></div><div class="row"><span>' + T.perGram + '</span><span>' + esc(p.cena_g) + T.rateUnit + '</span></div></div>' +
+            '<div class="price"><div><div class="rate">' + T.total + '</div><div class="total" data-total></div></div><span class="view-hint">' + T.catalog + ' ' + svgIcon(ARROW) + '</span></div>' +
           '</div>' +
         '</a>'
       );
@@ -567,7 +624,7 @@
         p.style.display = ok ? "" : "none";
         if (ok) visible++;
       });
-      if (countEl) countEl.innerHTML = "<strong>" + visible + "</strong> " + (visible === 1 ? "kus" : (visible >= 2 && visible <= 4 ? "kusy" : "kusů"));
+      if (countEl) countEl.innerHTML = "<strong>" + visible + "</strong> " + T.pieces(visible);
       if (emptyEl) emptyEl.classList.toggle("show", visible === 0);
       if (writeUrl !== false) syncUrl(lb, sb, wb, showSold);
     }
@@ -593,10 +650,11 @@
       shareBtn.addEventListener("click", function () {
         var url = window.location.href;
         var txt = shareBtn.querySelector("[data-share-text]");
+        var puvodni = txt ? txt.textContent : "";
         function feedback() {
           shareBtn.classList.add("copied");
-          if (txt) txt.textContent = "Odkaz zkopírován";
-          setTimeout(function () { shareBtn.classList.remove("copied"); if (txt) txt.textContent = "Sdílet výběr"; }, 2200);
+          if (txt) txt.textContent = T.copied;
+          setTimeout(function () { shareBtn.classList.remove("copied"); if (txt) txt.textContent = puvodni; }, 2200);
         }
         if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(url).then(feedback, function () { legacyCopy(url); feedback(); });
@@ -616,16 +674,16 @@
     function openModal(p) {
       lastFocused = document.activeElement;
       modal.querySelector("[data-m-img]").src = p.getAttribute("data-img") || "";
-      modal.querySelector("[data-m-img]").alt = "Vlasy " + (p.getAttribute("data-num") || "");
+      modal.querySelector("[data-m-img]").alt = T.hairAlt + " " + (p.getAttribute("data-num") || "");
       modal.querySelector("[data-m-title]").textContent = p.getAttribute("data-num") || "";
       modal.querySelector("[data-m-shade]").textContent = p.getAttribute("data-shade-label") || "";
       modal.querySelector("[data-m-length]").textContent = (p.getAttribute("data-length-label") || "") + " cm";
       modal.querySelector("[data-m-grams]").textContent = p.getAttribute("data-grams") + " g";
-      modal.querySelector("[data-m-rate]").textContent = p.getAttribute("data-rate") + " Kč/g";
+      modal.querySelector("[data-m-rate]").textContent = p.getAttribute("data-rate") + T.rateUnitG;
       modal.querySelector("[data-m-total]").textContent = fmtCZK(parseFloat(p.getAttribute("data-grams")) * parseFloat(p.getAttribute("data-rate")));
       var sold = p.getAttribute("data-status") === "sold";
       var statusEl = modal.querySelector("[data-m-status]");
-      statusEl.textContent = sold ? "Prodáno" : "Skladem";
+      statusEl.textContent = sold ? T.sold : T.inStock;
       statusEl.className = "status-badge " + (sold ? "out" : "in");
       var cta = modal.querySelector("[data-m-cta]");
       cta.href = "kontakt.html?kus=" + encodeURIComponent(p.getAttribute("data-num") || "") + "#poptavka";
@@ -655,7 +713,7 @@
     var kus = params.get("kus");
     if (!kus) return;
     var msg = document.querySelector('form[data-booking] textarea[name="message"]');
-    if (msg && !msg.value) msg.value = "Mám zájem o konkrétní kus: " + kus + ". Prosím o více informací a dostupnost.";
+    if (msg && !msg.value) msg.value = T.pieceMsg(kus);
     var subj = document.querySelector('form[data-booking] [name="subject"]');
     if (subj) subj.value = "Poptávka kusu " + kus;
   })();

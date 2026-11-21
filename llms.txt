@@ -1,20 +1,21 @@
 # Silki
 
-> Silki je česká rodinná firma prodávající pravé evropské vlasy na prodlužování — 100% neopracované (panenské) vlasy, ručně vybírané kus po kuse. Cena se počítá transparentně: gramáž × cena za gram. Firma také pořádá profesionální kurzy prodlužování vlasů metodou keratin (primárně Praha, po domluvě celá ČR) a nabízí velkoobchodní partnerství pro kadeřnice a salony.
+> Silki je česká rodinná firma z Prahy. Prodává panenské evropské vlasy na prodlužování: culíky ručně vybírané kus po kuse, tmavé a střední bez chemie, blond šetrně odbarvený. Cena kusu se počítá z gramáže a ceny za gram. Pořádá kurzy prodlužování vlasů metodou keratin v Praze a nabízí partnerství pro kadeřnice a salony. Web je česky, německy (/de/) a anglicky (/en/).
 
 Klíčová fakta:
-- Sortiment: jednotlivé culíky evropských vlasů (tmavé, střední, blond), délky 30–90 cm
-- Cena: za 1 gram podle délky a odstínu; celková cena kusu = gramáž × sazba Kč/g
-- Osobní předání: Praha; doručení: celá ČR i EU
-- Kurzy: keratinová metoda (micro/nano), pro začátečníky, kadeřnice i salony/školy, od 10 000 Kč, certifikát
-- Kontakt: info@silkihair.cz, WhatsApp, Instagram @silki_hair_cz
+- Sortiment: jednotlivé culíky (tmavé, střední, blond) s uvedenou délkou a gramáží
+- Cena: gramáž × cena za gram podle délky a odstínu, v Kč
+- Osobní předání v Praze, doručení po ČR i EU
+- Kurz: metoda keratin, Praha, 10 000 Kč, se startovacím balíčkem 13 000 Kč
+- Kontakt: WhatsApp +420 608 784 440, tereza.celedova@gmail.com, Instagram @silki_hair_cz
 
 ## Stránky
 
 - [Sortiment skladem](https://silkihair.cz/sortiment.html): aktuální culíky s délkou, gramáží a cenou
-- [Ceník za gram](https://silkihair.cz/cenik.html): sazby podle délky a odstínu + ceník služeb
-- [Kurzy prodlužování vlasů](https://silkihair.cz/kurzy.html): keratinová metoda, Praha i ČR
-- [Pro kadeřnice](https://silkihair.cz/pro-kadernice.html): velkoobchodní spolupráce
-- [Jak vybrat a pečovat](https://silkihair.cz/pece.html): rádce k délce, odstínu, gramáži a péči
-- [Blond z panenských vlasů](https://silkihair.cz/blond.html): jak vzniká blond šetrným odbarvováním
-- [Kontakt a poptávka](https://silkihair.cz/kontakt.html): nezávazná poptávka, FAQ
+- [Ceník za gram](https://silkihair.cz/cenik.html): ceny podle délky a odstínu a orientační ceny práce
+- [Kurzy prodlužování vlasů](https://silkihair.cz/kurzy.html): metoda keratin, Praha
+- [Pro kadeřnice](https://silkihair.cz/pro-kadernice.html): partnerství pro kadeřnice a salony
+- [Jak vybrat a pečovat](https://silkihair.cz/pece.html): délka, odstín, gramáž a péče
+- [Blond z panenských vlasů](https://silkihair.cz/blond.html): jak vzniká blond
+- [Kontakt a poptávka](https://silkihair.cz/kontakt.html): nezávazná poptávka, časté dotazy
+- [Deutsch](https://silkihair.cz/de/) · [English](https://silkihair.cz/en/)

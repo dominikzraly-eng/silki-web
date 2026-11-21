@@ -27,7 +27,10 @@ export default {
       const page = await env.ASSETS.fetch(new URL(path + ".html", url));
       if (page.ok) return page;
     }
-    const nf = await env.ASSETS.fetch(new URL("/404.html", url));
+    // Chybová stránka v jazyce části webu, ve které návštěvník je
+    const lang = /^\/(de|en)\//.exec(path);
+    let nf = lang ? await env.ASSETS.fetch(new URL("/" + lang[1] + "/404.html", url)) : null;
+    if (!nf || !nf.ok) nf = await env.ASSETS.fetch(new URL("/404.html", url));
     return new Response(nf.body, { status: 404, headers: nf.headers });
   }
 };
